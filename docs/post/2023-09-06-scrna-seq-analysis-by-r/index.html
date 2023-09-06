@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <meta property="og:title" content="scRNA-seq analysis by R" />
+<meta property="og:description" content="Insert Lead paragraph here." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://example.com/post/2023-09-06-scrna-seq-analysis-by-r/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-09-06T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-09-06T00:00:00+00:00" />
+
+        <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="scRNA-seq analysis by R"/>
+<meta name="twitter:description" content="Insert Lead paragraph here."/>
+<meta name="twitter:site" content="@realmattbutton"/>
+
+        
+        <title>
+  scRNA-seq analysis by R | Sivan`s blog
+</title>
+
+        <link rel="icon" type="image/png" href='https://example.com/images/favicon-16x16.png' sizes="16x16">
+        <link rel="icon" type="image/png" href='https://example.com/images/favicon-32x32.png' sizes="32x32">  
+
+        <link href="https://fonts.googleapis.com/css?family=Oswald:400" rel="stylesheet">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">      
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        
+        
+        
+        
+
+        <link rel="stylesheet" href="https://example.com/css/bundle.min.7ca6cd3bb53a831d18b6183000ae658b8d6f672f7acab1b00f788e5fe8b5d844.css" integrity="sha256-fKbNO7U6gx0YthgwAK5li41vZy96yrGwD3iOX&#43;i12EQ="  />
+
+        
+    <link rel="me" type="text/html" href="https://www.instagram.com/realmattbutton/" />
+<link rel="me" type="text/html" href="https://twitter.com/realmattbutton"/> 
+<link rel="me" type="text/html" href="https://www.linkedin.com/in/matt-button-2225537/"/> 
+<link rel="icon" type="image/png" href="https://example.com/images/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="https://example.com/images/favicon-32x32.png" sizes="32x32">
+
+<link rel="alternate" type="application/rss+xml" href='https://example.com/index.xml' />
+
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<meta name="author" content="Sivan Zhao" />
+<meta name="copyright" content="Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved." />
+
+
+<meta name="description" content="Insert Lead paragraph here.">
+
+
+    
+        
+    </head>
+    <body>
+        <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark py-1 top-nav">
+            <div class="container">
+                    <a class="navbar-brand pr-2" href="https://example.com">SIVAN`S BLOG</a>
+                <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="navbar-collapse collapse" id="navbarCollapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+    <a class="nav-link active" href="https://example.com/categories/development/">Development</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="https://example.com/categories/golang/">Golang</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="https://example.com/about/">About</a>
+</li>
+                    </ul>
+                    <div class="social-icons d-none d-lg-block">
+                        <a class="py-2 px-2" href="https://twitter.com/realmattbutton"><i class="fab fa-twitter"></i></a>
+<a class="py-2 px-2" href="https://instagram.com/realmattbutton"><i class="fab fa-instagram"></i></a>
+<a class="py-2 px-2" href="https://www.linkedin.com/in/matt-button-2225537/"><i class="fab fa-linkedin"></i></a>
+<a class="py-2 px-2" href='https://example.com/index.xml'><i class="fas fa-rss"></i></a>
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        
+<header class="feature-image d-print-none">
+</header>
+
+        
+        <div class="main">
+            
+<div class="container mt-4 post">
+    <h1>scRNA-seq analysis by R</h1>
+    <div class="mb-3">
+    <small>
+        <strong>By Sivan Zhao</strong>
+        | <i class="far fa-calendar-alt"></i>&nbsp;Sep 6, 2023&nbsp;
+        | <i class="fa fa-tags" title="Tags" aria-hidden="true"></i> <a href='https://example.com/tags/scrna-seq/'>scrna-seq</a>
+    </small>
+</div>
+
+    <div class="share-icons d-flex justify-content-center d-print-none">
+        <a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&text=scRNA-seq%20analysis%20by%20R&tw_p=tweetbutton" class="p-2" title="Share on Twitter" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Tweet</small></div>
+</a>
+
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&t=scRNA-seq%20analysis%20by%20R" class="p-2" title="Share on Facebook" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-facebook fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Share</small></div>
+</a>
+
+<a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&title=scRNA-seq%20analysis%20by%20R&source=mattbutton.com" class="p-2" title="Share on LinkedIn" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Share</small></div>
+</a>
+
+<a href="javascript:window.print()" title="Print this article" class="p-2" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fa fa-print fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Print</small></div>
+</a>
+    </div>
+
+    <div class="mt-4 mb-4 main-content">
+        <p><strong>Insert Lead paragraph here.</strong></p>
+
+
+        <div class="share-icons d-flex justify-content-center d-print-none">
+            <a href="https://twitter.com/intent/tweet?url=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&text=scRNA-seq%20analysis%20by%20R&tw_p=tweetbutton" class="p-2" title="Share on Twitter" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Tweet</small></div>
+</a>
+
+<a href="https://www.facebook.com/sharer.php?u=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&t=scRNA-seq%20analysis%20by%20R" class="p-2" title="Share on Facebook" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-facebook fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Share</small></div>
+</a>
+
+<a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fexample.com%2fpost%2f2023-09-06-scrna-seq-analysis-by-r%2f&title=scRNA-seq%20analysis%20by%20R&source=mattbutton.com" class="p-2" title="Share on LinkedIn" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Share</small></div>
+</a>
+
+<a href="javascript:window.print()" title="Print this article" class="p-2" target="_blank" rel="nofollow">
+    <div>
+        <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x"></i>
+            <i class="fa fa-print fa-stack-1x fa-inverse"></i>
+        </span>
+    </div>
+    <div class="fa-inverse text-center"><small>Print</small></div>
+</a>
+        </div>
+    </div>
+
+    
+</div>
+<div class="sidebar d-print-none d-none d-xl-block">
+    
+        <h2>Sivan Zhao</h2>
+        <div>
+            Hi, I&#39;m Sivan Zhao.
+        </div>
+        <a href='https://example.com/about/' class="btn btn-outline-secondary mt-3" role="button">Read More...</a>
+        <h2 class="mt-4">Top Posts</h2>
+    
+    
+        <a href="https://example.com/post/creating-a-new-theme/" class="nav-link">Creating a New Theme</a>
+    
+    <h2 class="mt-4">Recent Posts</h2>
+    <nav class="nav flex-column">
+        
+        <a href="https://example.com/post/creating-a-new-theme/" class="nav-link">Creating a New Theme</a>
+        
+        <a href="https://example.com/post/2023-09-06-scrna-seq-analysis-by-r/" class="nav-link">scRNA-seq analysis by R</a>
+        
+        <a href="https://example.com/post/2020-12-01-r-rmarkdown/" class="nav-link">Hello R Markdown</a>
+        
+    </nav>
+    
+    <h2 class="mt-4 text-capitalize">categories</h2>
+    <nav class="nav flex-column">
+        
+        <a href='https://example.comcategories/r/' class="nav-link">
+        r
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comcategories/scrna-seq/' class="nav-link">
+        scrna-seq
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+    </nav>
+    
+    <h2 class="mt-4 text-capitalize">tags</h2>
+    <nav class="nav flex-column">
+        
+        <a href='https://example.comtags/featured/' class="nav-link">
+        featured
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/hugo/' class="nav-link">
+        hugo
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/plot/' class="nav-link">
+        plot
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/r-markdown/' class="nav-link">
+        r-markdown
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/regression/' class="nav-link">
+        regression
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/scrna-seq/' class="nav-link">
+        scrna-seq
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+        <a href='https://example.comtags/themes/' class="nav-link">
+        themes
+        <span class="badge badge-pill badge-secondary">1</span>
+        </a>
+        
+    </nav>
+    
+</div>
+
+        </div>
+
+        <footer class="mt-auto footer d-print-none">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-md-4 col-xl-3">
+                        <h5>Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.</h5>
+I&#39;m happy for you to share content on this site, but please provide attribution.
+                    </div>
+                    <div class="col-md-4 col-xl-3">
+                        <h5>Disclaimer</h5>
+Opinions expressed here are my own and may not reflect those of the company I work for, or the people I work with.
+                    </div>
+                    <div class="col-md-4 col-xl-3">
+                        <h5>About This Site</h5>
+This blog was created using the <a href="https://gohugo.io/">Hugo</a> static site generator, using
+<a href="https://getbootstrap.com/">Bootstrap</a>, using the Silhouette Hugo theme, created by
+<a href='https://www.mattbutton.com'>Matt Button</a>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-center icons">
+                    <a class="py-2 px-2" href="https://twitter.com/realmattbutton"><i class="fab fa-twitter"></i></a>
+<a class="py-2 px-2" href="https://instagram.com/realmattbutton"><i class="fab fa-instagram"></i></a>
+<a class="py-2 px-2" href="https://www.linkedin.com/in/matt-button-2225537/"><i class="fab fa-linkedin"></i></a>
+<a class="py-2 px-2" href='https://example.com/index.xml'><i class="fas fa-rss"></i></a>
+
+                </div>
+            </div>
+        </footer>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+        
+    </body>
+</html>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>scRNA-seq on Sivan`s blog</title>
+    <link>https://example.com/tags/scrna-seq/</link>
+    <description>Recent content in scRNA-seq on Sivan`s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
+    <lastBuildDate>Wed, 06 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://example.com/tags/scrna-seq/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>scRNA-seq analysis by R</title>
+      <link>https://example.com/post/2023-09-06-scrna-seq-analysis-by-r/</link>
+      <pubDate>Wed, 06 Sep 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/2023-09-06-scrna-seq-analysis-by-r/</guid>
+      <description>Insert Lead paragraph here.</description>
+    </item>
+    
+  </channel>
+</rss>

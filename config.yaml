@@ -1,0 +1,19 @@
+baseurl: https://example.com
+title: Sivan`s blog
+author: Sivan Zhao
+copyright: Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.
+canonifyurls: yes
+paginate: 3
+theme: silhouette-hugo
+pygmentsUseClasses: yes
+publishDir: docs
+
+params:
+  author: Sivan Zhao
+  contentSharing: I'm happy for you to share content on this site, but please provide
+    attribution.
+  introDescription: Hi, I'm Sivan Zhao. 
+social:
+  instagram: realmattbutton
+  linkedin: matt-button-2225537
+  twitter: realmattbutton
