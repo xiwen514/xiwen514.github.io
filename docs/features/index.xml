@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Personal Blog</title>
+    <link>https://xiwen514.github.io/features/</link>
+    <description>Recent content on Personal Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://xiwen514.github.io/features/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/buttons/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/buttons/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/columns/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/columns/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/details/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/details/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/expand/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/expand/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/mermaid/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/mermaid/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://xiwen514.github.io/features/tabs/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/tabs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Callouts</title>
+      <link>https://xiwen514.github.io/features/callouts/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/callouts/</guid>
+      <description>Callout support # Amethyst supports the same Admonition-callout syntax as Obsidian.
+This includes
+12 Distinct callout types (each with several aliases) Collapsable callouts See documentation on supported types and syntax here.
+Showcase # [!EXAMPLE] Examples
+Aliases: example
+[!note] Notes
+Aliases: note
+[!abstract] Summaries
+Aliases: abstract, summary, tldr
+[!info] Info
+Aliases: info, todo
+[!tip] Hint
+Aliases: tip, hint, important
+[!success] Success
+Aliases: success, check, done
+[!question] Question
+Aliases: question, help, faq</description>
+    </item>
+    
+    <item>
+      <title>Chinese, Japanese, Korean Support (测试)</title>
+      <link>https://xiwen514.github.io/features/languages/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/languages/</guid>
+      <description>Chinese, Japanese, Korean Support # 几乎在我们意识到之前，我们已经离开了地面。
+우리가 그것을 알기도 전에 우리는 땅을 떠났습니다.
+私たちがそれを知るほぼ前に、私たちは地面を離れていました。
+RTL # More information on configuring RTL languages like Arabic in the config page.</description>
+    </item>
+    
+    <item>
+      <title>LaTeX</title>
+      <link>https://xiwen514.github.io/features/latex/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/features/latex/</guid>
+      <description>Block math works with two dollar signs $$...$$
+$$f(x) = \int_{-\infty}^\infty f\hat(\xi),e^{2 \pi i \xi x} ,d\xi$$
+Inline math also works with single dollar signs $...$. For example, Euler&amp;rsquo;s identity but inline: $e^{i\pi} = -1$
+Aligned equations work quite well:
+$$ \begin{aligned} a &amp;amp;= b + c \ &amp;amp;= e + f \ \end{aligned} $$
+And matrices
+$$ \begin{bmatrix} 1 &amp;amp; 2 &amp;amp; 3 \ a &amp;amp; b &amp;amp; c \end{bmatrix} $$</description>
+    </item>
+    
+  </channel>
+</rss>

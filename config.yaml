@@ -1,20 +1,74 @@
-baseurl: https://xiwen514.github.io/
-title: Sivan`s blog
-author: Sivan Zhao
-relativeURLs: true
-copyright: Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.
-canonifyurls: yes
-paginate: 3
-theme: silhouette-hugo
-pygmentsUseClasses: yes
+baseURL: https://xiwen514.github.io/
+languageCode: en-us
+title: Personal Blog
+theme: "amethyst"
 publishDir: docs
-
-params:
-  author: Sivan Zhao
-  contentSharing: I'm happy for you to share content on this site, but please provide
-    attribution.
-  introDescription: Hi, I'm Sivan Zhao. 
-social:
-  instagram: realmattbutton
-  linkedin: matt-button-2225537
-  twitter: realmattbutton
+googleAnalytics: UA-PROPERTY_ID
+Params:
+  description: My Personal Blog
+  enableSearch: yes
+  images: /digital-garden-logo.png
+  newsletter:
+    description: A curated weekly digest once a week to your mailbox
+    path: https://buttondown.email/api/emails/embed-subscribe/
+    provider: buttondown
+    title: ''
+menu:
+  main:
+    - name: Home
+      url: /
+      weight: 1
+    - name: Content
+      params:
+        header: yes
+      weight: 2
+    - name: Articles
+      url: /articles
+      weight: 3
+    - name: Portfolio
+      url: /portfolio
+      weight: 4
+    - name: Stack
+      url: /stack
+      weight: 5
+    - name: Links
+      params:
+        header: yes
+      weight: 6
+    - name: Polywork
+      url: https://polywork.com
+      weight: 7
+  social:
+    - name: Twitter
+      url: https://twitter.com
+      weight: 1
+    - name: GitHub
+      url: https://github.com
+      weight: 2
+    - name: LinkedIn
+      url: https://linkedin.com
+      weight: 3
+    - name: Instagram
+      url: https://instagram.com
+      weight: 4
+    - name: Dribbble
+      url: https://dribbble.com
+      weight: 5
+    - name: Codepen
+      url: https://codepen.io
+      weight: 6
+    - name: Twitch
+      url: https://twitch.com
+      weight: 7
+    - name: Email
+      url: mailto:user@example.org
+      weight: 8
+    - name: RSS
+      url: /articles/index.xml
+      weight: 9
+markup:
+  goldmark:
+    renderer:
+      unsafe: yes
+  highlight:
+    style: dracula

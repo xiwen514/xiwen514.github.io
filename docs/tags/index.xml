@@ -1,73 +1,45 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Sivan`s blog</title>
-    <link>https://example.com/tags/</link>
-    <description>Recent content in Tags on Sivan`s blog</description>
+    <title>Tags on Personal Blog</title>
+    <link>https://xiwen514.github.io/tags/</link>
+    <description>Recent content in Tags on Personal Blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <copyright>Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
-    <lastBuildDate>Wed, 06 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://example.com/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>scRNA-seq</title>
-      <link>https://example.com/tags/scrna-seq/</link>
-      <pubDate>Wed, 06 Sep 2023 00:00:00 +0000</pubDate>
-      
-      <guid>https://example.com/tags/scrna-seq/</guid>
-      <description></description>
-    </item>
-    
+    <language>en-us</language>
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://xiwen514.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>plot</title>
-      <link>https://example.com/tags/plot/</link>
+      <link>https://xiwen514.github.io/tags/plot/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://example.com/tags/plot/</guid>
+      <guid>https://xiwen514.github.io/tags/plot/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R Markdown</title>
-      <link>https://example.com/tags/r-markdown/</link>
+      <link>https://xiwen514.github.io/tags/r-markdown/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://example.com/tags/r-markdown/</guid>
+      <guid>https://xiwen514.github.io/tags/r-markdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>regression</title>
-      <link>https://example.com/tags/regression/</link>
+      <link>https://xiwen514.github.io/tags/regression/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://example.com/tags/regression/</guid>
+      <guid>https://xiwen514.github.io/tags/regression/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>featured</title>
-      <link>https://example.com/tags/featured/</link>
-      <pubDate>Sun, 28 Sep 2014 00:00:00 +0000</pubDate>
+      <title>setup</title>
+      <link>https://xiwen514.github.io/tags/setup/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://example.com/tags/featured/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>hugo</title>
-      <link>https://example.com/tags/hugo/</link>
-      <pubDate>Sun, 28 Sep 2014 00:00:00 +0000</pubDate>
-      
-      <guid>https://example.com/tags/hugo/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>themes</title>
-      <link>https://example.com/tags/themes/</link>
-      <pubDate>Sun, 28 Sep 2014 00:00:00 +0000</pubDate>
-      
-      <guid>https://example.com/tags/themes/</guid>
+      <guid>https://xiwen514.github.io/tags/setup/</guid>
       <description></description>
     </item>
     
