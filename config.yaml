@@ -1,6 +1,7 @@
-baseurl: https://example.com
+baseurl: https://xiwen514.github.io/
 title: Sivan`s blog
 author: Sivan Zhao
+relativeURLs: true
 copyright: Copyright © 2008–2023, Steve Francia and the Hugo Authors; all rights reserved.
 canonifyurls: yes
 paginate: 3
