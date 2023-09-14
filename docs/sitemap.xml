@@ -23,31 +23,16 @@
     <loc>https://xiwen514.github.io/example/collapsed/</loc>
   </url><url>
     <loc>https://xiwen514.github.io/</loc>
-    <lastmod>2021-12-19T00:00:00+00:00</lastmod>
+    <lastmod>2023-09-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://xiwen514.github.io/articles/installation/</loc>
-    <lastmod>2021-12-19T00:00:00+00:00</lastmod>
+    <loc>https://xiwen514.github.io/post/2023-09-14-functional-analysis/</loc>
+    <lastmod>2023-09-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://xiwen514.github.io/articles/</loc>
-    <lastmod>2021-12-19T00:00:00+00:00</lastmod>
+    <loc>https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/</loc>
+    <lastmod>2023-09-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://xiwen514.github.io/articles/structure/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/articles/primary-menu/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/articles/social-menu/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/articles/newsletter/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/articles/google-analytics/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/articles/metatags/</loc>
-    <lastmod>2021-12-18T00:00:00+00:00</lastmod>
+    <loc>https://xiwen514.github.io/post/</loc>
+    <lastmod>2023-09-14T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://xiwen514.github.io/portfolio/design1/</loc>
     <lastmod>2021-12-18T00:00:00+00:00</lastmod>
@@ -60,30 +45,6 @@
   </url><url>
     <loc>https://xiwen514.github.io/portfolio/design3/</loc>
     <lastmod>2021-12-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/categories/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/post/2020-12-01-r-rmarkdown/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/tags/plot/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/post/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/categories/r/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/tags/r-markdown/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/tags/regression/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
-  </url><url>
-    <loc>https://xiwen514.github.io/tags/</loc>
-    <lastmod>2020-12-01T21:13:14-05:00</lastmod>
   </url><url>
     <loc>https://xiwen514.github.io/example/collapsed/3rd-level/4th-level/</loc>
   </url><url>
@@ -113,6 +74,8 @@
   </url><url>
     <loc>https://xiwen514.github.io/features/callouts/</loc>
   </url><url>
+    <loc>https://xiwen514.github.io/categories/</loc>
+  </url><url>
     <loc>https://xiwen514.github.io/features/languages/</loc>
   </url><url>
     <loc>https://xiwen514.github.io/setup/custom-domain/</loc>
@@ -130,6 +93,8 @@
     <loc>https://xiwen514.github.io/tags/setup/</loc>
   </url><url>
     <loc>https://xiwen514.github.io/stack/</loc>
+  </url><url>
+    <loc>https://xiwen514.github.io/tags/</loc>
   </url><url>
     <loc>https://xiwen514.github.io/setup/troubleshooting/</loc>
   </url><url>

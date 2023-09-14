@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="Introduction to PCA" />
+<meta property="og:description" content="PCA is an unsupervised analysis that reflects the true trend of the data itself.
+PCA is one of the dimension reduction methods.The purpose of PCA (Principal Component Analysis) is to transform the original data into a new coordinate system, where the variance of the data along the axes is maximized. The first principal component (PC1) represents the direction of the greatest variance in the data, while the second principal component (PC2) is orthogonal to PC1 and represents the direction of the second greatest variance, and so on." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-09-14T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-09-14T00:00:00+00:00" /><meta property="og:site_name" content="📓 Amethyst" />
+<title>Introduction to PCA | 📓 Amethyst</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="PCA is an unsupervised analysis that reflects the true trend of the data itself.
+PCA is one of the dimension reduction methods.The purpose of PCA (Principal Component Analysis) is to transform the original data into a new coordinate system, where the variance of the data along the axes is maximized. The first principal component (PC1) represents the direction of the greatest variance in the data, while the second principal component (PC2) is orthogonal to PC1 and represents the direction of the second greatest variance, and so on."
+/>
+<title>
+  Introduction to PCA
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/">📓 Amethyst</a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Getting Started</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/setup/" class="">Setup</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/editing/" class="">Editing Content</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/obsidian/" class="">Obsidian Vault Integration</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/preview-changes/" class="">Preview Changes</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/custom-domain/" class="">Custom Domain</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/config/" class="">Customization</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/hosting/" class="">Deploying Amethyst to the Web</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/ignore-notes/" class="">Ignoring Notes</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/search/" class="">Search</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/troubleshooting/" class="">Troubleshooting and FAQ</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/setup/updating/" class="">Updating</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-daee4b63470ea20ac3f41145e3651181" class="toggle"  />
+    <label for="section-daee4b63470ea20ac3f41145e3651181" class="flex justify-between">
+      <a href="/example/" class="book-collapse-toggle ">Example Site</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/example/table-of-contents/" class="">Table of Contents</a>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/example/table-of-contents/with-toc/" class="">With ToC</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/example/table-of-contents/without-toc/" class="">Without ToC</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-eb3924552631b64bef8c8e766e27e6fc" class="toggle"  />
+    <label for="section-eb3924552631b64bef8c8e766e27e6fc" class="flex justify-between">
+      <a href="/example/collapsed/" class="book-collapse-toggle ">Collapsed</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">3rd Level</span>
+  
+
+          
+  <ul>
+    
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="active">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Portfolio (demo)</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/portfolio/design1/" class="">Pastry jelly cookie sugar donut orange</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/portfolio/design2/" class="">Cream sugar apple donut apple croissant</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/portfolio/design3/" class="">Apple cream vanilla apple marzipan muffin</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Features</span>
+  
+
+          
+  <ul>
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <input type="checkbox" id="section-5c0b9990a5b4a901a4121e35f49d2890" class="toggle"  />
+    <label for="section-5c0b9990a5b4a901a4121e35f49d2890" class="flex justify-between">
+      <a href="/features/section/" class="book-collapse-toggle ">Section</a>
+    </label>
+  
+
+          
+  <ul>
+    
+      
+    
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/features/callouts/" class="">Callouts</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/features/languages/" class="">Chinese, Japanese, Korean Support (测试)</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/features/latex/" class="">LaTeX</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Stack</span>
+  
+
+          
+  <ul>
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/64bitpandas/amethyst"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">Introduction to PCA</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+<p>PCA is an unsupervised analysis that reflects the true trend of the data itself.</p>
+<p>PCA is one of the dimension reduction methods.The purpose of PCA (Principal Component Analysis) is to transform the original data into a new coordinate system, where the variance of the data along the axes is maximized. The first principal component (PC1) represents the direction of the greatest variance in the data, while the second principal component (PC2) is orthogonal to PC1 and represents the direction of the second greatest variance, and so on.</p>
+<p>When you plot the results of PCA on a two-dimensional plane，you are essentially looking at the projection of the data onto these two main directions. The distance between points reflects their relative positions in these two directions, and indeed, it is the Euclidean distance.</p>
+<p>However, remember that PCA involves a linear transformation of the data, implying that distances in the original data space may have been distorted. Thus, the Euclidean distances between points on a PCA plot might not fully represent the actual relationships in the original data, especially when the total variance explained by the principal components is relatively low.</p>
+<div id="generally-the-principal-component-analysispca-steps-are" class="section level3">
+<h3>Generally, the Principal Component Analysis(PCA) steps are:</h3>
+<ol style="list-style-type: decimal">
+<li>Scaling our data (if the columns don’t scale the same). This is important because PCA is an algorithm that is strongly influenced by the size of each column.</li>
+<li>Calculate Covariance Matrix</li>
+<li>Calculate Eigenvalues and Eigenvector</li>
+<li>Sort Eigenvalues and Eigenvector</li>
+<li>Pick top-2 or top-3 (or any amount of Principal Components that you want) eigenvalues</li>
+<li>Transform the original data</li>
+</ol>
+</div>
+<div id="how-to-calculate-covariance" class="section level3">
+<h3>How to calculate covariance?</h3>
+<p>Here provides a formula for you.</p>
+<p><img src="covariance.png" width="50%" /></p>
+</div>
+<div id="example-codes-in-r" class="section level3">
+<h3>Example codes in R</h3>
+<pre class="r"><code>#install.packages(&quot;factoextra&quot;)
+#install.packages(&quot;FactoMineR&quot;)
+library(&quot;factoextra&quot;)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa</code></pre>
+<pre class="r"><code>library(&quot;FactoMineR&quot;)
+library(ggpubr) 
+data(&quot;iris&quot;)
+head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>iris.pca &lt;- PCA(iris[,-5], graph = FALSE) 
+# The quality of representation of the variables of the principal components are called the cos2.
+print(iris.pca)</code></pre>
+<pre><code>## **Results for the Principal Component Analysis (PCA)**
+## The analysis was performed on 150 individuals, described by 4 variables
+## *The results are available in the following objects:
+## 
+##    name               description                          
+## 1  &quot;$eig&quot;             &quot;eigenvalues&quot;                        
+## 2  &quot;$var&quot;             &quot;results for the variables&quot;          
+## 3  &quot;$var$coord&quot;       &quot;coord. for the variables&quot;           
+## 4  &quot;$var$cor&quot;         &quot;correlations variables - dimensions&quot;
+## 5  &quot;$var$cos2&quot;        &quot;cos2 for the variables&quot;             
+## 6  &quot;$var$contrib&quot;     &quot;contributions of the variables&quot;     
+## 7  &quot;$ind&quot;             &quot;results for the individuals&quot;        
+## 8  &quot;$ind$coord&quot;       &quot;coord. for the individuals&quot;         
+## 9  &quot;$ind$cos2&quot;        &quot;cos2 for the individuals&quot;           
+## 10 &quot;$ind$contrib&quot;     &quot;contributions of the individuals&quot;   
+## 11 &quot;$call&quot;            &quot;summary statistics&quot;                 
+## 12 &quot;$call$centre&quot;     &quot;mean of the variables&quot;              
+## 13 &quot;$call$ecart.type&quot; &quot;standard error of the variables&quot;    
+## 14 &quot;$call$row.w&quot;      &quot;weights for the individuals&quot;        
+## 15 &quot;$call$col.w&quot;      &quot;weights for the variables&quot;</code></pre>
+<pre class="r"><code>fviz_pca_ind(iris.pca, label=&quot;none&quot;)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca,  label=&quot;none&quot;, habillage=iris$Species)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca, label=&quot;none&quot;, habillage=iris$Species,
+             addEllipses=TRUE, ellipse.level=0.95)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_biplot(iris.pca, 
+                habillage = iris$Species, addEllipses = TRUE,
+                col.var = &quot;red&quot;, alpha.var =&quot;cos2&quot;,
+                label = &quot;var&quot;) +
+  scale_color_brewer(palette=&quot;Dark2&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-4.png" width="672" /></p>
+<pre class="r"><code>fviz_screeplot(iris.pca, ncp=10)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-5.png" width="672" /></p>
+<pre class="r"><code>plot(iris.pca, choix = &quot;var&quot;)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-6.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_var(iris.pca, col.var=&quot;contrib&quot;)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-7.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_var(iris.pca, alpha.var=&quot;contrib&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-8.png" width="672" /></p>
+<pre class="r"><code># Coordinates of individuals on the principal components
+head(iris.pca$ind$coord)</code></pre>
+<pre><code>##       Dim.1      Dim.2       Dim.3       Dim.4
+## 1 -2.264703  0.4800266 -0.12770602 -0.02416820
+## 2 -2.080961 -0.6741336 -0.23460885 -0.10300677
+## 3 -2.364229 -0.3419080  0.04420148 -0.02837705
+## 4 -2.299384 -0.5973945  0.09129011  0.06595556
+## 5 -2.389842  0.6468354  0.01573820  0.03592281
+## 6 -2.075631  1.4891775  0.02696829 -0.00660818</code></pre>
+<pre class="r"><code>head(iris.pca$ind$cos2)</code></pre>
+<pre><code>##       Dim.1      Dim.2        Dim.3        Dim.4
+## 1 0.9539975 0.04286032 0.0030335249 1.086460e-04
+## 2 0.8927725 0.09369248 0.0113475382 2.187482e-03
+## 3 0.9790410 0.02047578 0.0003422122 1.410446e-04
+## 4 0.9346682 0.06308947 0.0014732682 7.690193e-04
+## 5 0.9315095 0.06823959 0.0000403979 2.104697e-04
+## 6 0.6600989 0.33978301 0.0001114335 6.690714e-06</code></pre>
+<pre class="r"><code>head(iris.pca$ind$contrib)</code></pre>
+<pre><code>##       Dim.1      Dim.2       Dim.3       Dim.4
+## 1 1.1715796 0.16806554 0.074085470 0.018798188
+## 2 0.9891845 0.33146674 0.250034006 0.341474919
+## 3 1.2768164 0.08526419 0.008875320 0.025915633
+## 4 1.2077372 0.26029781 0.037858004 0.140000650
+## 5 1.3046313 0.30516562 0.001125175 0.041530572
+## 6 0.9841236 1.61748779 0.003303827 0.001405371</code></pre>
+<pre class="r"><code>plot(iris.pca, choix = &quot;ind&quot;)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-9.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-10.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_biplot(iris.pca,  geom = &quot;text&quot;)</code></pre>
+<p><img src="https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/index_files/figure-html/unnamed-chunk-2-11.png" width="672" /></p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p><a href="https://bioconductor.org/packages/release/bioc/vignettes/roFFF/inst/doc/ropls-vignette.html" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/roFFF/inst/doc/ropls-vignette.html</a>
+<a href="https://bioconductor.org/packages/release/bioc/vignettes/PCAtools/inst/doc/PCAtools.html" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/PCAtools/inst/doc/PCAtools.html</a>
+<a href="https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643" class="uri">https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643</a>
+<a href="https://www.mathsisfun.com/algebra/eigenvalue.html" class="uri">https://www.mathsisfun.com/algebra/eigenvalue.html</a>
+<a href="http://www.sthda.com/english/wiki/wiki.php?id_contents=7866" class="uri">http://www.sthda.com/english/wiki/wiki.php?id_contents=7866</a>
+<a href="http://blog.codinglabs.org/articles/pca-tutorial.html" class="uri">http://blog.codinglabs.org/articles/pca-tutorial.html</a>
+<a href="https://www.youtube.com/watch?v=GEn-_dAyYME" class="uri">https://www.youtube.com/watch?v=GEn-_dAyYME</a>
+<a href="https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643" class="uri">https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643</a>
+<a href="http://blog.codinglabs.org/articles/pca-tutorial.html" class="uri">http://blog.codinglabs.org/articles/pca-tutorial.html</a>
+<a href="http://www.sthda.com/english/wiki/wiki.php?id_contents=7851" class="uri">http://www.sthda.com/english/wiki/wiki.php?id_contents=7851</a>
+<a href="https://peterbloem.nl/blog/pca" class="uri">https://peterbloem.nl/blog/pca</a></p>
+</div>
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 Ben Cuan</p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://bencuan.me">Website</a></li><li><a href="https://blog.bencuan.me">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

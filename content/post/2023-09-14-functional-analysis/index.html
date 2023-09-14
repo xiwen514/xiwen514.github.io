@@ -1,0 +1,35 @@
+---
+title: Functional analysis
+author: Sivan
+date: '2023-09-14'
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<div id="over-representation-analysis" class="section level3">
+<h3>Over representation analysis</h3>
+</div>
+<div id="gene-set-enrichment-analysis" class="section level3">
+<h3>Gene set enrichment analysis</h3>
+<p>GSEA is a method designed to assess whether a predefined set of genes shows significant distribution patterns within a gene list ranked by its association with a phenotype. Rather than focusing solely on individual genes, it evaluates the collective prominence of a gene set at the top or bottom of the ranked list, inferring the set’s overall contribution to the phenotype.</p>
+<p>After conducting differential gene expression analysis and obtaining logFC values for each gene, these logFC values offer a ranking based on expression differences. By employing GSEA, you can determine if a predefined gene set, such as those from a specific biological process or pathway, is significantly enriched within your ranked list of differentially expressed genes. This assists in discerning functional and pathway differences between the two conditions.</p>
+<p>The predefined gene sets originate from the MSigDB database (<a href="https://www.gsea-msigdb.org/gsea/msigdb/index.jsp" class="uri">https://www.gsea-msigdb.org/gsea/msigdb/index.jsp</a>). These sets predominantly consist of functional genes. If one only has non-functional genes (e.g., miRNA, lncRNA, circRNA), GSEA analysis might not be feasible due to the absence of appropriate gene sets.</p>
+</div>
+<div id="gene-set-variation-analysis" class="section level3">
+<h3>Gene set variation analysis</h3>
+<p>GSVA is a non-parametric, unsupervised analytical method primarily for evaluating gene set enrichment in microarrays and transcriptomes. It works by transforming gene expression matrices across samples into gene set expression matrices to assess the enrichment of metabolic pathways. GSVA quantifies gene set enrichment scores per sample, facilitating subsequent statistical analyses. Using the limma package, one can identify differentially expressed genes between samples. Similarly, applying limma to GSVA results (still a matrix) identifies significantly different gene sets. These differentially expressed gene sets, compared to individual genes, offer richer biological insights and interpretability, which can further aid in areas like tumor subtyping and other biologically-relevant inquiries</p>
+</div>
+<div id="main-takeaways" class="section level3">
+<h3>Main takeaways</h3>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p><a href="https://string-db.org/cgi/network?taskId=bPOuuq42ucGt&amp;sessionId=bLeXsbEr0ukN" class="uri">https://string-db.org/cgi/network?taskId=bPOuuq42ucGt&amp;sessionId=bLeXsbEr0ukN</a></p>
+<p>shinygo: <a href="http://impala.molgen.mpg.de/" class="uri">http://impala.molgen.mpg.de/</a></p>
+<p>goprofiler: <a href="https://biit.cs.ut.ee/gprofiler/page/r" class="uri">https://biit.cs.ut.ee/gprofiler/page/r</a></p>
+<p>heatmap: <a href="https://github.com/jokergoo/KeywordsEnrichment" class="uri">https://github.com/jokergoo/KeywordsEnrichment</a></p>
+<p>gsva原理： <a href="https://www.pathwaycommons.org/guide/primers/data_analysis/gsea/" class="uri">https://www.pathwaycommons.org/guide/primers/data_analysis/gsea/</a></p>
+</div>

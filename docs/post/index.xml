@@ -6,16 +6,25 @@
     <description>Recent content in Posts on Personal Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://xiwen514.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 14 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Hello R Markdown</title>
-      <link>https://xiwen514.github.io/post/2020-12-01-r-rmarkdown/</link>
-      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
+      <title>Functional analysis</title>
+      <link>https://xiwen514.github.io/post/2023-09-14-functional-analysis/</link>
+      <pubDate>Thu, 14 Sep 2023 00:00:00 +0000</pubDate>
       
-      <guid>https://xiwen514.github.io/post/2020-12-01-r-rmarkdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+      <guid>https://xiwen514.github.io/post/2023-09-14-functional-analysis/</guid>
+      <description>Over representation analysis Gene set enrichment analysis GSEA is a method designed to assess whether a predefined set of genes shows significant distribution patterns within a gene list ranked by its association with a phenotype. Rather than focusing solely on individual genes, it evaluates the collective prominence of a gene set at the top or bottom of the ranked list, inferring the set’s overall contribution to the phenotype.
+After conducting differential gene expression analysis and obtaining logFC values for each gene, these logFC values offer a ranking based on expression differences.</description>
+    </item>
+    
+    <item>
+      <title>Introduction to PCA</title>
+      <link>https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/</link>
+      <pubDate>Thu, 14 Sep 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-09-14-introduction-to-pca/</guid>
+      <description>PCA is an unsupervised analysis that reflects the true trend of the data itself.
+PCA is one of the dimension reduction methods.The purpose of PCA (Principal Component Analysis) is to transform the original data into a new coordinate system, where the variance of the data along the axes is maximized. The first principal component (PC1) represents the direction of the greatest variance in the data, while the second principal component (PC2) is orthogonal to PC1 and represents the direction of the second greatest variance, and so on.</description>
     </item>
     
   </channel>
