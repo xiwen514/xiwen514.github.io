@@ -1,0 +1,141 @@
+---
+title: Introduction to PCA
+author: Sivan
+date: '2023-09-14'
+slug: []
+categories: []
+tags: []
+---
+
+
+
+<p>PCA is an unsupervised analysis that reflects the true trend of the data itself.</p>
+<p>PCA is one of the dimension reduction methods.The purpose of PCA (Principal Component Analysis) is to transform the original data into a new coordinate system, where the variance of the data along the axes is maximized. The first principal component (PC1) represents the direction of the greatest variance in the data, while the second principal component (PC2) is orthogonal to PC1 and represents the direction of the second greatest variance, and so on.</p>
+<p>When you plot the results of PCA on a two-dimensional plane，you are essentially looking at the projection of the data onto these two main directions. The distance between points reflects their relative positions in these two directions, and indeed, it is the Euclidean distance.</p>
+<p>However, remember that PCA involves a linear transformation of the data, implying that distances in the original data space may have been distorted. Thus, the Euclidean distances between points on a PCA plot might not fully represent the actual relationships in the original data, especially when the total variance explained by the principal components is relatively low.</p>
+<div id="generally-the-principal-component-analysispca-steps-are" class="section level3">
+<h3>Generally, the Principal Component Analysis(PCA) steps are:</h3>
+<ol style="list-style-type: decimal">
+<li>Scaling our data (if the columns don’t scale the same). This is important because PCA is an algorithm that is strongly influenced by the size of each column.</li>
+<li>Calculate Covariance Matrix</li>
+<li>Calculate Eigenvalues and Eigenvector</li>
+<li>Sort Eigenvalues and Eigenvector</li>
+<li>Pick top-2 or top-3 (or any amount of Principal Components that you want) eigenvalues</li>
+<li>Transform the original data</li>
+</ol>
+</div>
+<div id="how-to-calculate-covariance" class="section level3">
+<h3>How to calculate covariance?</h3>
+<p>Here provides a formula for you.</p>
+<p><img src="covariance.png" width="50%" /></p>
+</div>
+<div id="example-codes-in-r" class="section level3">
+<h3>Example codes in R</h3>
+<pre class="r"><code>#install.packages(&quot;factoextra&quot;)
+#install.packages(&quot;FactoMineR&quot;)
+library(&quot;factoextra&quot;)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa</code></pre>
+<pre class="r"><code>library(&quot;FactoMineR&quot;)
+library(ggpubr) 
+data(&quot;iris&quot;)
+head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>iris.pca &lt;- PCA(iris[,-5], graph = FALSE) 
+# The quality of representation of the variables of the principal components are called the cos2.
+print(iris.pca)</code></pre>
+<pre><code>## **Results for the Principal Component Analysis (PCA)**
+## The analysis was performed on 150 individuals, described by 4 variables
+## *The results are available in the following objects:
+## 
+##    name               description                          
+## 1  &quot;$eig&quot;             &quot;eigenvalues&quot;                        
+## 2  &quot;$var&quot;             &quot;results for the variables&quot;          
+## 3  &quot;$var$coord&quot;       &quot;coord. for the variables&quot;           
+## 4  &quot;$var$cor&quot;         &quot;correlations variables - dimensions&quot;
+## 5  &quot;$var$cos2&quot;        &quot;cos2 for the variables&quot;             
+## 6  &quot;$var$contrib&quot;     &quot;contributions of the variables&quot;     
+## 7  &quot;$ind&quot;             &quot;results for the individuals&quot;        
+## 8  &quot;$ind$coord&quot;       &quot;coord. for the individuals&quot;         
+## 9  &quot;$ind$cos2&quot;        &quot;cos2 for the individuals&quot;           
+## 10 &quot;$ind$contrib&quot;     &quot;contributions of the individuals&quot;   
+## 11 &quot;$call&quot;            &quot;summary statistics&quot;                 
+## 12 &quot;$call$centre&quot;     &quot;mean of the variables&quot;              
+## 13 &quot;$call$ecart.type&quot; &quot;standard error of the variables&quot;    
+## 14 &quot;$call$row.w&quot;      &quot;weights for the individuals&quot;        
+## 15 &quot;$call$col.w&quot;      &quot;weights for the variables&quot;</code></pre>
+<pre class="r"><code>fviz_pca_ind(iris.pca, label=&quot;none&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca,  label=&quot;none&quot;, habillage=iris$Species)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca, label=&quot;none&quot;, habillage=iris$Species,
+             addEllipses=TRUE, ellipse.level=0.95)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_biplot(iris.pca, 
+                habillage = iris$Species, addEllipses = TRUE,
+                col.var = &quot;red&quot;, alpha.var =&quot;cos2&quot;,
+                label = &quot;var&quot;) +
+  scale_color_brewer(palette=&quot;Dark2&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-4.png" width="672" /></p>
+<pre class="r"><code>fviz_screeplot(iris.pca, ncp=10)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-5.png" width="672" /></p>
+<pre class="r"><code>plot(iris.pca, choix = &quot;var&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-6.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_var(iris.pca, col.var=&quot;contrib&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-7.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_var(iris.pca, alpha.var=&quot;contrib&quot;)+
+  theme_minimal()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-8.png" width="672" /></p>
+<pre class="r"><code># Coordinates of individuals on the principal components
+head(iris.pca$ind$coord)</code></pre>
+<pre><code>##       Dim.1      Dim.2       Dim.3       Dim.4
+## 1 -2.264703  0.4800266 -0.12770602 -0.02416820
+## 2 -2.080961 -0.6741336 -0.23460885 -0.10300677
+## 3 -2.364229 -0.3419080  0.04420148 -0.02837705
+## 4 -2.299384 -0.5973945  0.09129011  0.06595556
+## 5 -2.389842  0.6468354  0.01573820  0.03592281
+## 6 -2.075631  1.4891775  0.02696829 -0.00660818</code></pre>
+<pre class="r"><code>head(iris.pca$ind$cos2)</code></pre>
+<pre><code>##       Dim.1      Dim.2        Dim.3        Dim.4
+## 1 0.9539975 0.04286032 0.0030335249 1.086460e-04
+## 2 0.8927725 0.09369248 0.0113475382 2.187482e-03
+## 3 0.9790410 0.02047578 0.0003422122 1.410446e-04
+## 4 0.9346682 0.06308947 0.0014732682 7.690193e-04
+## 5 0.9315095 0.06823959 0.0000403979 2.104697e-04
+## 6 0.6600989 0.33978301 0.0001114335 6.690714e-06</code></pre>
+<pre class="r"><code>head(iris.pca$ind$contrib)</code></pre>
+<pre><code>##       Dim.1      Dim.2       Dim.3       Dim.4
+## 1 1.1715796 0.16806554 0.074085470 0.018798188
+## 2 0.9891845 0.33146674 0.250034006 0.341474919
+## 3 1.2768164 0.08526419 0.008875320 0.025915633
+## 4 1.2077372 0.26029781 0.037858004 0.140000650
+## 5 1.3046313 0.30516562 0.001125175 0.041530572
+## 6 0.9841236 1.61748779 0.003303827 0.001405371</code></pre>
+<pre class="r"><code>plot(iris.pca, choix = &quot;ind&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-9.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_ind(iris.pca)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-10.png" width="672" /></p>
+<pre class="r"><code>fviz_pca_biplot(iris.pca,  geom = &quot;text&quot;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-11.png" width="672" /></p>
+</div>
+<div id="references" class="section level3">
+<h3>References</h3>
+<p><a href="https://bioconductor.org/packages/release/bioc/vignettes/roFFF/inst/doc/ropls-vignette.html" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/roFFF/inst/doc/ropls-vignette.html</a>
+<a href="https://bioconductor.org/packages/release/bioc/vignettes/PCAtools/inst/doc/PCAtools.html" class="uri">https://bioconductor.org/packages/release/bioc/vignettes/PCAtools/inst/doc/PCAtools.html</a>
+<a href="https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643" class="uri">https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643</a>
+<a href="https://www.mathsisfun.com/algebra/eigenvalue.html" class="uri">https://www.mathsisfun.com/algebra/eigenvalue.html</a>
+<a href="http://www.sthda.com/english/wiki/wiki.php?id_contents=7866" class="uri">http://www.sthda.com/english/wiki/wiki.php?id_contents=7866</a>
+<a href="http://blog.codinglabs.org/articles/pca-tutorial.html" class="uri">http://blog.codinglabs.org/articles/pca-tutorial.html</a>
+<a href="https://www.youtube.com/watch?v=GEn-_dAyYME" class="uri">https://www.youtube.com/watch?v=GEn-_dAyYME</a>
+<a href="https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643" class="uri">https://towardsdatascience.com/the-mathematics-behind-principal-component-analysis-fff2d7f4b643</a>
+<a href="http://blog.codinglabs.org/articles/pca-tutorial.html" class="uri">http://blog.codinglabs.org/articles/pca-tutorial.html</a>
+<a href="http://www.sthda.com/english/wiki/wiki.php?id_contents=7851" class="uri">http://www.sthda.com/english/wiki/wiki.php?id_contents=7851</a>
+<a href="https://peterbloem.nl/blog/pca" class="uri">https://peterbloem.nl/blog/pca</a></p>
+</div>
