@@ -13,8 +13,8 @@
       <pubDate>Thu, 14 Sep 2023 00:00:00 +0000</pubDate>
       
       <guid>https://xiwen514.github.io/post/2023-09-14-functional-analysis/</guid>
-      <description>Over representation analysis Gene set enrichment analysis GSEA is a method designed to assess whether a predefined set of genes shows significant distribution patterns within a gene list ranked by its association with a phenotype. Rather than focusing solely on individual genes, it evaluates the collective prominence of a gene set at the top or bottom of the ranked list, inferring the set’s overall contribution to the phenotype.
-After conducting differential gene expression analysis and obtaining logFC values for each gene, these logFC values offer a ranking based on expression differences.</description>
+      <description>Here mainly introduce over representation analysis(ORA), gene set enrichment analysis(GSEA) and gene set variation analysis(GSVA).
+1. Over representation analysis(ORA) Hypergeometric test is a statistical method used to determine if the frequency of a specific subset in a sample significantly deviates from what would be expected under random sampling. To be specific, we classify the genes we’ve selected to see which ones have functions relevant to our research. Then, we conduct a test and use the p-value to determine if the association is random or significant.</description>
     </item>
     
     <item>

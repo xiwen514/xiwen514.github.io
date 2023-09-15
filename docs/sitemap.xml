@@ -2,26 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://xiwen514.github.io/setup/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/setup/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/editing/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/obsidian/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/preview-changes/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/table-of-contents/with-toc/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/table-of-contents/without-toc/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/table-of-contents/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/collapsed/</loc>
-  </url><url>
     <loc>https://xiwen514.github.io/</loc>
     <lastmod>2023-09-14T00:00:00+00:00</lastmod>
   </url><url>
@@ -46,58 +26,8 @@
     <loc>https://xiwen514.github.io/portfolio/design3/</loc>
     <lastmod>2021-12-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://xiwen514.github.io/example/collapsed/3rd-level/4th-level/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/collapsed/3rd-level/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/example/hidden/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/buttons/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/columns/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/details/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/expand/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/mermaid/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/section/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/section/first-page/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/section/second-page/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/tabs/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/callouts/</loc>
-  </url><url>
     <loc>https://xiwen514.github.io/categories/</loc>
   </url><url>
-    <loc>https://xiwen514.github.io/features/languages/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/custom-domain/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/config/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/hosting/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/ignore-notes/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/features/latex/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/search/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/tags/setup/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/stack/</loc>
-  </url><url>
     <loc>https://xiwen514.github.io/tags/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/troubleshooting/</loc>
-  </url><url>
-    <loc>https://xiwen514.github.io/setup/updating/</loc>
   </url>
 </urlset>
