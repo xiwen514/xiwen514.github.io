@@ -51,8 +51,7 @@ Gene set collections
 - GAzer
 
 #### Example codes in R
-clusterProfiler perform over-representation analysis on GO terms associated with our list of significant genes. The tool takes as input a significant gene list and a background gene list and performs statistical enrichment analysis using hypergeometric testing.
-
+clusterProfiler takes as input a significant gene list and a background gene list and performs statistical enrichment analysis using hypergeometric testing.
 
 
 ### 2. Gene set enrichment analysis(GSEA)
@@ -103,11 +102,10 @@ The predefined gene sets originate from the MSigDB database (https://www.gsea-ms
 ### 3. Gene set variation analysis(GSVA)
 
 GSVA is a non-parametric, unsupervised analytical method primarily for evaluating gene set enrichment in microarrays and transcriptomes. It works by transforming gene expression matrices across samples into gene set expression matrices to assess the enrichment of metabolic pathways. GSVA quantifies gene set enrichment scores per sample, facilitating subsequent statistical analyses. Using the limma package, one can identify differentially expressed genes between samples. Similarly, applying limma to GSVA results (still a matrix) identifies significantly different gene sets. These differentially expressed gene sets, compared to individual genes, offer richer biological insights and interpretability, which can further aid in areas like tumor subtyping and other biologically-relevant inquiries
-gsva : 提供count data, meta info , 不需要提前差异分析
-enrichKEGG；gsva; gseKEGG;
 
 
-### References and materials 
+
+### References and Codes
 
 online analysis 
 

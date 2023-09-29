@@ -1,6 +1,6 @@
 ---
 title: Introduction to PCA
-author: Sivan
+author: Package Build
 date: '2023-09-14'
 slug: []
 categories: []
@@ -38,11 +38,10 @@ library(knitr)
 ```
 
 ### Example codes in R
-```{r}
-#install.packages("factoextra")
-#install.packages("FactoMineR")
-library("factoextra")
-library("FactoMineR")
+```{r,warning=F,message=F,results=F,echo=TRUE}
+
+library(factoextra)
+library(FactoMineR)
 library(ggpubr) 
 data("iris")
 head(iris)

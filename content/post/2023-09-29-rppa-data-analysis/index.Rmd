@@ -1,0 +1,466 @@
+---
+title: RPPA data analysis
+author: Package Build
+date: '2023-09-29'
+slug: []
+categories: []
+tags: []
+---
+
+### What is RPPA?
+
+Reverse phase protein array (RPPA) is a high-throughput antibody-based technique with the procedures similar to that of Western blots. Proteins are extracted from tumor tissue or cultured cells, denatured by SDS, printed on nitrocellulose-coated slides followed by antibody probe. 
+
+### What are the advantages of RPPA?
+
+- Inexpensive, high-throughput method utilizing automation for increased quality and reliability
+- Sample preparation requirements are similar to that of Western blots
+- Complete assay requires only 40 microliters of each sample for 150 antibodies
+- Robust quantification due to serial dilution of samples
+
+Here, I compare the differentially expressed genes based on the patients' status(aLive or dead) and their associated functions.
+
+
+## libraries
+
+```{r,warning=F,message=F,results=F,echo=TRUE}
+library(utils)
+library(TCGAbiolinks)
+library(tidyverse)
+library(skimr)
+library(factoextra)
+library(FactoMineR)
+library(factoextra)
+library(limma)
+library(tidyverse)
+library(modelbased)
+library(patchwork)
+library(EnhancedVolcano)
+library(WGCNA)
+library(ggpubr)
+library(rstatix)
+library(circlize)
+library(ComplexHeatmap)
+library(clusterProfiler)
+library(fgsea)
+library(enrichplot)
+```
+
+
+## Data extraction from TCGA
+```{r,warning=F,message=F,echo=TRUE,results='hide'}
+query.rppa <- GDCquery(
+  project = "TCGA-ESCA", 
+  data.category = "Proteome Profiling",
+  data.type = "Protein Expression Quantification"
+)
+GDCdownload(query.rppa) 
+rppa <- GDCprepare(query.rppa) 
+```
+
+## Normalization using limma
+```{r}
+data <- rppa[,-c(1:5)]
+colnames(data) <- gsub("-01A","", colnames(data))
+rownames(data) <- make.names(rppa$peptide_target)
+data1 <- data.frame(t(data))
+# delete the proteins which expresssion values are NA
+na.count <- apply(is.na(data1),2,sum)
+data2 <- data1[,na.count !=(nrow(data1))]
+dim(data2)
+skim(data2[,1:10])
+
+data.norm <- normalizeQuantiles(data2)
+skim(data.norm[,1:10])
+
+```
+
+## meta info
+```{r}
+met <- read.delim("GDCdata/clinical.tsv")
+met_fil <-met[match(colnames(data),met$case_submitter_id),] 
+met_fil[met_fil=="'--"] <- NA
+na_count <- apply(is.na(met_fil), 2, sum)
+met_filNA <- met_fil[,na_count!=126]
+met1 <- met_filNA[,c("case_submitter_id", "age_at_index" ,"gender", 
+               "vital_status" )]
+rownames(met1) <- met1$case_submitter_id
+met1$vital_status <- factor(met1$vital_status)
+head(met1)
+```
+
+## Dimentionally reduction (PCA) 
+```{r}
+data.pca <- PCA(data.norm, graph = FALSE) 
+fviz_pca_ind(data.pca, label="none", habillage=met1$vital_status,
+             addEllipses=TRUE, ellipse.level=0.95)
+
+```
+
+## Differential analysis
+#### linear regression
+```{r}
+data3 <- cbind(met1,data.norm) %>% mutate(across(gender, as.factor))
+lm_list <- NULL
+for (i in names(data3)[5:461]) {
+  model <- lm(as.formula(paste0(i, "~ vital_status")), data = data3)
+  # Recompute contrasts with a higher precision (for a smoother plot)
+  contrasts <- estimate_contrasts(model, contrast ="vital_status", length = 20, standardize = TRUE)
+  contrasts$pro <- i
+  lm_list <- rbind(lm_list,contrasts)
+}
+```
+
+```{r}
+# filter the significant proteins
+sig.res <- lm_list %>%
+dplyr::mutate(asterisk_label = case_when(
+  p > 0.1 ~ "ns",
+  p < 0.1 & p > 0.05 ~ "*",
+  p < 0.05 & p > 0.01 ~ "**",
+  p < 0.01 & p > 0.001 ~ "***",
+  p < 0.001 ~ "****"
+)) %>%
+dplyr::filter(asterisk_label != "ns")
+```
+
+#### limma
+```{r}
+design <- model.matrix(~ met1$vital_status)
+limma.model <- lmFit(t(data.norm), design = design)
+data.eb <- eBayes(limma.model)
+limma.res <- topTable(data.eb, number = Inf)
+
+
+rppa$symbol <- make.names(rppa$peptide_target)
+limma.res$symbol <-rownames(limma.res) 
+limma.res <- left_join(limma.res,rppa[,c("peptide_target", "symbol")])
+
+sig.res.limma <- limma.res %>% filter(P.Value < 0.1)
+intersect(sig.res$pro, rownames(sig.res.limma))
+```
+
+## Visualization 
+#### boxplot for significant proteins  (p.value < 0.05)
+
+```{r}
+# 
+# pst <- NULL
+# for (i in sig.res$pro) {
+#   p <- ggplot(data3,
+#       aes_string(x = "vital_status", y = i)) +
+#       geom_violin(aes(colour = vital_status, fill = vital_status), trim = FALSE) +
+#       geom_boxplot(aes(fill = vital_status), width = 0.2, colour = "black")
+#   p <- p+ ggplot2::theme_minimal() + theme(legend.position="none")
+#   pst[[i]] <- p
+# }
+#   
+```
+
+#### Volcano plot
+```{r}
+EnhancedVolcano(limma.res,
+    lab = limma.res$peptide_target,
+    x = 'logFC',
+    y = 'P.Value',
+    pCutoff = 0.05,
+    FCcutoff = 0.01,
+    xlim = c(-0.5, 0.5),
+    ylim = c(0, 3),
+    #xlab = "difference",
+    #ylab = "p.value",
+    labSize = 4.0,
+    #legendLabSize = 8,
+  legendIconSize = 5,
+    legendLabels = c("NS", "Coefficient", "FDR", "FDR and Coefficient"))
+```
+  
+  
+#### heatmap
+```{r,fig.width=10,fig.height=10}
+data_sig <- data.norm[,sig.res$pro]
+col_fun = colorRamp2(c(-2, 0, 2), c("blue", "white", "red"))
+
+Heatmap(data_sig,
+        col= col_fun,
+        row_split =met1$vital_status,
+        cluster_column_slices = F,
+        column_names_gp = gpar(fontsize = 6),
+        row_names_gp = gpar(fontsize = 4))
+```
+
+
+## kegg
+```{r}
+
+## to acquire more pathways, I set p.value cutoff is 0.2.
+eg = bitr(sig.res.limma$peptide_target, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+kegg <- enrichKEGG(eg$ENTREZID, organism = 'hsa',
+                   pvalueCutoff = 0.2)
+barplot(kegg, drop = F, showCategory = 12)
+heatplot(kegg, foldChange=sig.res.limma[sig.res.limma$P.Value<0.2&abs(sig.res.limma$logFC)>1,]$log2fc,showCategory = 10) + ggtitle("Heatplot")
+```
+
+
+## GO
+```{r}
+## to acquire more pathways, I set p.value cutoff is 0.2.
+go <- enrichGO(
+  eg$ENTREZID,
+  "org.Hs.eg.db",
+  keyType = "ENTREZID",
+  ont = "BP",
+  pvalueCutoff = 0.2,
+  pAdjustMethod = "BH",
+  #universe,
+  qvalueCutoff = 0.2,
+  #minGSSize = 10,
+  #maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
+barplot(go, drop = F, showCategory = 12)
+enrichplot::cnetplot(go,categorySize = "pvalue", 
+                    foldChange=sig.res.limma[sig.res.limma$P.Value<0.2&abs(sig.res.limma$logFC)>1,]$log2fc,
+                    colorEdge= TRUE)
+heatplot(go, foldChange=sig.res.limma[sig.res.limma$P.Value<0.2&abs(sig.res.limma$logFC)>1,]$log2fc,showCategory = 10) + ggtitle("Heatplot")
+```
+
+
+## fgsea
+```{r}
+ranks <-sig.res.limma[sig.res.limma$peptide_target %in% eg$SYMBOL,]$logFC
+names(ranks) <-eg$ENTREZID
+ranks  <- sort(ranks,decreasing = T)
+
+fgsea <- fgsea(pathways= kegg@geneSets,
+               stats = ranks)
+fgsea[fgsea$pval <0.1,]
+#plotEnrichment(  kegg@geneSets[[head(fgsea[order(pval), ], 1)$pathway]],
+#                ranks)
+```
+
+## GSEA KEGG
+```{r}
+eg = bitr(limma.res$peptide_target, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+limma.res$SYMBOL <- limma.res$peptide_target
+df <- merge(limma.res,eg,"SYMBOL")
+df1 <- df[order(df$logFC,decreasing = T),]
+ranks <- df1$logFC
+names(ranks) <- df1$ENTREZID
+head(ranks)
+
+gse.KEGG <- gseKEGG(ranks, 
+                    organism = "hsa", 
+                    pvalueCutoff = 0.5,
+                    pAdjustMethod = "BH") 
+ges_kegg_res <- gse.KEGG@result
+head(gse.KEGG[order(gse.KEGG@result$p.adjust,decreasing = F),],10)
+
+dotplot(gse.KEGG, showCategory = 10, title = "Enriched Pathways", split=".sign") + facet_grid(.~.sign)
+
+x2 = pairwise_termsim(gse.KEGG)
+emapplot(x2, showCategory = 20)
+ridgeplot(gse.KEGG,showCategory = 15) + labs(x = "enrichment distribution")
+```
+
+## GSEA GO
+```{r}
+barplot(sort(ranks, decreasing = T))
+gse.GO <- gseGO(
+  ranks, #geneList
+  ont = "ALL",  
+  OrgDb = "org.Hs.eg.db", 
+  keyType = "ENTREZID",
+  pvalueCutoff = 0.5,
+  pAdjustMethod = "BH",
+)
+gse_go_res <- gse.GO@result
+head(gse.GO[order(gse.GO@result$p.adjust,decreasing = F),],10)
+
+dotplot(gse.GO, showCategory = 10, title = "Enriched Pathways", split=".sign") + facet_grid(.~.sign)
+
+x2 = pairwise_termsim(gse.GO)
+emapplot(x2, showCategory = 20)
+ridgeplot(gse.GO,showCategory = 15) + labs(x = "enrichment distribution")
+```
+
+
+## WGCNA
+### Construction of co-expression network
+
+```{r,message=FALSE,warning=FALSE}
+enableWGCNAThreads()
+powers <- c(1:10,seq(12,20,2))
+sft <- pickSoftThreshold(data.norm, powerVector = powers, verbose = 5,networkType = "signed")
+
+cex1 = 0.9
+# Scale-free topology fit index as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], 
+     -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     xlab="Soft Threshold (power)",
+     ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+     main = paste("Scale independence"))
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     labels=powers,cex=cex1,col="red")
+
+#Mean connectivity as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], sft$fitIndices[,5],
+     xlab="Soft Threshold (power)",
+     ylab="Mean Connectivity", type="n",
+     main = paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+sft$powerEstimate
+```
+
+
+### Network construction and module detection
+
+**softPower = 6; minModuleSize = 20; hclust : average**
+
+```{r,message=FALSE,warning=FALSE,fig.width=16,fig.height=7}
+## adjacency matrix
+softPower <- 6
+adjacency <- adjacency(data.norm, power = softPower, type = "signed")
+
+## TOM matrix
+TOM = TOMsimilarity(adjacency, TOMType = "signed")
+dissTOM <- 1-TOM
+
+## Create a dendogram using a hierarchical clustering tree
+TaxaTree <- hclust(as.dist(dissTOM), method = "average")
+
+## Module identification using dynamic tree cut
+minModuleSize <- 20
+
+dynamicMods <- cutreeDynamic(dendro = TaxaTree, distM = dissTOM, 
+                             deepSplit = 2, pamRespectsDendro = FALSE,
+                             minClusterSize = minModuleSize)
+
+## Convert numeric labels into colors
+dynamicColors <- labels2colors(dynamicMods)
+
+## Plot the dendrogram with module colors underneath
+plotDendroAndColors(TaxaTree, dynamicColors, "Dynamic Tree Cut",
+                    dendroLabels = F, hang = 0.03,
+                    addGuide = T, guideHang = 0.05,
+                    main = "Dendrogram and module colors")
+
+```
+
+### Find the relationships modules and clinical met1
+```{r,message=FALSE,warning=FALSE,fig.width=14,fig.height=6}
+nTaxa = ncol(data.norm)
+nSamples = nrow(data.norm)
+
+met1$age_at_index <- as.numeric(met1$age_at_index)
+met1$gender<- as.numeric(factor(met1$gender))
+met1$vital_status  <-  as.numeric(met1$vital_status)
+#met1 <- met1[,-1]
+#met1 <- apply(met1, 2, as.numeric)
+  
+moduleColors <- dynamicColors
+MEs0 <- moduleEigengenes(data.norm, moduleColors,softPower = softPower)$eigengenes
+MEs <- orderMEs(MEs0)
+
+moduleTraitCor <- cor(MEs, met1[,2:4], use = "p")
+moduleTraitPvalue <- corPvalueStudent(moduleTraitCor, nSamples)
+
+## visualize it
+textMatrix <- paste(signif(moduleTraitCor, 2), 
+                    "\n(", signif(moduleTraitPvalue, 1), ")", sep = "")
+dim(textMatrix) <- dim(moduleTraitCor)
+
+labeledHeatmap(Matrix = moduleTraitCor, 
+               xLabels = colnames(met1[2:4]), yLabels = names(MEs), 
+               ySymbols = names(MEs), colorLabels = FALSE, 
+               colors = blueWhiteRed(50), textMatrix = textMatrix, 
+               setStdMargins = T, cex.text = 1, 
+               main = paste("Module-trait relationships"))
+```
+
+
+### Output hubgenes
+```{r}
+## output connectivity
+mod_conn <- intramodularConnectivity(adjacency, moduleColors, scaleByMax = FALSE)
+mod_con <- add_column(mod_conn, protein=rownames(mod_conn),moduleColors=moduleColors,.before = colnames(mod_conn)[1])
+yellow <- mod_con[mod_con$moduleColors=="yellow",]$protein
+yellow.df <- limma.res[limma.res$symbol %in% yellow,]
+
+```
+
+
+## kegg
+```{r}
+## to acquire more pathways, I set p.value cutoff is 0.2.
+eg = bitr(yellow.df$peptide_target, fromType="SYMBOL", toType="ENTREZID", OrgDb="org.Hs.eg.db")
+kegg <- enrichKEGG(eg$ENTREZID, organism = 'hsa',
+                   pvalueCutoff = 0.2)
+barplot(kegg, drop = F, showCategory = 12)
+
+```
+
+
+## GO
+```{r}
+## to acquire more pathways, I set p.value cutoff is 0.2.
+go <- enrichGO(
+  eg$ENTREZID,
+  "org.Hs.eg.db",
+  keyType = "ENTREZID",
+  ont = "BP",
+  pvalueCutoff = 0.2,
+  pAdjustMethod = "BH",
+  #universe,
+  qvalueCutoff = 0.2,
+  #minGSSize = 10,
+  #maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
+barplot(go, drop = F, showCategory = 12)
+
+
+```
+
+
+
+```{r}
+## membership
+datKME = signedKME(data.norm, MEs,outputColumnName="MM")
+kme <- datKME
+
+
+## connectivity to hub genes
+top10 <- mod_con %>% group_by(moduleColors) %>% top_n(10,kWithin)
+hub_dat <- add_column(mod_con, hub=0, .after = colnames(mod_con)[1])
+hub_dat$hub[which(hub_dat$protein %in% top10$protein)] <- 1
+
+
+cor_mat <- t(moduleTraitCor)
+corp_mat <- t(moduleTraitPvalue)
+module_rename <- data.frame(cbind(colnames(cor_mat), paste("M",1:ncol(cor_mat),sep = "")),stringsAsFactors = F)
+module_colors <- gsub("ME","",module_rename$X1)
+
+node_names <- hub_dat$moduleColors
+for (i in 1:length(module_colors)) {
+  node_names[which(hub_dat$moduleColors==module_colors[i])] <- module_rename$X2[i]
+}
+hub_out <- add_column(hub_dat, moduleNames = node_names, .after = colnames(hub_dat)[1])
+
+kme1 <- kme
+colnames(kme1) <- paste("M",1:ncol(cor_mat),sep = "")
+hub_out_file <- cbind(hub_out,kme1)
+
+
+cor_data <- cbind(data.norm,met1[2:4])
+name_1 <- colnames(data.norm)
+name_2 <- colnames(met1[2:4])
+dat_sig <- cor_test(cor_data,vars = name_1, vars2 = name_2)
+sig_mat <- as_cor_mat(dat_sig)
+datSIG <- sig_mat[,-1]
+rownames(datSIG) <- sig_mat$rowname
+sig <- datSIG
+
+```
