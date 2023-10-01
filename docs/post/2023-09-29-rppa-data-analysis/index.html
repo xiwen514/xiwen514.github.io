@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="RPPA data analysis" />
+<meta property="og:description" content="What is RPPA? # Reverse phase protein array (RPPA) is a high-throughput antibody-based technique with the procedures similar to that of Western blots. Proteins are extracted from tumor tissue or cultured cells, denatured by SDS, printed on nitrocellulose-coated slides followed by antibody probe.
+What are the advantages of RPPA? # Inexpensive, high-throughput method utilizing automation for increased quality and reliability Sample preparation requirements are similar to that of Western blots Complete assay requires only 40 microliters of each sample for 150 antibodies Robust quantification due to serial dilution of samples Here, I compare the differentially expressed genes based on the patients&rsquo; status(aLive or dead) and their associated functions." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-09-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-09-29T00:00:00+00:00" /><meta property="og:site_name" content="📓 Amethyst" />
+<title>RPPA data analysis | 📓 Amethyst</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="What is RPPA? # Reverse phase protein array (RPPA) is a high-throughput antibody-based technique with the procedures similar to that of Western blots. Proteins are extracted from tumor tissue or cultured cells, denatured by SDS, printed on nitrocellulose-coated slides followed by antibody probe.
+What are the advantages of RPPA? # Inexpensive, high-throughput method utilizing automation for increased quality and reliability Sample preparation requirements are similar to that of Western blots Complete assay requires only 40 microliters of each sample for 150 antibodies Robust quantification due to serial dilution of samples Here, I compare the differentially expressed genes based on the patients&rsquo; status(aLive or dead) and their associated functions."
+/>
+<title>
+  RPPA data analysis
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/">📓 Amethyst</a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="active">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/64bitpandas/amethyst"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">RPPA data analysis</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<h3 id="what-is-rppa">
+  What is RPPA?
+  <a class="anchor" href="#what-is-rppa">#</a>
+</h3>
+<p>Reverse phase protein array (RPPA) is a high-throughput antibody-based technique with the procedures similar to that of Western blots. Proteins are extracted from tumor tissue or cultured cells, denatured by SDS, printed on nitrocellulose-coated slides followed by antibody probe.</p>
+<h3 id="what-are-the-advantages-of-rppa">
+  What are the advantages of RPPA?
+  <a class="anchor" href="#what-are-the-advantages-of-rppa">#</a>
+</h3>
+<ul>
+<li>Inexpensive, high-throughput method utilizing automation for increased quality and reliability</li>
+<li>Sample preparation requirements are similar to that of Western blots</li>
+<li>Complete assay requires only 40 microliters of each sample for 150 antibodies</li>
+<li>Robust quantification due to serial dilution of samples</li>
+</ul>
+<p>Here, I compare the differentially expressed genes based on the patients&rsquo; status(aLive or dead) and their associated functions.</p>
+<h2 id="libraries">
+  libraries
+  <a class="anchor" href="#libraries">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(utils)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(TCGAbiolinks)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tidyverse)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(skimr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(factoextra)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(FactoMineR)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(factoextra)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(limma)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tidyverse)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(modelbased)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(patchwork)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(EnhancedVolcano)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(WGCNA)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(rstatix)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(circlize)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ComplexHeatmap)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(clusterProfiler)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(fgsea)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(enrichplot)
+</span></span></code></pre></div><h2 id="data-extraction-from-tcga">
+  Data extraction from TCGA
+  <a class="anchor" href="#data-extraction-from-tcga">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>query.rppa <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">GDCquery</span>(
+</span></span><span style="display:flex;"><span>  project <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;TCGA-ESCA&#34;</span>, 
+</span></span><span style="display:flex;"><span>  data.category <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Proteome Profiling&#34;</span>,
+</span></span><span style="display:flex;"><span>  data.type <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Protein Expression Quantification&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">GDCdownload</span>(query.rppa) 
+</span></span><span style="display:flex;"><span>rppa <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">GDCprepare</span>(query.rppa) 
+</span></span></code></pre></div><h2 id="normalization-using-limma">
+  Normalization using limma
+  <a class="anchor" href="#normalization-using-limma">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data <span style="color:#ff79c6">&lt;-</span> rppa[,<span style="color:#ff79c6">-</span><span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">5</span>)]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(data) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;-01A&#34;</span>,<span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#50fa7b">colnames</span>(data))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(data) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(rppa<span style="color:#ff79c6">$</span>peptide_target)
+</span></span></code></pre></div><pre tabindex="0"><code>## Warning: Setting row names on a tibble is deprecated.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">t</span>(data))
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># delete the proteins which expresssion values are NA</span>
+</span></span><span style="display:flex;"><span>na.count <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(<span style="color:#50fa7b">is.na</span>(data1),<span style="color:#bd93f9">2</span>,sum)
+</span></span><span style="display:flex;"><span>data2 <span style="color:#ff79c6">&lt;-</span> data1[,na.count <span style="color:#ff79c6">!=</span>(<span style="color:#50fa7b">nrow</span>(data1))]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(data2)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 126 457
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">skim</span>(data2[,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>])
+</span></span></code></pre></div><p>Table: <span id="tab:unnamed-chunk-3"></span>Table 1: Data summary</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Name</td>
+<td style="text-align:left">data2[, 1:10]</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of rows</td>
+<td style="text-align:left">126</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of columns</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">_______________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Column type frequency:</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">numeric</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">________________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Group variables</td>
+<td style="text-align:left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">skim_variable</th>
+<th style="text-align:right">n_missing</th>
+<th style="text-align:right">complete_rate</th>
+<th style="text-align:right">mean</th>
+<th style="text-align:right">sd</th>
+<th style="text-align:right">p0</th>
+<th style="text-align:right">p25</th>
+<th style="text-align:right">p50</th>
+<th style="text-align:right">p75</th>
+<th style="text-align:right">p100</th>
+<th style="text-align:left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">X1433BETA</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0.25</td>
+<td style="text-align:right">0.18</td>
+<td style="text-align:right">-0.02</td>
+<td style="text-align:right">0.14</td>
+<td style="text-align:right">0.21</td>
+<td style="text-align:right">0.32</td>
+<td style="text-align:right">0.85</td>
+<td style="text-align:left">▅▇▂▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X1433EPSILON</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0.09</td>
+<td style="text-align:right">0.12</td>
+<td style="text-align:right">-0.24</td>
+<td style="text-align:right">0.04</td>
+<td style="text-align:right">0.10</td>
+<td style="text-align:right">0.16</td>
+<td style="text-align:right">0.64</td>
+<td style="text-align:left">▁▇▆▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X1433ZETA</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0.00</td>
+<td style="text-align:right">0.28</td>
+<td style="text-align:right">-0.58</td>
+<td style="text-align:right">-0.22</td>
+<td style="text-align:right">-0.05</td>
+<td style="text-align:right">0.16</td>
+<td style="text-align:right">0.72</td>
+<td style="text-align:left">▂▇▆▃▂</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0.13</td>
+<td style="text-align:right">0.51</td>
+<td style="text-align:right">-1.08</td>
+<td style="text-align:right">-0.18</td>
+<td style="text-align:right">0.10</td>
+<td style="text-align:right">0.37</td>
+<td style="text-align:right">1.63</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pS65</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.13</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">-0.73</td>
+<td style="text-align:right">-0.30</td>
+<td style="text-align:right">-0.14</td>
+<td style="text-align:right">0.04</td>
+<td style="text-align:right">0.71</td>
+<td style="text-align:left">▁▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pT37T46</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.27</td>
+<td style="text-align:right">0.63</td>
+<td style="text-align:right">-2.09</td>
+<td style="text-align:right">-0.68</td>
+<td style="text-align:right">-0.21</td>
+<td style="text-align:right">0.09</td>
+<td style="text-align:right">1.39</td>
+<td style="text-align:left">▁▅▇▆▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pT70</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0.12</td>
+<td style="text-align:right">0.14</td>
+<td style="text-align:right">-0.13</td>
+<td style="text-align:right">0.03</td>
+<td style="text-align:right">0.11</td>
+<td style="text-align:right">0.19</td>
+<td style="text-align:right">0.67</td>
+<td style="text-align:left">▅▇▃▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X53BP1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.94</td>
+<td style="text-align:right">0.65</td>
+<td style="text-align:right">-3.00</td>
+<td style="text-align:right">-1.31</td>
+<td style="text-align:right">-0.79</td>
+<td style="text-align:right">-0.50</td>
+<td style="text-align:right">0.36</td>
+<td style="text-align:left">▁▂▃▇▂</td>
+</tr>
+<tr>
+<td style="text-align:left">ACC_pS79</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.19</td>
+<td style="text-align:right">0.55</td>
+<td style="text-align:right">-1.51</td>
+<td style="text-align:right">-0.57</td>
+<td style="text-align:right">-0.22</td>
+<td style="text-align:right">0.20</td>
+<td style="text-align:right">1.10</td>
+<td style="text-align:left">▂▆▇▆▂</td>
+</tr>
+<tr>
+<td style="text-align:left">ACC1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.60</td>
+<td style="text-align:right">-2.10</td>
+<td style="text-align:right">-0.42</td>
+<td style="text-align:right">-0.06</td>
+<td style="text-align:right">0.31</td>
+<td style="text-align:right">1.48</td>
+<td style="text-align:left">▁▂▇▆▂</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data.norm <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">normalizeQuantiles</span>(data2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">skim</span>(data.norm[,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>])
+</span></span></code></pre></div><p>Table: <span id="tab:unnamed-chunk-3"></span>Table 1: Data summary</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Name</td>
+<td style="text-align:left">data.norm[, 1:10]</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of rows</td>
+<td style="text-align:left">126</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of columns</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">_______________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Column type frequency:</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">numeric</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">________________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Group variables</td>
+<td style="text-align:left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">skim_variable</th>
+<th style="text-align:right">n_missing</th>
+<th style="text-align:right">complete_rate</th>
+<th style="text-align:right">mean</th>
+<th style="text-align:right">sd</th>
+<th style="text-align:right">p0</th>
+<th style="text-align:right">p25</th>
+<th style="text-align:right">p50</th>
+<th style="text-align:right">p75</th>
+<th style="text-align:right">p100</th>
+<th style="text-align:left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">X1433BETA</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X1433EPSILON</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X1433ZETA</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pS65</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pT37T46</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X4EBP1_pT70</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">X53BP1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ACC_pS79</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ACC1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">-0.01</td>
+<td style="text-align:right">0.45</td>
+<td style="text-align:right">-1.12</td>
+<td style="text-align:right">-0.3</td>
+<td style="text-align:right">-0.04</td>
+<td style="text-align:right">0.24</td>
+<td style="text-align:right">1.54</td>
+<td style="text-align:left">▂▇▇▂▁</td>
+</tr>
+</tbody>
+</table>
+<h2 id="meta-info">
+  meta info
+  <a class="anchor" href="#meta-info">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>met <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.delim</span>(<span style="color:#f1fa8c">&#34;GDCdata/clinical.tsv&#34;</span>)
+</span></span><span style="display:flex;"><span>met_fil <span style="color:#ff79c6">&lt;-</span>met<span style="color:#50fa7b">[match</span>(<span style="color:#50fa7b">colnames</span>(data),met<span style="color:#ff79c6">$</span>case_submitter_id),] 
+</span></span><span style="display:flex;"><span>met_fil[met_fil<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;&#39;--&#34;</span>] <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>na_count <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(<span style="color:#50fa7b">is.na</span>(met_fil), <span style="color:#bd93f9">2</span>, sum)
+</span></span><span style="display:flex;"><span>met_filNA <span style="color:#ff79c6">&lt;-</span> met_fil[,na_count<span style="color:#ff79c6">!=</span><span style="color:#bd93f9">126</span>]
+</span></span><span style="display:flex;"><span>met1 <span style="color:#ff79c6">&lt;-</span> met_filNA[,<span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;case_submitter_id&#34;</span>, <span style="color:#f1fa8c">&#34;age_at_index&#34;</span> ,<span style="color:#f1fa8c">&#34;gender&#34;</span>, 
+</span></span><span style="display:flex;"><span>               <span style="color:#f1fa8c">&#34;vital_status&#34;</span> )]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(met1) <span style="color:#ff79c6">&lt;-</span> met1<span style="color:#ff79c6">$</span>case_submitter_id
+</span></span><span style="display:flex;"><span>met1<span style="color:#ff79c6">$</span>vital_status <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">factor</span>(met1<span style="color:#ff79c6">$</span>vital_status)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(met1)
+</span></span></code></pre></div><pre tabindex="0"><code>##              case_submitter_id age_at_index gender vital_status
+## TCGA-LN-A49Y      TCGA-LN-A49Y           77   male        Alive
+## TCGA-Q9-A6FW      TCGA-Q9-A6FW           61   male        Alive
+## TCGA-LN-A49L      TCGA-LN-A49L           44   male         Dead
+## TCGA-LN-A49N      TCGA-LN-A49N           50   male        Alive
+## TCGA-LN-A49P      TCGA-LN-A49P           71   male        Alive
+## TCGA-L5-A4OJ      TCGA-L5-A4OJ           70 female        Alive
+</code></pre><h2 id="dimentionally-reduction-pca">
+  Dimentionally reduction (PCA)
+  <a class="anchor" href="#dimentionally-reduction-pca">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data.pca <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">PCA</span>(data.norm, graph <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>) 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">fviz_pca_ind</span>(data.pca, label<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>, habillage<span style="color:#ff79c6">=</span>met1<span style="color:#ff79c6">$</span>vital_status,
+</span></span><span style="display:flex;"><span>             addEllipses<span style="color:#ff79c6">=</span><span style="color:#ff79c6">TRUE</span>, ellipse.level<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0.95</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<h2 id="differential-analysis">
+  Differential analysis
+  <a class="anchor" href="#differential-analysis">#</a>
+</h2>
+<h4 id="linear-regression">
+  linear regression
+  <a class="anchor" href="#linear-regression">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data3 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(met1,data.norm) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">mutate</span>(<span style="color:#50fa7b">across</span>(gender, as.factor))
+</span></span><span style="display:flex;"><span>lm_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NULL</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">names</span>(data3)[5<span style="color:#ff79c6">:</span><span style="color:#bd93f9">461</span>]) {
+</span></span><span style="display:flex;"><span>  model <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lm</span>(<span style="color:#50fa7b">as.formula</span>(<span style="color:#50fa7b">paste0</span>(i, <span style="color:#f1fa8c">&#34;~ vital_status&#34;</span>)), data <span style="color:#ff79c6">=</span> data3)
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># Recompute contrasts with a higher precision (for a smoother plot)</span>
+</span></span><span style="display:flex;"><span>  contrasts <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">estimate_contrasts</span>(model, contrast <span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;vital_status&#34;</span>, length <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">20</span>, standardize <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>  contrasts<span style="color:#ff79c6">$</span>pro <span style="color:#ff79c6">&lt;-</span> i
+</span></span><span style="display:flex;"><span>  lm_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rbind</span>(lm_list,contrasts)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># filter the significant proteins</span>
+</span></span><span style="display:flex;"><span>sig.res <span style="color:#ff79c6">&lt;-</span> lm_list <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">mutate</span>(asterisk_label <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">case_when</span>(
+</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">0.1</span> <span style="color:#ff79c6">~</span> <span style="color:#f1fa8c">&#34;ns&#34;</span>,
+</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.1</span> <span style="color:#ff79c6">&amp;</span> p <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">0.05</span> <span style="color:#ff79c6">~</span> <span style="color:#f1fa8c">&#34;*&#34;</span>,
+</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span> <span style="color:#ff79c6">&amp;</span> p <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">0.01</span> <span style="color:#ff79c6">~</span> <span style="color:#f1fa8c">&#34;**&#34;</span>,
+</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.01</span> <span style="color:#ff79c6">&amp;</span> p <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">0.001</span> <span style="color:#ff79c6">~</span> <span style="color:#f1fa8c">&#34;***&#34;</span>,
+</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.001</span> <span style="color:#ff79c6">~</span> <span style="color:#f1fa8c">&#34;****&#34;</span>
+</span></span><span style="display:flex;"><span>)) <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">filter</span>(asterisk_label <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;ns&#34;</span>)
+</span></span></code></pre></div><h4 id="limma">
+  limma
+  <a class="anchor" href="#limma">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>design <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">model.matrix</span>(<span style="color:#ff79c6">~</span> met1<span style="color:#ff79c6">$</span>vital_status)
+</span></span><span style="display:flex;"><span>limma.model <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lmFit</span>(<span style="color:#50fa7b">t</span>(data.norm), design <span style="color:#ff79c6">=</span> design)
+</span></span><span style="display:flex;"><span>data.eb <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">eBayes</span>(limma.model)
+</span></span><span style="display:flex;"><span>limma.res <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">topTable</span>(data.eb, number <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">Inf</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## Removing intercept from test coefficients
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>rppa<span style="color:#ff79c6">$</span>symbol <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(rppa<span style="color:#ff79c6">$</span>peptide_target)
+</span></span><span style="display:flex;"><span>limma.res<span style="color:#ff79c6">$</span>symbol <span style="color:#ff79c6">&lt;-</span><span style="color:#50fa7b">rownames</span>(limma.res) 
+</span></span><span style="display:flex;"><span>limma.res <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">left_join</span>(limma.res,rppa[,<span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;peptide_target&#34;</span>, <span style="color:#f1fa8c">&#34;symbol&#34;</span>)])
+</span></span></code></pre></div><pre tabindex="0"><code>## Joining with `by = join_by(symbol)`
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sig.res.limma <span style="color:#ff79c6">&lt;-</span> limma.res <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">filter</span>(P.Value <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.1</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">intersect</span>(sig.res<span style="color:#ff79c6">$</span>pro, <span style="color:#50fa7b">rownames</span>(sig.res.limma))
+</span></span></code></pre></div><pre tabindex="0"><code>## character(0)
+</code></pre><h2 id="visualization">
+  Visualization
+  <a class="anchor" href="#visualization">#</a>
+</h2>
+<h4 id="boxplot-for-significant-proteins--pvalue--005">
+  boxplot for significant proteins  (p.value &lt; 0.05)
+  <a class="anchor" href="#boxplot-for-significant-proteins--pvalue--005">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># </span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># pst &lt;- NULL</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># for (i in sig.res$pro) {</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#   p &lt;- ggplot(data3,</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#       aes_string(x = &#34;vital_status&#34;, y = i)) +</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#       geom_violin(aes(colour = vital_status, fill = vital_status), trim = FALSE) +</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#       geom_boxplot(aes(fill = vital_status), width = 0.2, colour = &#34;black&#34;)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#   p &lt;- p+ ggplot2::theme_minimal() + theme(legend.position=&#34;none&#34;)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#   pst[[i]] &lt;- p</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># }</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#   </span>
+</span></span></code></pre></div><h4 id="volcano-plot">
+  Volcano plot
+  <a class="anchor" href="#volcano-plot">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">EnhancedVolcano</span>(limma.res,
+</span></span><span style="display:flex;"><span>    lab <span style="color:#ff79c6">=</span> limma.res<span style="color:#ff79c6">$</span>peptide_target,
+</span></span><span style="display:flex;"><span>    x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;logFC&#39;</span>,
+</span></span><span style="display:flex;"><span>    y <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;P.Value&#39;</span>,
+</span></span><span style="display:flex;"><span>    pCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>,
+</span></span><span style="display:flex;"><span>    FCcutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.01</span>,
+</span></span><span style="display:flex;"><span>    xlim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">-0.5</span>, <span style="color:#bd93f9">0.5</span>),
+</span></span><span style="display:flex;"><span>    ylim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">3</span>),
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">#xlab = &#34;difference&#34;,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">#ylab = &#34;p.value&#34;,</span>
+</span></span><span style="display:flex;"><span>    labSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4.0</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">#legendLabSize = 8,</span>
+</span></span><span style="display:flex;"><span>  legendIconSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>,
+</span></span><span style="display:flex;"><span>    legendLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;NS&#34;</span>, <span style="color:#f1fa8c">&#34;Coefficient&#34;</span>, <span style="color:#f1fa8c">&#34;FDR&#34;</span>, <span style="color:#f1fa8c">&#34;FDR and Coefficient&#34;</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<h4 id="heatmap">
+  heatmap
+  <a class="anchor" href="#heatmap">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data_sig <span style="color:#ff79c6">&lt;-</span> data.norm[,sig.res<span style="color:#ff79c6">$</span>pro]
+</span></span><span style="display:flex;"><span>col_fun <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colorRamp2</span>(<span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">-2</span>, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">2</span>), <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;blue&#34;</span>, <span style="color:#f1fa8c">&#34;white&#34;</span>, <span style="color:#f1fa8c">&#34;red&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">Heatmap</span>(data_sig,
+</span></span><span style="display:flex;"><span>        col<span style="color:#ff79c6">=</span> col_fun,
+</span></span><span style="display:flex;"><span>        row_split <span style="color:#ff79c6">=</span>met1<span style="color:#ff79c6">$</span>vital_status,
+</span></span><span style="display:flex;"><span>        cluster_column_slices <span style="color:#ff79c6">=</span> F,
+</span></span><span style="display:flex;"><span>        column_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">6</span>),
+</span></span><span style="display:flex;"><span>        row_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4</span>))
+</span></span></code></pre></div><pre tabindex="0"><code>## Warning: The input is a data frame-like object, convert it to a matrix.
+</code></pre><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-11-1.png" width="960" />
+<h2 id="kegg">
+  kegg
+  <a class="anchor" href="#kegg">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## to acquire more pathways, I set p.value cutoff is 0.2.</span>
+</span></span><span style="display:flex;"><span>eg <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bitr</span>(sig.res.limma<span style="color:#ff79c6">$</span>peptide_target, fromType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>, toType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>, OrgDb<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## 
+</code></pre><pre tabindex="0"><code>## &#39;select()&#39; returned 1:1 mapping between keys and columns
+</code></pre><pre tabindex="0"><code>## Warning in bitr(sig.res.limma$peptide_target, fromType = &#34;SYMBOL&#34;, toType =
+## &#34;ENTREZID&#34;, : 68.97% of input gene IDs are fail to map...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>kegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(eg<span style="color:#ff79c6">$</span>ENTREZID, organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;hsa&#39;</span>,
+</span></span><span style="display:flex;"><span>                   pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## Reading KEGG annotation online: &#34;https://rest.kegg.jp/link/hsa/pathway&#34;...
+</code></pre><pre tabindex="0"><code>## Reading KEGG annotation online: &#34;https://rest.kegg.jp/list/pathway/hsa&#34;...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(kegg, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">heatplot</span>(kegg, foldChange<span style="color:#ff79c6">=</span>sig.res.limma[sig.res.limma<span style="color:#ff79c6">$</span>P.Value<span style="color:#ff79c6">&lt;</span><span style="color:#bd93f9">0.2</span><span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">abs</span>(sig.res.limma<span style="color:#ff79c6">$</span>logFC)<span style="color:#ff79c6">&gt;</span><span style="color:#bd93f9">1</span>,]<span style="color:#ff79c6">$</span>log2fc,showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">ggtitle</span>(<span style="color:#f1fa8c">&#34;Heatplot&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-12-2.png" width="672" />
+<h2 id="go">
+  GO
+  <a class="anchor" href="#go">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## to acquire more pathways, I set p.value cutoff is 0.2.</span>
+</span></span><span style="display:flex;"><span>go <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(
+</span></span><span style="display:flex;"><span>  eg<span style="color:#ff79c6">$</span>ENTREZID,
+</span></span><span style="display:flex;"><span>  <span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>,
+</span></span><span style="display:flex;"><span>  keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>  ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>,
+</span></span><span style="display:flex;"><span>  pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#universe,</span>
+</span></span><span style="display:flex;"><span>  qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#minGSSize = 10,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#maxGSSize = 500,</span>
+</span></span><span style="display:flex;"><span>  readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>  pool <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(go, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>enrichplot<span style="color:#ff79c6">::</span><span style="color:#50fa7b">cnetplot</span>(go,categorySize <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pvalue&#34;</span>, 
+</span></span><span style="display:flex;"><span>                    foldChange<span style="color:#ff79c6">=</span>sig.res.limma[sig.res.limma<span style="color:#ff79c6">$</span>P.Value<span style="color:#ff79c6">&lt;</span><span style="color:#bd93f9">0.2</span><span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">abs</span>(sig.res.limma<span style="color:#ff79c6">$</span>logFC)<span style="color:#ff79c6">&gt;</span><span style="color:#bd93f9">1</span>,]<span style="color:#ff79c6">$</span>log2fc,
+</span></span><span style="display:flex;"><span>                    colorEdge<span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## Warning in cnetplot.enrichResult(x, ...): Use &#39;color.params = list(foldChange = your_value)&#39; instead of &#39;foldChange&#39;.
+##  The foldChange parameter will be removed in the next version.
+</code></pre><pre tabindex="0"><code>## Warning in cnetplot.enrichResult(x, ...): Use &#39;color.params = list(edge = your_value)&#39; instead of &#39;colorEdge&#39;.
+##  The colorEdge parameter will be removed in the next version.
+</code></pre><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-13-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">heatplot</span>(go, foldChange<span style="color:#ff79c6">=</span>sig.res.limma[sig.res.limma<span style="color:#ff79c6">$</span>P.Value<span style="color:#ff79c6">&lt;</span><span style="color:#bd93f9">0.2</span><span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">abs</span>(sig.res.limma<span style="color:#ff79c6">$</span>logFC)<span style="color:#ff79c6">&gt;</span><span style="color:#bd93f9">1</span>,]<span style="color:#ff79c6">$</span>log2fc,showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">ggtitle</span>(<span style="color:#f1fa8c">&#34;Heatplot&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-13-3.png" width="672" />
+<h2 id="fgsea">
+  fgsea
+  <a class="anchor" href="#fgsea">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>ranks <span style="color:#ff79c6">&lt;-</span>sig.res.limma[sig.res.limma<span style="color:#ff79c6">$</span>peptide_target <span style="color:#ff79c6">%in%</span> eg<span style="color:#ff79c6">$</span>SYMBOL,]<span style="color:#ff79c6">$</span>logFC
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">names</span>(ranks) <span style="color:#ff79c6">&lt;-</span>eg<span style="color:#ff79c6">$</span>ENTREZID
+</span></span><span style="display:flex;"><span>ranks  <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sort</span>(ranks,decreasing <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fgsea <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">fgsea</span>(pathways<span style="color:#ff79c6">=</span> kegg<span style="color:#ff79c6">@</span>geneSets,
+</span></span><span style="display:flex;"><span>               stats <span style="color:#ff79c6">=</span> ranks)
+</span></span><span style="display:flex;"><span>fgsea[fgsea<span style="color:#ff79c6">$</span>pval <span style="color:#ff79c6">&lt;</span><span style="color:#bd93f9">0.1</span>,]
+</span></span></code></pre></div><pre tabindex="0"><code>##     pathway       pval      padj   log2err      ES       NES size leadingEdge
+## 1: hsa04066 0.05172414 0.8277135 0.2765006 -0.9375 -1.716359    2   2597,7037
+## 2: hsa04216 0.05172414 0.8277135 0.2765006 -0.9375 -1.716359    2   2180,7037
+## 3: hsa04664 0.04619249 0.8277135 0.3217759  0.9375  1.733384    2   9846,7409
+## 4: hsa04666 0.04619249 0.8277135 0.3217759  0.9375  1.733384    2   9846,7409
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#plotEnrichment(  kegg@geneSets[[head(fgsea[order(pval), ], 1)$pathway]],</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#                ranks)</span>
+</span></span></code></pre></div><h2 id="gsea-kegg">
+  GSEA KEGG
+  <a class="anchor" href="#gsea-kegg">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>eg <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bitr</span>(limma.res<span style="color:#ff79c6">$</span>peptide_target, fromType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>, toType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>, OrgDb<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## &#39;select()&#39; returned 1:1 mapping between keys and columns
+</code></pre><pre tabindex="0"><code>## Warning in bitr(limma.res$peptide_target, fromType = &#34;SYMBOL&#34;, toType =
+## &#34;ENTREZID&#34;, : 66.74% of input gene IDs are fail to map...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>limma.res<span style="color:#ff79c6">$</span>SYMBOL <span style="color:#ff79c6">&lt;-</span> limma.res<span style="color:#ff79c6">$</span>peptide_target
+</span></span><span style="display:flex;"><span>df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">merge</span>(limma.res,eg,<span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>)
+</span></span><span style="display:flex;"><span>df1 <span style="color:#ff79c6">&lt;-</span> df<span style="color:#50fa7b">[order</span>(df<span style="color:#ff79c6">$</span>logFC,decreasing <span style="color:#ff79c6">=</span> T),]
+</span></span><span style="display:flex;"><span>ranks <span style="color:#ff79c6">&lt;-</span> df1<span style="color:#ff79c6">$</span>logFC
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">names</span>(ranks) <span style="color:#ff79c6">&lt;-</span> df1<span style="color:#ff79c6">$</span>ENTREZID
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(ranks)
+</span></span></code></pre></div><pre tabindex="0"><code>##      9846      2886      7409      7019       472       331 
+## 0.2248719 0.1903437 0.1900618 0.1883713 0.1770109 0.1728815
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>gse.KEGG <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gseKEGG</span>(ranks, 
+</span></span><span style="display:flex;"><span>                    organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;hsa&#34;</span>, 
+</span></span><span style="display:flex;"><span>                    pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>,
+</span></span><span style="display:flex;"><span>                    pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>) 
+</span></span></code></pre></div><pre tabindex="0"><code>## preparing geneSet collections...
+</code></pre><pre tabindex="0"><code>## GSEA analysis...
+</code></pre><pre tabindex="0"><code>## leading edge analysis...
+</code></pre><pre tabindex="0"><code>## done...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>ges_kegg_res <span style="color:#ff79c6">&lt;-</span> gse.KEGG<span style="color:#ff79c6">@</span>result
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(gse.KEGG<span style="color:#50fa7b">[order</span>(gse.KEGG<span style="color:#ff79c6">@</span>result<span style="color:#ff79c6">$</span>p.adjust,decreasing <span style="color:#ff79c6">=</span> F),],<span style="color:#bd93f9">10</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>##                ID              Description setSize enrichmentScore      NES
+## hsa01524 hsa01524 Platinum drug resistance      10       0.7182333 1.775986
+##               pvalue  p.adjust    qvalue rank                   leading_edge
+## hsa01524 0.004948142 0.1533924 0.1533924   17 tags=40%, list=11%, signal=38%
+##            core_enrichment
+## hsa01524 472/331/4292/7507
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(gse.KEGG, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>, title <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Enriched Pathways&#34;</span>, split<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;.sign&#34;</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">facet_grid</span>(.~.sign)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-15-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>x2 <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">pairwise_termsim</span>(gse.KEGG)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">emapplot</span>(x2, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-15-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">ridgeplot</span>(gse.KEGG,showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">15</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">labs</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;enrichment distribution&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## Picking joint bandwidth of 0.0177
+</code></pre><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-15-3.png" width="672" />
+<h2 id="gsea-go">
+  GSEA GO
+  <a class="anchor" href="#gsea-go">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(<span style="color:#50fa7b">sort</span>(ranks, decreasing <span style="color:#ff79c6">=</span> T))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-16-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>gse.GO <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gseGO</span>(
+</span></span><span style="display:flex;"><span>  ranks, <span style="color:#6272a4">#geneList</span>
+</span></span><span style="display:flex;"><span>  ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ALL&#34;</span>,  
+</span></span><span style="display:flex;"><span>  OrgDb <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>, 
+</span></span><span style="display:flex;"><span>  keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>  pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>,
+</span></span><span style="display:flex;"><span>  pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## preparing geneSet collections...
+</code></pre><pre tabindex="0"><code>## GSEA analysis...
+</code></pre><pre tabindex="0"><code>## leading edge analysis...
+</code></pre><pre tabindex="0"><code>## done...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>gse_go_res <span style="color:#ff79c6">&lt;-</span> gse.GO<span style="color:#ff79c6">@</span>result
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(gse.GO<span style="color:#50fa7b">[order</span>(gse.GO<span style="color:#ff79c6">@</span>result<span style="color:#ff79c6">$</span>p.adjust,decreasing <span style="color:#ff79c6">=</span> F),],<span style="color:#bd93f9">10</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>##            ONTOLOGY         ID
+## GO:0031347       BP GO:0031347
+## GO:0006325       BP GO:0006325
+## GO:0050727       BP GO:0050727
+## GO:0005615       CC GO:0005615
+## GO:0032101       BP GO:0032101
+## GO:0051649       BP GO:0051649
+## GO:0009986       CC GO:0009986
+## GO:0008585       BP GO:0008585
+## GO:0046545       BP GO:0046545
+## GO:0046660       BP GO:0046660
+##                                                     Description setSize
+## GO:0031347                       regulation of defense response      18
+## GO:0006325                               chromatin organization      13
+## GO:0050727                  regulation of inflammatory response      12
+## GO:0005615                                  extracellular space      38
+## GO:0032101          regulation of response to external stimulus      28
+## GO:0051649                establishment of localization in cell      24
+## GO:0009986                                         cell surface      12
+## GO:0008585                             female gonad development      10
+## GO:0046545 development of primary female sexual characteristics      10
+## GO:0046660                           female sex differentiation      10
+##            enrichmentScore       NES       pvalue  p.adjust    qvalue rank
+## GO:0031347       0.6766236  1.941582 0.0008383577 0.2448004 0.2420942   32
+## GO:0006325       0.7373285  1.937396 0.0007421146 0.2448004 0.2420942   32
+## GO:0050727       0.7403734  1.899500 0.0005116069 0.2448004 0.2420942   25
+## GO:0005615      -0.4741697 -1.759906 0.0043141588 0.3153585 0.3118722   51
+## GO:0032101       0.5461552  1.735473 0.0057316234 0.3153585 0.3118722   47
+## GO:0051649       0.5604075  1.725255 0.0062627097 0.3153585 0.3118722   14
+## GO:0009986      -0.6206356 -1.721293 0.0072921276 0.3153585 0.3118722   27
+## GO:0008585       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
+## GO:0046545       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
+## GO:0046660       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
+##                              leading_edge
+## GO:0031347 tags=56%, list=21%, signal=50%
+## GO:0006325 tags=62%, list=21%, signal=53%
+## GO:0050727 tags=58%, list=16%, signal=53%
+## GO:0005615 tags=61%, list=34%, signal=54%
+## GO:0032101 tags=54%, list=31%, signal=45%
+## GO:0051649  tags=33%, list=9%, signal=36%
+## GO:0009986 tags=50%, list=18%, signal=45%
+## GO:0008585  tags=30%, list=6%, signal=30%
+## GO:0046545  tags=30%, list=6%, signal=30%
+## GO:0046660  tags=30%, list=6%, signal=30%
+##                                                                                                          core_enrichment
+## GO:0031347                                                            7409/472/331/6714/6647/27250/3717/2625/253943/5058
+## GO:0006325                                                                      9557/29072/5080/64783/3717/2625/546/5058
+## GO:0050727                                                                             472/331/6714/6647/27250/3717/2625
+## GO:0005615 3486/780/4313/581/942/2194/5052/4323/26227/2539/1938/6275/952/1956/1977/983/1445/960/6648/4893/3485/7037/2597
+## GO:0032101                                   7409/472/331/6714/6647/27250/3717/2625/253943/5058/5728/2113/8805/83481/673
+## GO:0051649                                                                      9846/472/6714/6647/29072/4292/83548/5080
+## GO:0009986                                                                                     94/952/1956/4851/960/7037
+## GO:0008585                                                                                                 472/6714/6647
+## GO:0046545                                                                                                 472/6714/6647
+## GO:0046660                                                                                                 472/6714/6647
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(gse.GO, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>, title <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Enriched Pathways&#34;</span>, split<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;.sign&#34;</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">facet_grid</span>(.~.sign)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-16-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>x2 <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">pairwise_termsim</span>(gse.GO)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">emapplot</span>(x2, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-16-3.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">ridgeplot</span>(gse.GO,showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">15</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">labs</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;enrichment distribution&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## Picking joint bandwidth of 0.017
+</code></pre><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-16-4.png" width="672" />
+<h2 id="wgcna">
+  WGCNA
+  <a class="anchor" href="#wgcna">#</a>
+</h2>
+<h3 id="construction-of-co-expression-network">
+  Construction of co-expression network
+  <a class="anchor" href="#construction-of-co-expression-network">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">enableWGCNAThreads</span>()
+</span></span></code></pre></div><pre tabindex="0"><code>## Allowing parallel execution with up to 7 working processes.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>powers <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>,<span style="color:#50fa7b">seq</span>(<span style="color:#bd93f9">12</span>,<span style="color:#bd93f9">20</span>,<span style="color:#bd93f9">2</span>))
+</span></span><span style="display:flex;"><span>sft <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">pickSoftThreshold</span>(data.norm, powerVector <span style="color:#ff79c6">=</span> powers, verbose <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>,networkType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## pickSoftThreshold: will use block size 457.
+##  pickSoftThreshold: calculating connectivity for given powers...
+##    ..working on genes 1 through 457 of 457
+##    Power SFT.R.sq  slope truncated.R.sq mean.k. median.k. max.k.
+## 1      1    0.244 -67.40          0.939 228.000   228.000 232.00
+## 2      2    0.509 -19.30          0.885 120.000   119.000 130.00
+## 3      3    0.728  -7.94          0.858  66.000    64.700  80.40
+## 4      4    0.779  -5.00          0.898  37.900    36.500  53.80
+## 5      5    0.822  -3.72          0.908  22.500    21.200  38.00
+## 6      6    0.873  -3.02          0.938  13.900    12.700  28.00
+## 7      7    0.878  -2.61          0.908   8.850     7.790  21.30
+## 8      8    0.912  -2.35          0.928   5.810     4.910  16.70
+## 9      9    0.880  -2.20          0.871   3.920     3.190  13.30
+## 10    10    0.896  -2.07          0.886   2.710     2.100  10.80
+## 11    12    0.906  -1.92          0.881   1.400     0.966   7.69
+## 12    14    0.303  -3.51          0.194   0.779     0.473   5.94
+## 13    16    0.940  -1.80          0.924   0.467     0.246   4.80
+## 14    18    0.929  -1.77          0.909   0.297     0.129   4.00
+## 15    20    0.319  -2.79          0.202   0.199     0.071   3.42
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>cex1 <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.9</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Scale-free topology fit index as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], 
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Scale Free Topology Model Fit,signed R^2&#34;</span>,type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Scale independence&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     labels<span style="color:#ff79c6">=</span>powers,cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-17-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#Mean connectivity as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Mean Connectivity&#34;</span>, type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Mean connectivity&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>], labels<span style="color:#ff79c6">=</span>powers, cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-17-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sft<span style="color:#ff79c6">$</span>powerEstimate
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 6
+</code></pre><h3 id="network-construction-and-module-detection">
+  Network construction and module detection
+  <a class="anchor" href="#network-construction-and-module-detection">#</a>
+</h3>
+<p><strong>softPower = 6; minModuleSize = 20; hclust : average</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## adjacency matrix</span>
+</span></span><span style="display:flex;"><span>softPower <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">6</span>
+</span></span><span style="display:flex;"><span>adjacency <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">adjacency</span>(data.norm, power <span style="color:#ff79c6">=</span> softPower, type <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## TOM matrix</span>
+</span></span><span style="display:flex;"><span>TOM <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">TOMsimilarity</span>(adjacency, TOMType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## ..connectivity..
+## ..matrix multiplication (system BLAS)..
+## ..normalization..
+## ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dissTOM <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">-</span>TOM
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Create a dendogram using a hierarchical clustering tree</span>
+</span></span><span style="display:flex;"><span>TaxaTree <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">hclust</span>(<span style="color:#50fa7b">as.dist</span>(dissTOM), method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;average&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Module identification using dynamic tree cut</span>
+</span></span><span style="display:flex;"><span>minModuleSize <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dynamicMods <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cutreeDynamic</span>(dendro <span style="color:#ff79c6">=</span> TaxaTree, distM <span style="color:#ff79c6">=</span> dissTOM, 
+</span></span><span style="display:flex;"><span>                             deepSplit <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, pamRespectsDendro <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>                             minClusterSize <span style="color:#ff79c6">=</span> minModuleSize)
+</span></span></code></pre></div><pre tabindex="0"><code>##  ..cutHeight not given, setting it to 0.977  ===&gt;  99% of the (truncated) height range in dendro.
+##  ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Convert numeric labels into colors</span>
+</span></span><span style="display:flex;"><span>dynamicColors <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">labels2colors</span>(dynamicMods)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Plot the dendrogram with module colors underneath</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotDendroAndColors</span>(TaxaTree, dynamicColors, <span style="color:#f1fa8c">&#34;Dynamic Tree Cut&#34;</span>,
+</span></span><span style="display:flex;"><span>                    dendroLabels <span style="color:#ff79c6">=</span> F, hang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.03</span>,
+</span></span><span style="display:flex;"><span>                    addGuide <span style="color:#ff79c6">=</span> T, guideHang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>,
+</span></span><span style="display:flex;"><span>                    main <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dendrogram and module colors&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-18-1.png" width="1536" />
+<h3 id="find-the-relationships-modules-and-clinical-met1">
+  Find the relationships modules and clinical met1
+  <a class="anchor" href="#find-the-relationships-modules-and-clinical-met1">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>nTaxa <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ncol</span>(data.norm)
+</span></span><span style="display:flex;"><span>nSamples <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">nrow</span>(data.norm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>met1<span style="color:#ff79c6">$</span>age_at_index <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.numeric</span>(met1<span style="color:#ff79c6">$</span>age_at_index)
+</span></span><span style="display:flex;"><span>met1<span style="color:#ff79c6">$</span>gender<span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">factor</span>(met1<span style="color:#ff79c6">$</span>gender))
+</span></span><span style="display:flex;"><span>met1<span style="color:#ff79c6">$</span>vital_status  <span style="color:#ff79c6">&lt;-</span>  <span style="color:#50fa7b">as.numeric</span>(met1<span style="color:#ff79c6">$</span>vital_status)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#met1 &lt;- met1[,-1]</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#met1 &lt;- apply(met1, 2, as.numeric)</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>moduleColors <span style="color:#ff79c6">&lt;-</span> dynamicColors
+</span></span><span style="display:flex;"><span>MEs0 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">moduleEigengenes</span>(data.norm, moduleColors,softPower <span style="color:#ff79c6">=</span> softPower)<span style="color:#ff79c6">$</span>eigengenes
+</span></span><span style="display:flex;"><span>MEs <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">orderMEs</span>(MEs0)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>moduleTraitCor <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cor</span>(MEs, met1[,<span style="color:#bd93f9">2</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">4</span>], use <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p&#34;</span>)
+</span></span><span style="display:flex;"><span>moduleTraitPvalue <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">corPvalueStudent</span>(moduleTraitCor, nSamples)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## visualize it</span>
+</span></span><span style="display:flex;"><span>textMatrix <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">paste</span>(<span style="color:#50fa7b">signif</span>(moduleTraitCor, <span style="color:#bd93f9">2</span>), 
+</span></span><span style="display:flex;"><span>                    <span style="color:#f1fa8c">&#34;\n(&#34;</span>, <span style="color:#50fa7b">signif</span>(moduleTraitPvalue, <span style="color:#bd93f9">1</span>), <span style="color:#f1fa8c">&#34;)&#34;</span>, sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(textMatrix) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">dim</span>(moduleTraitCor)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">labeledHeatmap</span>(Matrix <span style="color:#ff79c6">=</span> moduleTraitCor, 
+</span></span><span style="display:flex;"><span>               xLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(met1[2<span style="color:#ff79c6">:</span><span style="color:#bd93f9">4</span>]), yLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), 
+</span></span><span style="display:flex;"><span>               ySymbols <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), colorLabels <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>, 
+</span></span><span style="display:flex;"><span>               colors <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">blueWhiteRed</span>(<span style="color:#bd93f9">50</span>), textMatrix <span style="color:#ff79c6">=</span> textMatrix, 
+</span></span><span style="display:flex;"><span>               setStdMargins <span style="color:#ff79c6">=</span> T, cex.text <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, 
+</span></span><span style="display:flex;"><span>               main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Module-trait relationships&#34;</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-19-1.png" width="1344" />
+<h3 id="output-hubgenes">
+  Output hubgenes
+  <a class="anchor" href="#output-hubgenes">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## output connectivity</span>
+</span></span><span style="display:flex;"><span>mod_conn <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">intramodularConnectivity</span>(adjacency, moduleColors, scaleByMax <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>mod_con <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(mod_conn, protein<span style="color:#ff79c6">=</span><span style="color:#50fa7b">rownames</span>(mod_conn),moduleColors<span style="color:#ff79c6">=</span>moduleColors,.before <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(mod_conn)[1])
+</span></span><span style="display:flex;"><span>yellow <span style="color:#ff79c6">&lt;-</span> mod_con[mod_con<span style="color:#ff79c6">$</span>moduleColors<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;yellow&#34;</span>,]<span style="color:#ff79c6">$</span>protein
+</span></span><span style="display:flex;"><span>yellow.df <span style="color:#ff79c6">&lt;-</span> limma.res[limma.res<span style="color:#ff79c6">$</span>symbol <span style="color:#ff79c6">%in%</span> yellow,]
+</span></span></code></pre></div><h2 id="kegg-1">
+  kegg
+  <a class="anchor" href="#kegg-1">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## to acquire more pathways, I set p.value cutoff is 0.2.</span>
+</span></span><span style="display:flex;"><span>eg <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bitr</span>(yellow.df<span style="color:#ff79c6">$</span>peptide_target, fromType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>, toType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>, OrgDb<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## &#39;select()&#39; returned 1:1 mapping between keys and columns
+</code></pre><pre tabindex="0"><code>## Warning in bitr(yellow.df$peptide_target, fromType = &#34;SYMBOL&#34;, toType =
+## &#34;ENTREZID&#34;, : 73.68% of input gene IDs are fail to map...
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>kegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(eg<span style="color:#ff79c6">$</span>ENTREZID, organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;hsa&#39;</span>,
+</span></span><span style="display:flex;"><span>                   pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(kegg, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-21-1.png" width="672" />
+<h2 id="go-1">
+  GO
+  <a class="anchor" href="#go-1">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## to acquire more pathways, I set p.value cutoff is 0.2.</span>
+</span></span><span style="display:flex;"><span>go <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(
+</span></span><span style="display:flex;"><span>  eg<span style="color:#ff79c6">$</span>ENTREZID,
+</span></span><span style="display:flex;"><span>  <span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>,
+</span></span><span style="display:flex;"><span>  keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>  ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>,
+</span></span><span style="display:flex;"><span>  pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#universe,</span>
+</span></span><span style="display:flex;"><span>  qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#minGSSize = 10,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#maxGSSize = 500,</span>
+</span></span><span style="display:flex;"><span>  readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>  pool <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(go, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/index_files/figure-html/unnamed-chunk-22-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## membership</span>
+</span></span><span style="display:flex;"><span>datKME <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">signedKME</span>(data.norm, MEs,outputColumnName<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;MM&#34;</span>)
+</span></span><span style="display:flex;"><span>kme <span style="color:#ff79c6">&lt;-</span> datKME
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## connectivity to hub genes</span>
+</span></span><span style="display:flex;"><span>top10 <span style="color:#ff79c6">&lt;-</span> mod_con <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">group_by</span>(moduleColors) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">top_n</span>(<span style="color:#bd93f9">10</span>,kWithin)
+</span></span><span style="display:flex;"><span>hub_dat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(mod_con, hub<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0</span>, .after <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(mod_con)[1])
+</span></span><span style="display:flex;"><span>hub_dat<span style="color:#ff79c6">$</span>hub<span style="color:#50fa7b">[which</span>(hub_dat<span style="color:#ff79c6">$</span>protein <span style="color:#ff79c6">%in%</span> top10<span style="color:#ff79c6">$</span>protein)] <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cor_mat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(moduleTraitCor)
+</span></span><span style="display:flex;"><span>corp_mat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(moduleTraitPvalue)
+</span></span><span style="display:flex;"><span>module_rename <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">cbind</span>(<span style="color:#50fa7b">colnames</span>(cor_mat), <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;M&#34;</span>,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">ncol</span>(cor_mat),sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&#34;</span>)),stringsAsFactors <span style="color:#ff79c6">=</span> F)
+</span></span><span style="display:flex;"><span>module_colors <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;ME&#34;</span>,<span style="color:#f1fa8c">&#34;&#34;</span>,module_rename<span style="color:#ff79c6">$</span>X1)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>node_names <span style="color:#ff79c6">&lt;-</span> hub_dat<span style="color:#ff79c6">$</span>moduleColors
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">length</span>(module_colors)) {
+</span></span><span style="display:flex;"><span>  node_names<span style="color:#50fa7b">[which</span>(hub_dat<span style="color:#ff79c6">$</span>moduleColors<span style="color:#ff79c6">==</span>module_colors[i])] <span style="color:#ff79c6">&lt;-</span> module_rename<span style="color:#ff79c6">$</span>X2[i]
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>hub_out <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(hub_dat, moduleNames <span style="color:#ff79c6">=</span> node_names, .after <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(hub_dat)[1])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kme1 <span style="color:#ff79c6">&lt;-</span> kme
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(kme1) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;M&#34;</span>,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">ncol</span>(cor_mat),sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>hub_out_file <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(hub_out,kme1)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cor_data <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(data.norm,met1[2<span style="color:#ff79c6">:</span><span style="color:#bd93f9">4</span>])
+</span></span><span style="display:flex;"><span>name_1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(data.norm)
+</span></span><span style="display:flex;"><span>name_2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(met1[2<span style="color:#ff79c6">:</span><span style="color:#bd93f9">4</span>])
+</span></span><span style="display:flex;"><span>dat_sig <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cor_test</span>(cor_data,vars <span style="color:#ff79c6">=</span> name_1, vars2 <span style="color:#ff79c6">=</span> name_2)
+</span></span></code></pre></div><pre tabindex="0"><code>## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
+## ℹ Please use `all_of()` or `any_of()` instead.
+##   # Was:
+##   data %&gt;% select(name_1)
+## 
+##   # Now:
+##   data %&gt;% select(all_of(name_1))
+## 
+## See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+</code></pre><pre tabindex="0"><code>## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
+## ℹ Please use `all_of()` or `any_of()` instead.
+##   # Was:
+##   data %&gt;% select(name_2)
+## 
+##   # Now:
+##   data %&gt;% select(all_of(name_2))
+## 
+## See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sig_mat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as_cor_mat</span>(dat_sig)
+</span></span><span style="display:flex;"><span>datSIG <span style="color:#ff79c6">&lt;-</span> sig_mat[,<span style="color:#bd93f9">-1</span>]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(datSIG) <span style="color:#ff79c6">&lt;-</span> sig_mat<span style="color:#ff79c6">$</span>rowname
+</span></span></code></pre></div><pre tabindex="0"><code>## Warning: Setting row names on a tibble is deprecated.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sig <span style="color:#ff79c6">&lt;-</span> datSIG
+</span></span></code></pre></div>
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 Ben Cuan</p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://bencuan.me">Website</a></li><li><a href="https://blog.bencuan.me">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#what-is-rppa">What is RPPA?</a></li>
+        <li><a href="#what-are-the-advantages-of-rppa">What are the advantages of RPPA?</a></li>
+      </ul>
+    </li>
+    <li><a href="#libraries">libraries</a></li>
+    <li><a href="#data-extraction-from-tcga">Data extraction from TCGA</a></li>
+    <li><a href="#normalization-using-limma">Normalization using limma</a></li>
+    <li><a href="#meta-info">meta info</a></li>
+    <li><a href="#dimentionally-reduction-pca">Dimentionally reduction (PCA)</a></li>
+    <li><a href="#differential-analysis">Differential analysis</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#visualization">Visualization</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#kegg">kegg</a></li>
+    <li><a href="#go">GO</a></li>
+    <li><a href="#fgsea">fgsea</a></li>
+    <li><a href="#gsea-kegg">GSEA KEGG</a></li>
+    <li><a href="#gsea-go">GSEA GO</a></li>
+    <li><a href="#wgcna">WGCNA</a>
+      <ul>
+        <li><a href="#construction-of-co-expression-network">Construction of co-expression network</a></li>
+        <li><a href="#network-construction-and-module-detection">Network construction and module detection</a></li>
+        <li><a href="#find-the-relationships-modules-and-clinical-met1">Find the relationships modules and clinical met1</a></li>
+        <li><a href="#output-hubgenes">Output hubgenes</a></li>
+      </ul>
+    </li>
+    <li><a href="#kegg-1">kegg</a></li>
+    <li><a href="#go-1">GO</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

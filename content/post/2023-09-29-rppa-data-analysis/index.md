@@ -6,7 +6,7 @@ slug: []
 categories: []
 tags: []
 ---
-
+ 
 ### What is RPPA?
 
 Reverse phase protein array (RPPA) is a high-throughput antibody-based technique with the procedures similar to that of Western blots. Proteins are extracted from tumor tissue or cultured cells, denatured by SDS, printed on nitrocellulose-coated slides followed by antibody probe. 
@@ -417,11 +417,11 @@ fgsea[fgsea$pval <0.1,]
 ```
 
 ```
-##     pathway       pval     padj   log2err      ES       NES size leadingEdge
-## 1: hsa04066 0.02786260 0.927139 0.3524879 -0.9375 -1.724879    2   2597,7037
-## 2: hsa04216 0.02786260 0.927139 0.3524879 -0.9375 -1.724879    2   2180,7037
-## 3: hsa04664 0.05464322 0.927139 0.3217759  0.9375  1.707957    2   9846,7409
-## 4: hsa04666 0.05464322 0.927139 0.3217759  0.9375  1.707957    2   9846,7409
+##     pathway       pval      padj   log2err      ES       NES size leadingEdge
+## 1: hsa04066 0.05172414 0.8277135 0.2765006 -0.9375 -1.716359    2   2597,7037
+## 2: hsa04216 0.05172414 0.8277135 0.2765006 -0.9375 -1.716359    2   2180,7037
+## 3: hsa04664 0.04619249 0.8277135 0.3217759  0.9375  1.733384    2   9846,7409
+## 4: hsa04666 0.04619249 0.8277135 0.3217759  0.9375  1.733384    2   9846,7409
 ```
 
 ```r
@@ -488,9 +488,9 @@ head(gse.KEGG[order(gse.KEGG@result$p.adjust,decreasing = F),],10)
 
 ```
 ##                ID              Description setSize enrichmentScore      NES
-## hsa01524 hsa01524 Platinum drug resistance      10       0.7182333 1.778472
-##            pvalue p.adjust   qvalue rank                   leading_edge
-## hsa01524 0.007217 0.223727 0.223727   17 tags=40%, list=11%, signal=38%
+## hsa01524 hsa01524 Platinum drug resistance      10       0.7182333 1.775986
+##               pvalue  p.adjust    qvalue rank                   leading_edge
+## hsa01524 0.004948142 0.1533924 0.1533924   17 tags=40%, list=11%, signal=38%
 ##            core_enrichment
 ## hsa01524 472/331/4292/7507
 ```
@@ -559,50 +559,61 @@ head(gse.GO[order(gse.GO@result$p.adjust,decreasing = F),],10)
 ```
 
 ```
-##            ONTOLOGY         ID                              Description setSize
-## GO:0006325       BP GO:0006325                   chromatin organization      13
-## GO:0031347       BP GO:0031347           regulation of defense response      18
-## GO:0050727       BP GO:0050727      regulation of inflammatory response      12
-## GO:0005654       CC GO:0005654                              nucleoplasm      70
-## GO:0043230       CC GO:0043230                  extracellular organelle      33
-## GO:0065010       CC GO:0065010 extracellular membrane-bounded organelle      33
-## GO:0070062       CC GO:0070062                    extracellular exosome      33
-## GO:1903561       CC GO:1903561                    extracellular vesicle      33
-## GO:0002682       BP GO:0002682      regulation of immune system process      44
-## GO:0007584       BP GO:0007584                     response to nutrient      13
+##            ONTOLOGY         ID
+## GO:0031347       BP GO:0031347
+## GO:0006325       BP GO:0006325
+## GO:0050727       BP GO:0050727
+## GO:0005615       CC GO:0005615
+## GO:0032101       BP GO:0032101
+## GO:0051649       BP GO:0051649
+## GO:0009986       CC GO:0009986
+## GO:0008585       BP GO:0008585
+## GO:0046545       BP GO:0046545
+## GO:0046660       BP GO:0046660
+##                                                     Description setSize
+## GO:0031347                       regulation of defense response      18
+## GO:0006325                               chromatin organization      13
+## GO:0050727                  regulation of inflammatory response      12
+## GO:0005615                                  extracellular space      38
+## GO:0032101          regulation of response to external stimulus      28
+## GO:0051649                establishment of localization in cell      24
+## GO:0009986                                         cell surface      12
+## GO:0008585                             female gonad development      10
+## GO:0046545 development of primary female sexual characteristics      10
+## GO:0046660                           female sex differentiation      10
 ##            enrichmentScore       NES       pvalue  p.adjust    qvalue rank
-## GO:0006325       0.7373285  1.951834 0.0005046933 0.2506891 0.2452066   32
-## GO:0031347       0.6766236  1.943052 0.0007678868 0.2506891 0.2452066   32
-## GO:0050727       0.7403734  1.903234 0.0008585244 0.2506891 0.2452066   25
-## GO:0005654       0.4540381  1.684286 0.0018638130 0.4081750 0.3992484   45
-## GO:0043230      -0.4773779 -1.726843 0.0044193822 0.4301532 0.4207459   46
-## GO:0065010      -0.4773779 -1.726843 0.0044193822 0.4301532 0.4207459   46
-## GO:0070062      -0.4773779 -1.726843 0.0044193822 0.4301532 0.4207459   46
-## GO:1903561      -0.4773779 -1.726843 0.0044193822 0.4301532 0.4207459   46
-## GO:0002682       0.4868758  1.694255 0.0036260273 0.4301532 0.4207459   41
-## GO:0007584      -0.6247797 -1.762782 0.0120732135 0.4476325 0.4378429   11
+## GO:0031347       0.6766236  1.941582 0.0008383577 0.2448004 0.2420942   32
+## GO:0006325       0.7373285  1.937396 0.0007421146 0.2448004 0.2420942   32
+## GO:0050727       0.7403734  1.899500 0.0005116069 0.2448004 0.2420942   25
+## GO:0005615      -0.4741697 -1.759906 0.0043141588 0.3153585 0.3118722   51
+## GO:0032101       0.5461552  1.735473 0.0057316234 0.3153585 0.3118722   47
+## GO:0051649       0.5604075  1.725255 0.0062627097 0.3153585 0.3118722   14
+## GO:0009986      -0.6206356 -1.721293 0.0072921276 0.3153585 0.3118722   27
+## GO:0008585       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
+## GO:0046545       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
+## GO:0046660       0.7062552  1.707106 0.0062689631 0.3153585 0.3118722    9
 ##                              leading_edge
-## GO:0006325 tags=62%, list=21%, signal=53%
 ## GO:0031347 tags=56%, list=21%, signal=50%
+## GO:0006325 tags=62%, list=21%, signal=53%
 ## GO:0050727 tags=58%, list=16%, signal=53%
-## GO:0005654 tags=41%, list=30%, signal=54%
-## GO:0043230 tags=55%, list=30%, signal=49%
-## GO:0065010 tags=55%, list=30%, signal=49%
-## GO:0070062 tags=55%, list=30%, signal=49%
-## GO:1903561 tags=55%, list=30%, signal=49%
-## GO:0002682 tags=43%, list=27%, signal=44%
-## GO:0007584  tags=38%, list=7%, signal=39%
-##                                                                                                                                            core_enrichment
-## GO:0006325                                                                                                        9557/29072/5080/64783/3717/2625/546/5058
-## GO:0031347                                                                                              7409/472/331/6714/6647/27250/3717/2625/253943/5058
-## GO:0050727                                                                                                               472/331/6714/6647/27250/3717/2625
-## GO:0005654 472/331/9557/6714/6647/29072/4292/5080/3667/7507/64783/5395/2475/3717/2625/546/2073/1846/5058/3280/5728/8505/9589/7494/2113/8805/367/5347/56893
-## GO:0043230                                                           581/942/2194/5052/26227/2539/1938/6275/952/1977/983/1445/960/6648/4893/3485/7037/2597
-## GO:0065010                                                           581/942/2194/5052/26227/2539/1938/6275/952/1977/983/1445/960/6648/4893/3485/7037/2597
-## GO:0070062                                                           581/942/2194/5052/26227/2539/1938/6275/952/1977/983/1445/960/6648/4893/3485/7037/2597
-## GO:1903561                                                           581/942/2194/5052/26227/2539/1938/6275/952/1977/983/1445/960/6648/4893/3485/7037/2597
-## GO:0002682                                                 9846/7409/472/331/6714/6647/4292/3932/64783/3140/2475/3717/2625/253943/5058/3280/5728/7494/2113
-## GO:0007584                                                                                                                        6648/2730/3485/7037/2180
+## GO:0005615 tags=61%, list=34%, signal=54%
+## GO:0032101 tags=54%, list=31%, signal=45%
+## GO:0051649  tags=33%, list=9%, signal=36%
+## GO:0009986 tags=50%, list=18%, signal=45%
+## GO:0008585  tags=30%, list=6%, signal=30%
+## GO:0046545  tags=30%, list=6%, signal=30%
+## GO:0046660  tags=30%, list=6%, signal=30%
+##                                                                                                          core_enrichment
+## GO:0031347                                                            7409/472/331/6714/6647/27250/3717/2625/253943/5058
+## GO:0006325                                                                      9557/29072/5080/64783/3717/2625/546/5058
+## GO:0050727                                                                             472/331/6714/6647/27250/3717/2625
+## GO:0005615 3486/780/4313/581/942/2194/5052/4323/26227/2539/1938/6275/952/1956/1977/983/1445/960/6648/4893/3485/7037/2597
+## GO:0032101                                   7409/472/331/6714/6647/27250/3717/2625/253943/5058/5728/2113/8805/83481/673
+## GO:0051649                                                                      9846/472/6714/6647/29072/4292/83548/5080
+## GO:0009986                                                                                     94/952/1956/4851/960/7037
+## GO:0008585                                                                                                 472/6714/6647
+## GO:0046545                                                                                                 472/6714/6647
+## GO:0046660                                                                                                 472/6714/6647
 ```
 
 ```r
@@ -623,7 +634,7 @@ ridgeplot(gse.GO,showCategory = 15) + labs(x = "enrichment distribution")
 ```
 
 ```
-## Picking joint bandwidth of 0.018
+## Picking joint bandwidth of 0.017
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-16-4.png" width="672" />
