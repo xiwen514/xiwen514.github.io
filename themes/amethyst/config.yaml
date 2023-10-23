@@ -1,4 +1,4 @@
-baseURL: https://amethyst.bencuan.me
+baseURL: https://xiwen514.github.io
 
 # Book configuration
 disablePathToLower: true
@@ -19,19 +19,19 @@ markup:
 
 # Sidebar menu additional links
 menu:
-  # before:
-  #   - name: "Sample"
-  #     url: "https://google.com"
-  #     weight: 10
+   # before:
+   #   - name: "Sample"
+   #     url: "https://google.com"
+   #     weight: 10
   after:
     - name: "Github"
-      url: "https://github.com/64bitpandas/amethyst"
+      url: "https://github.com/xiwen514/xiwen514.github.io"
       weight: 10
 
 params:
 
-  name: Ben Cuan
-  title: 📓 Amethyst
+  #name: Xiwen Zhao
+  #title: 📓 Sivan's blog
 
   # OPTIONAL: custom favicon location
   # favicon: 'location/to/favicon.png'
@@ -70,7 +70,7 @@ params:
   enableMermaid: true
 
   # Link to your Github repo
-  GitHubLink: https://github.com/64bitpandas/amethyst
+  GitHubLink: https://github.com/xiwen514?tab=repositories
 
   # Search (WIP)
   search:
@@ -86,9 +86,9 @@ params:
   # Footer links
   links:
     - link_name: Website
-      link: https://bencuan.me
+      link: https://xiwen514.github.io
     - link_name: Blog
-      link: https://blog.bencuan.me
+      link: https://xiwen514.github.io
 
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.
@@ -110,7 +110,8 @@ params:
 
   # Set source repository location.
   # Used for 'Last Modified' and 'Edit this page' links.
-  BookRepo: https://github.com/64bitpandas/amethyst
+  BookRepo: https://xiwen514.github.io
+
 
   # (Optional, default 'commit') Specifies commit portion of the link to the page's last modified
   # commit hash for 'doc' page type.

@@ -1,0 +1,225 @@
+---
+title: Intergration of the platelet transcriptome and proteome in Alzheimer’s disease
+  and aging data analysis
+author: Package Build
+date: '2023-10-23'
+slug: []
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE,warning=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning =FALSE, message=FALSE)
+```
+
+
+I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly integrate transccriptomes and proteomics data to identify a highly correlated multi-omics signature that discriminates AD and old group.
+
+
+### Load libraries
+```{r}
+library(annotables)
+library(mixOmics)
+library(dplyr)
+library(DescTools)
+library(readxl)
+library(tibble)
+library(stringr)
+library(BiocParallel)
+library(tidyselect)
+```
+
+
+### Data preparation
+
+Regarding the preprocessing, all of methods in mixOmics assume the right preprocessing method has been applied.
+
+Here, for transcriptome data, I use rlog data by DESeq2.For proteomic data, I use log2 data. Additionally, 200 features with highest variance in each dataset are selected for saving runtime.
+
+```{r}
+met1 <- read.csv("APPA-participants.csv")
+met2 <- read_excel("Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX")
+colnames(met2)[1] <- "New.ID"
+met <- inner_join(met1,met2)
+met <- met[-grep('CY', met$New.ID),]
+
+rna <- read.csv("bulk_RNA_deseq2_normalized_afterQC_rlogged.csv")
+rna1 <- t(rna[,-1]) 
+colnames(rna1) <- rna$X
+rna1 <- rna1[rownames(rna1) %in% met$New.ID,]
+rna1 <- rna1[match(met$New.ID, rownames(rna1)),]
+```
+
+
+
+
+```{r}
+## select 100 genes with the highest variance among all genes
+rna.var <- apply(rna1,2,var)
+rna.var <- sort(rna.var,decreasing = T)
+rna2 <- rna1[,colnames(rna1) %in% names(rna.var)[1:500]]
+
+
+## Return the IDs for the gene symbols in the DE results
+head(grch37)
+idx <- grch37$ensgene %in% colnames(rna2)
+ids <- grch37[idx, ]
+
+## The gene names can map to more than one Ensembl ID (some genes change ID over time),
+## so we need to remove duplicate IDs 
+non_duplicates <- which(duplicated(ids$symbol) == FALSE)
+ids <- ids[non_duplicates, ]
+
+rna2 <- rna2[,colnames(rna2) %in% ids$ensgene]
+all(colnames(rna2)== ids$ensgene)
+colnames(rna2) <- ids$symbol
+dim(rna2)
+
+pro <- read.csv("protein_after_QC_log2_KNNimputation.csv")
+rownames(pro) <- gsub("LFQ.intensity.","", pro$X)
+pro1 <- pro[rownames(pro) %in% met$New.ID, -1]
+pro1 <- pro1[match(met$New.ID,rownames(pro1)),]
+
+## select 100 proteins with the highest variance among all proteins
+pro.var <- apply(pro1,2,var)
+pro.var <- sort(pro.var,decreasing = T)
+pro2 <- pro1[,colnames(pro1) %in% names(pro.var)[1:500]]
+dim(pro2)
+
+all(rownames(rna2)==rownames(pro2))
+
+```
+
+
+```{r}
+## data design
+data = list(transcriptome = rna2,
+            proteome = pro2)
+Y = factor(met$Condition)
+
+## design matrix
+design = matrix(0.1, ncol = length(data), nrow = length(data), 
+              dimnames = list(names(data), names(data)))
+diag(design) = 0
+
+## Tuning the number of components
+sgccda.res = block.splsda(X = data, Y = Y, ncomp = 5, 
+                         design = design)
+set.seed(123) 
+perf.diablo = perf(sgccda.res, validation = 'Mfold', folds = 10, nrepeat = 5)
+plot(perf.diablo)
+```
+
+From above plot, 2 PC has the lowerst error rate of mahalanobis.dist calculation. But I choose centroids distance calculation for more understandable comprehension and faster calculation. In addition, the data does not have large samples and features so that I set folds is 5 for validation.
+
+
+```{r}
+# set the optimal ncomp value
+ncomp = perf.diablo$choice.ncomp$WeightedVote["Overall.BER", "centroids.dist"] 
+# show the optimal choice for ncomp for each dist metric
+perf.diablo$choice.ncomp$WeightedVote 
+
+## Tuning keepX
+set.seed(123)
+test.keepX = list(transcriptome = c(seq(10,50,5)),
+                proteome = c(seq(10,50,5)))
+
+Y
+tune.TCGA = tune.block.splsda(X = data, Y = Y, ncomp = 2,
+                             test.keepX = test.keepX, design = design,
+                             validation = 'Mfold', folds = 5, nrepeat = 1,
+                            dist = "centroids.dist")
+## list.keepX
+list.keepX = tune.TCGA$choice.keepX # set the optimal values of features to retain
+list.keepX$transcriptome
+list.keepX$proteome
+## Final model
+sgccda.res = block.splsda(X = data, Y = Y, ncomp = 2, 
+                        keepX = list.keepX, design = design)
+```
+
+We can see from above results that the optimal features number is 10 in PC1 and PC2 in each omics data.
+
+
+```{r}
+# the features selected to form the first component
+selectVar(sgccda.res, block = 'transcriptome', comp = 1)$transcriptome$value
+sel.rna <- selectVar(sgccda.res, block = 'transcriptome', comp = 1)$transcriptome$name
+selectVar(sgccda.res, block = 'proteome', comp = 1)$proteome$value
+sel.pro <- selectVar(sgccda.res, block = 'proteome', comp = 1)$proteome$name
+
+```
+Here shows the selected features on PC1 from two data sets.
+
+
+
+### Plot results
+```{r}
+plotDiablo(sgccda.res, ncomp = 1)
+plotDiablo(sgccda.res, ncomp = 2)
+```
+
+As we can see, the first components from two data set are highly correlated to each other.The colours and ellipses related to the sample subtypes indicate the discriminative power of each component to separate AD and old group.  
+
+```{r}
+plotIndiv(sgccda.res, ind.names = FALSE, legend = TRUE)
+```
+
+Clustering of the samples can be better assessed with this plot. It seems that the quality of clustering of the RNA data and proteomics  is similar. This suggests that two data sets ikely to hold similar discriminative power within the model.
+
+```{r,fig.width=9,fig.height=7}
+plotVar(sgccda.res, var.names =T, style = 'graphics', cutoff=0.5, legend = TRUE)
+```
+
+These first two components correlate highly with the selected variables from the proteomics and transcriptomes dataset.
+
+```{r}
+circosPlot(sgccda.res,  cutoff = 0.5, line = F,size.variables= 0.6, size.labels = 1,size.legend = 1)
+```
+
+We can see that each RNA and proteins are correlated whether they are negative or postiive correlated.
+
+
+```{r}
+plotLoadings(sgccda.res, 1,comp = 1, contrib = 'max', method = 'median')
+plotLoadings(sgccda.res, 2,comp = 1, contrib = 'max', method = 'median')
+
+```
+
+
+```{r,fig.width=10,fig.height=6}
+par(mar = c(5, 4, 2, 2))
+cimDiablo(sgccda.res,legend.position = "topright",size.legend = 0.7,cluster = "column",comp=1,margins = c(5, 5))
+
+cimDiablo(sgccda.res,legend.position = "topright",size.legend = 0.7,cluster = "column", comp=c(1,2),margins = c(5, 5))
+```
+
+
+### Performance of the model
+```{r}
+# run repeated CV performance evaluation
+perf.diablo = perf(sgccda.res, validation = 'Mfold', 
+                   M = 10, nrepeat = 10, 
+                   dist = 'centroids.dist') 
+
+perf.diablo$MajorityVote.error.rate
+perf.diablo$WeightedVote.error.rate
+
+```
+
+
+```{r}
+auc.splsda = auroc(sgccda.res, roc.block = "transcriptome", 
+                   roc.comp = 2, print = FALSE)
+
+auc.splsda = auroc(sgccda.res, roc.block = "proteome", 
+                   roc.comp = 2, print = FALSE)
+```
+
+
+
+
+
+
+

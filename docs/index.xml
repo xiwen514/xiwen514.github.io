@@ -6,7 +6,38 @@
     <description>Recent content in 💜 Welcome to Sivan&#39;s blog! on Personal Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 23 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</title>
+      <link>https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/</link>
+      <pubDate>Mon, 23 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/</guid>
+      <description>I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly integrate transccriptomes and proteomics data to identify a highly correlated multi-omics signature that discriminates AD and old group.
+Load libraries # library(annotables) library(mixOmics) library(dplyr) library(DescTools) library(readxl) library(tibble) library(stringr) library(BiocParallel) library(tidyselect) Data preparation # Regarding the preprocessing, all of methods in mixOmics assume the right preprocessing method has been applied.</description>
+    </item>
+    
+    <item>
+      <title>The platelet transcriptome in Alzheimer’s disease and aging data analysis</title>
+      <link>https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/</link>
+      <pubDate>Mon, 23 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/</guid>
+      <description>I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze Bulk RNA data by comparing AD VS old to identify differential genes and explore their functions.
+This article provides DESeq2-normalized counts using Median of ratios method by 4 steps ( https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html):
+creates a pseudo-reference sample (row-wise geometric mean) calculates ratio of each sample to the reference calculate the normalization factor for each sample (size factor) calculate the normalized count values using the normalization factor This data has 27 samples, 3 groups(AD, old and young), each group has 9 samples.</description>
+    </item>
+    
+    <item>
+      <title>The platelet proteome in Alzheimer’s disease and aging data analysis</title>
+      <link>https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/</link>
+      <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/</guid>
+      <description>I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze proteomics data by comparing AD VS old to identify differential proteins and explore their functions.
+Libraries # library(utils) library(PCAtools) library(factoextra) library(FactoMineR) library(parameters) library(tibble) library(ggplot2) library(ggvenn) library(skimr) library(dplyr) library(ggpubr) library(ggprism) library(VIM) library(ComplexHeatmap) library(EnhancedVolcano) library(clusterProfiler) library(gridExtra) # library(reactome.db) # library(ReactomePA) Proteomics data introduction # This article provides two proteomics data tables(AD and old, old and young) after MAXQUANT preprocessing, but without AD and young group protein abundance table.</description>
+    </item>
+    
     <item>
       <title>RPPA data analysis</title>
       <link>https://xiwen514.github.io/post/2023-09-29-rppa-data-analysis/</link>

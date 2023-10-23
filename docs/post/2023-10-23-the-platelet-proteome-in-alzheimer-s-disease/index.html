@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="The platelet proteome in Alzheimer’s disease and aging data analysis" />
+<meta property="og:description" content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze proteomics data by comparing AD VS old to identify differential proteins and explore their functions.
+Libraries # library(utils) library(PCAtools) library(factoextra) library(FactoMineR) library(parameters) library(tibble) library(ggplot2) library(ggvenn) library(skimr) library(dplyr) library(ggpubr) library(ggprism) library(VIM) library(ComplexHeatmap) library(EnhancedVolcano) library(clusterProfiler) library(gridExtra) # library(reactome.db) # library(ReactomePA) Proteomics data introduction # This article provides two proteomics data tables(AD and old, old and young) after MAXQUANT preprocessing, but without AD and young group protein abundance table." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-10-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-10-10T00:00:00+00:00" />
+<title>The platelet proteome in Alzheimer’s disease and aging data analysis | </title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze proteomics data by comparing AD VS old to identify differential proteins and explore their functions.
+Libraries # library(utils) library(PCAtools) library(factoextra) library(FactoMineR) library(parameters) library(tibble) library(ggplot2) library(ggvenn) library(skimr) library(dplyr) library(ggpubr) library(ggprism) library(VIM) library(ComplexHeatmap) library(EnhancedVolcano) library(clusterProfiler) library(gridExtra) # library(reactome.db) # library(ReactomePA) Proteomics data introduction # This article provides two proteomics data tables(AD and old, old and young) after MAXQUANT preprocessing, but without AD and young group protein abundance table."
+/>
+<title>
+  The platelet proteome in Alzheimer’s disease and aging data analysis
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/"></a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" class="">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" class="">The platelet transcriptome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" class="active">The platelet proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/64bitpandas/amethyst"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">The platelet proteome in Alzheimer’s disease and aging data analysis</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<p>I borrow the data from this article ( 
+<a href="https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full" rel="noopener">https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full</a> ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze proteomics data by comparing AD VS old to identify differential proteins and explore their functions.</p>
+<h3 id="libraries">
+  Libraries
+  <a class="anchor" href="#libraries">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(utils)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(PCAtools)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(factoextra)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(FactoMineR)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(parameters)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tibble)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggplot2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggvenn)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(skimr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(dplyr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggprism)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(VIM)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ComplexHeatmap)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(EnhancedVolcano)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(clusterProfiler)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(gridExtra)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># library(reactome.db)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># library(ReactomePA)</span>
+</span></span></code></pre></div><h3 id="proteomics-data-introduction">
+  Proteomics data introduction
+  <a class="anchor" href="#proteomics-data-introduction">#</a>
+</h3>
+<p>This article provides two proteomics data tables(AD and old, old and young) after MAXQUANT preprocessing, but without AD and young group protein abundance table.</p>
+<ul>
+<li>AD: AD, 10samples</li>
+<li>CO : old,9 samples</li>
+<li>CY : young, 10 samples</li>
+</ul>
+<h3 id="input-preprocessing">
+  input preprocessing
+  <a class="anchor" href="#input-preprocessing">#</a>
+</h3>
+<p>I cannot compare AD and young group abundance from two tables directly due to the nonrepeatability of MAXQUANT. To validate this, PCA is applied to see the patterns of same old samples from two tables.</p>
+<p>First, quality control is a essential step to exclude data noise. Some criteria show here.</p>
+<ol>
+<li>gene names is not NULL</li>
+<li>Reverse is NULL( not &ldquo;+&rdquo;)</li>
+<li>Only.identified.by.site is NULL( not &ldquo;+&rdquo;)</li>
+<li>Potential.contaminant is NULL( not &ldquo;+&rdquo;)</li>
+<li>Q.value &lt; 0.01</li>
+<li>delete the proteins those of number of missing values more than 50% samples</li>
+</ol>
+<p>For missing values, I use KNN algorithm to impute. Before imputation, transform the data using log2.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>data.ad <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.delim</span>(<span style="color:#f1fa8c">&#34;proteinGroups_AD_patients_2.txt&#34;</span>) <span style="color:#6272a4"># AD and old samples,2031 proteins</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## quality control</span>
+</span></span><span style="display:flex;"><span>data.ad[data.ad<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;&#34;</span>] <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>data.ad1 <span style="color:#ff79c6">&lt;-</span> data.ad <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#ff79c6">!</span><span style="color:#50fa7b">is.na</span>(Gene.names)) <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Reverse)) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Only.identified.by.site)) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Potential.contaminant)) <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(Q.value <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.01</span>) <span style="color:#6272a4"># 1810 proteins</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data.ad1 <span style="color:#ff79c6">&lt;-</span> data.ad1[,<span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;Gene.names&#34;</span>, <span style="color:#50fa7b">colnames</span>(data.ad1)),
+</span></span><span style="display:flex;"><span>                  <span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(data.ad1)))]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(data.ad1)
+</span></span></code></pre></div><pre tabindex="0"><code>##  [1] &#34;Gene.names&#34;         &#34;LFQ.intensity.AD6&#34;  &#34;LFQ.intensity.AD7&#34; 
+##  [4] &#34;LFQ.intensity.AD5&#34;  &#34;LFQ.intensity.AD4&#34;  &#34;LFQ.intensity.AD9&#34; 
+##  [7] &#34;LFQ.intensity.AD1&#34;  &#34;LFQ.intensity.AD2&#34;  &#34;LFQ.intensity.AD3&#34; 
+## [10] &#34;LFQ.intensity.AD8&#34;  &#34;LFQ.intensity.AD10&#34; &#34;LFQ.intensity.CO6&#34; 
+## [13] &#34;LFQ.intensity.CO5&#34;  &#34;LFQ.intensity.CO7&#34;  &#34;LFQ.intensity.CO9&#34; 
+## [16] &#34;LFQ.intensity.CO3&#34;  &#34;LFQ.intensity.CO8&#34;  &#34;LFQ.intensity.CO1&#34; 
+## [19] &#34;LFQ.intensity.CO4&#34;  &#34;LFQ.intensity.CO2&#34;
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## drop the proteins those of number of missing values more than 50% samples</span>
+</span></span><span style="display:flex;"><span>data.ad1[data.ad1 <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>na_per <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rowSums</span>(<span style="color:#50fa7b">is.na</span>(data.ad1))<span style="color:#ff79c6">/</span>(<span style="color:#50fa7b">ncol</span>(data.ad1)<span style="color:#bd93f9">-1</span>)
+</span></span><span style="display:flex;"><span>per_cut <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">0.5</span>
+</span></span><span style="display:flex;"><span>data.ad1 <span style="color:#ff79c6">&lt;-</span> data.ad1[na_per <span style="color:#ff79c6">&lt;=</span> per_cut,] <span style="color:#6272a4"># 421 proteins</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## log transformation and KNN impute missing values</span>
+</span></span><span style="display:flex;"><span>data.ad2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">log2</span>(data.ad1[,<span style="color:#bd93f9">-1</span>]) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">t</span>()
+</span></span><span style="display:flex;"><span>ad.imp <span style="color:#ff79c6">&lt;-</span> VIM<span style="color:#ff79c6">::</span><span style="color:#50fa7b">kNN</span>(data.ad2, k<span style="color:#ff79c6">=</span><span style="color:#bd93f9">10</span>, imp_var<span style="color:#ff79c6">=</span>F) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">t</span>() <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">data.frame</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(ad.imp) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(data.ad1)[<span style="color:#bd93f9">-1</span>]
+</span></span><span style="display:flex;"><span>ad.imp<span style="color:#ff79c6">$</span>Gene.names <span style="color:#ff79c6">&lt;-</span> data.ad1<span style="color:#ff79c6">$</span>Gene.names
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#skim(ad.imp)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">################################################################################</span>
+</span></span><span style="display:flex;"><span>data.cy <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.delim</span>(<span style="color:#f1fa8c">&#34;proteinGroups_Drerup_2.txt&#34;</span>) <span style="color:#6272a4"># old and young samples, 1115 proteins</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## quality control</span>
+</span></span><span style="display:flex;"><span>data.cy[data.cy<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;&#34;</span>] <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>data.cy1 <span style="color:#ff79c6">&lt;-</span> data.cy <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#ff79c6">!</span><span style="color:#50fa7b">is.na</span>(Gene.names)) <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Reverse)) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Only.identified.by.site)) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(<span style="color:#50fa7b">is.na</span>(Potential.contaminant))  <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(Q.value <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.01</span>)<span style="color:#6272a4"># 911 proteins</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data.cy1 <span style="color:#ff79c6">&lt;-</span> data.cy1[,<span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;Gene.names&#34;</span>, <span style="color:#50fa7b">colnames</span>(data.cy1)),
+</span></span><span style="display:flex;"><span>                  <span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(data.cy1)))]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(data.cy1)
+</span></span></code></pre></div><pre tabindex="0"><code>##  [1] &#34;Gene.names&#34;         &#34;LFQ.intensity.CO6&#34;  &#34;LFQ.intensity.CO5&#34; 
+##  [4] &#34;LFQ.intensity.CO7&#34;  &#34;LFQ.intensity.CO9&#34;  &#34;LFQ.intensity.CO3&#34; 
+##  [7] &#34;LFQ.intensity.CO8&#34;  &#34;LFQ.intensity.CO1&#34;  &#34;LFQ.intensity.CO4&#34; 
+## [10] &#34;LFQ.intensity.CO2&#34;  &#34;LFQ.intensity.CY1&#34;  &#34;LFQ.intensity.CY10&#34;
+## [13] &#34;LFQ.intensity.CY2&#34;  &#34;LFQ.intensity.CY3&#34;  &#34;LFQ.intensity.CY4&#34; 
+## [16] &#34;LFQ.intensity.CY5&#34;  &#34;LFQ.intensity.CY6&#34;  &#34;LFQ.intensity.CY7&#34; 
+## [19] &#34;LFQ.intensity.CY8&#34;  &#34;LFQ.intensity.CY9&#34;
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## drop the proteins those of number of missing values more than 50% samples,</span>
+</span></span><span style="display:flex;"><span>data.cy1[data.cy1 <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>na_per <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rowSums</span>(<span style="color:#50fa7b">is.na</span>(data.cy1))<span style="color:#ff79c6">/</span>(<span style="color:#50fa7b">ncol</span>(data.cy1)<span style="color:#bd93f9">-1</span>)
+</span></span><span style="display:flex;"><span>per_cut <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">0.5</span>
+</span></span><span style="display:flex;"><span>data.cy1 <span style="color:#ff79c6">&lt;-</span> data.cy1[na_per <span style="color:#ff79c6">&lt;=</span> per_cut,] <span style="color:#6272a4"># 218 proteins</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## log transformation and KNN impute missing values</span>
+</span></span><span style="display:flex;"><span>data.cy2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">log2</span>(data.cy1[,<span style="color:#bd93f9">-1</span>]<span style="color:#bd93f9">+0.00001</span>) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">t</span>()
+</span></span><span style="display:flex;"><span>cy.imp <span style="color:#ff79c6">&lt;-</span> VIM<span style="color:#ff79c6">::</span><span style="color:#50fa7b">kNN</span>(data.cy2, k<span style="color:#ff79c6">=</span><span style="color:#bd93f9">10</span>, imp_var<span style="color:#ff79c6">=</span>F) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">t</span>() <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">data.frame</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(cy.imp) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(data.cy1)[<span style="color:#bd93f9">-1</span>]
+</span></span><span style="display:flex;"><span>cy.imp<span style="color:#ff79c6">$</span>Gene.names <span style="color:#ff79c6">&lt;-</span> data.cy1<span style="color:#ff79c6">$</span>Gene.names
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#skim(t(cy.imp))</span>
+</span></span></code></pre></div><p>Find the shared proteins between old samples from two table, and apply PCA analysis.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>common.names <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">intersect</span>(ad.imp<span style="color:#ff79c6">$</span>Gene.names,cy.imp<span style="color:#ff79c6">$</span>Gene.names) <span style="color:#6272a4"># 197 common genes</span>
+</span></span><span style="display:flex;"><span>ad.lfq <span style="color:#ff79c6">&lt;-</span> ad.imp<span style="color:#50fa7b">[match</span>(common.names,ad.imp<span style="color:#ff79c6">$</span>Gene.names),<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(ad.imp))]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(ad.lfq) <span style="color:#ff79c6">&lt;-</span> common.names
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cy.lfq <span style="color:#ff79c6">&lt;-</span> cy.imp<span style="color:#50fa7b">[match</span>(common.names,cy.imp<span style="color:#ff79c6">$</span>Gene.names),<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(cy.imp))]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(cy.lfq) <span style="color:#ff79c6">&lt;-</span> common.names
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>lfq <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(ad.lfq,cy.lfq)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(lfq) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity.&#34;</span>,<span style="color:#f1fa8c">&#34;&#34;</span>,<span style="color:#50fa7b">colnames</span>(lfq))
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## pca between old samples from two tables</span>
+</span></span><span style="display:flex;"><span>old <span style="color:#ff79c6">&lt;-</span> lfq[,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>, <span style="color:#50fa7b">colnames</span>(lfq))]
+</span></span><span style="display:flex;"><span>old.met <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(sample<span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(old),
+</span></span><span style="display:flex;"><span>                      group <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;g1&#34;</span>,<span style="color:#bd93f9">9</span>),<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;g2&#34;</span>,<span style="color:#bd93f9">9</span>)))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(old.met) <span style="color:#ff79c6">&lt;-</span> old.met<span style="color:#ff79c6">$</span>sample
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>old.pca <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">prcomp</span>(old, scale <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>pca.res <span style="color:#ff79c6">&lt;-</span> PCAtools<span style="color:#ff79c6">::</span><span style="color:#50fa7b">pca</span>(old, metadata <span style="color:#ff79c6">=</span> old.met, removeVar <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.1</span>, scale <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">biplot</span>(pca.res,
+</span></span><span style="display:flex;"><span>       lab <span style="color:#ff79c6">=</span> pca.res<span style="color:#ff79c6">$</span>metadata<span style="color:#ff79c6">$</span>sample,
+</span></span><span style="display:flex;"><span>       colby <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>,
+</span></span><span style="display:flex;"><span>       hline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, vline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>       legendPosition <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;right&#39;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<p>After QA, AD and old table remains 421 proteins; old and young table remains 218 proteins.</p>
+<p>There are 197 common proteins in two tables and the PCA plot demonstrate a shift between the two groups, yet the intrinsic relationship among the samples within each group remains unchanged. I assume that the nonrepeatability of MAXQUANT is because of the algorithm of MAXQUANT. If I have to compare AD and young group protein abundance, I would like to use &ldquo;combat&rdquo; function to correct two batch table.</p>
+<h3 id="differential-analysis-using-linear-regression">
+  differential analysis using linear regression
+  <a class="anchor" href="#differential-analysis-using-linear-regression">#</a>
+</h3>
+<ol>
+<li>Compare AD and old(Control group) by linear regression to identify differential proteins( cutoff: p &lt; 0.05)</li>
+<li>Compare old and young(Control group) by linear regression to identify differential proteins( cutoff: p &lt; 0.05)</li>
+<li>And detect the common differential proteins.</li>
+</ol>
+<h4 id="ad-vs-old">
+  AD vs old
+  <a class="anchor" href="#ad-vs-old">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sub</span>(<span style="color:#f1fa8c">&#34;;.*&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, ad.imp<span style="color:#ff79c6">$</span>Gene.names)
+</span></span><span style="display:flex;"><span>df1 <span style="color:#ff79c6">&lt;-</span> ad.imp[,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(ad.imp))]
+</span></span><span style="display:flex;"><span>tdf1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">t</span>(df1))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(tdf1) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(genes)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#write.csv(tdf1,&#34;protein_after_QC_log2_KNNimputation.csv&#34;)</span>
+</span></span><span style="display:flex;"><span>tdf1<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>,<span style="color:#bd93f9">10</span>), <span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>,<span style="color:#bd93f9">9</span>))
+</span></span><span style="display:flex;"><span>ad.genes.df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(gene <span style="color:#ff79c6">=</span> genes, colnames<span style="color:#ff79c6">=</span><span style="color:#50fa7b">colnames</span>(tdf1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(tdf1)])
+</span></span><span style="display:flex;"><span>ad.genes.df<span style="color:#ff79c6">$</span>raw <span style="color:#ff79c6">&lt;-</span> data.ad1<span style="color:#ff79c6">$</span>Gene.names
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## PCA</span>
+</span></span><span style="display:flex;"><span>ad.met <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(group<span style="color:#ff79c6">=</span>tdf1<span style="color:#ff79c6">$</span>group)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(ad.met) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rownames</span>(tdf1)
+</span></span><span style="display:flex;"><span>ad.met<span style="color:#ff79c6">$</span>sample <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity.&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#50fa7b">rownames</span>(ad.met))
+</span></span><span style="display:flex;"><span>df.pca <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">prcomp</span>(df1, scale <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>pca.res <span style="color:#ff79c6">&lt;-</span> PCAtools<span style="color:#ff79c6">::</span><span style="color:#50fa7b">pca</span>(df1, metadata <span style="color:#ff79c6">=</span> ad.met, removeVar <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.1</span>, scale <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">biplot</span>(pca.res,
+</span></span><span style="display:flex;"><span>       lab <span style="color:#ff79c6">=</span> pca.res<span style="color:#ff79c6">$</span>metadata<span style="color:#ff79c6">$</span>sample,
+</span></span><span style="display:flex;"><span>       colby <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>,
+</span></span><span style="display:flex;"><span>       hline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, vline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>       legendPosition <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;right&#39;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## linear regression</span>
+</span></span><span style="display:flex;"><span>lm_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(tdf1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(tdf1)]) {
+</span></span><span style="display:flex;"><span>  lm_list[[i]] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lm</span>(<span style="color:#50fa7b">paste0</span>(i, <span style="color:#f1fa8c">&#34;~ group&#34;</span>), data <span style="color:#ff79c6">=</span> tdf1)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>lm_fit <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lapply</span>(lm_list, parameters)
+</span></span><span style="display:flex;"><span>lm_dat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">do.call</span>(rbind,lm_fit)
+</span></span><span style="display:flex;"><span>lm_df <span style="color:#ff79c6">&lt;-</span> lm_dat[lm_dat<span style="color:#ff79c6">$</span>Parameter <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;groupCO&#34;</span>,]
+</span></span><span style="display:flex;"><span>lm_df<span style="color:#ff79c6">$</span>fdr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">p.adjust</span>(lm_df<span style="color:#ff79c6">$</span>p, method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>)
+</span></span><span style="display:flex;"><span>ad.lm_df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(lm_df, features <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(lm_list), .before <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>ad.sig <span style="color:#ff79c6">&lt;-</span> ad.lm_df <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span>)
+</span></span></code></pre></div><h4 id="old-vs-young">
+  old vs young
+  <a class="anchor" href="#old-vs-young">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>genes1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sub</span>(<span style="color:#f1fa8c">&#34;;.*&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, cy.imp<span style="color:#ff79c6">$</span>Gene.names)
+</span></span><span style="display:flex;"><span>df1 <span style="color:#ff79c6">&lt;-</span> cy.imp[,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity&#34;</span>,<span style="color:#50fa7b">colnames</span>(cy.imp))]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>tdf1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">t</span>(df1))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(tdf1) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(genes1)
+</span></span><span style="display:flex;"><span>tdf1<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>,<span style="color:#bd93f9">9</span>), <span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CY&#34;</span>,<span style="color:#bd93f9">10</span>))
+</span></span><span style="display:flex;"><span>cy.genes.df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(gene <span style="color:#ff79c6">=</span> genes1, colnames<span style="color:#ff79c6">=</span><span style="color:#50fa7b">colnames</span>(tdf1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(tdf1)])
+</span></span><span style="display:flex;"><span>cy.genes.df<span style="color:#ff79c6">$</span>raw <span style="color:#ff79c6">&lt;-</span> data.cy1<span style="color:#ff79c6">$</span>Gene.names
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## PCA</span>
+</span></span><span style="display:flex;"><span>cy.met <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(group<span style="color:#ff79c6">=</span>tdf1<span style="color:#ff79c6">$</span>group)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(cy.met) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rownames</span>(tdf1)
+</span></span><span style="display:flex;"><span>cy.met<span style="color:#ff79c6">$</span>sample <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity.&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#50fa7b">rownames</span>(cy.met))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>df.pca <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">prcomp</span>(df1, scale <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>pca.res <span style="color:#ff79c6">&lt;-</span> PCAtools<span style="color:#ff79c6">::</span><span style="color:#50fa7b">pca</span>(df1, metadata <span style="color:#ff79c6">=</span> cy.met, removeVar <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.1</span>, scale <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">biplot</span>(pca.res,
+</span></span><span style="display:flex;"><span>       lab <span style="color:#ff79c6">=</span> pca.res<span style="color:#ff79c6">$</span>metadata<span style="color:#ff79c6">$</span>sample,
+</span></span><span style="display:flex;"><span>       colby <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>,
+</span></span><span style="display:flex;"><span>       hline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, vline <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>       legendPosition <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;right&#39;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## linear regression</span>
+</span></span><span style="display:flex;"><span>lm_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(tdf1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(tdf1)]) {
+</span></span><span style="display:flex;"><span>  lm_list[[i]] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lm</span>(<span style="color:#50fa7b">paste0</span>(i, <span style="color:#f1fa8c">&#34;~ group&#34;</span>), data <span style="color:#ff79c6">=</span> tdf1)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>lm_fit <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lapply</span>(lm_list, parameters)
+</span></span><span style="display:flex;"><span>lm_dat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">do.call</span>(rbind,lm_fit)
+</span></span><span style="display:flex;"><span>lm_df <span style="color:#ff79c6">&lt;-</span> lm_dat[lm_dat<span style="color:#ff79c6">$</span>Parameter <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;groupCY&#34;</span>,]
+</span></span><span style="display:flex;"><span>lm_df<span style="color:#ff79c6">$</span>fdr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">p.adjust</span>(lm_df<span style="color:#ff79c6">$</span>p, method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>)
+</span></span><span style="display:flex;"><span>cy.lm_df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(lm_df, features <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(lm_list), .before <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>cy.sig <span style="color:#ff79c6">&lt;-</span> cy.lm_df <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sets_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>(AD_old <span style="color:#ff79c6">=</span> ad.sig<span style="color:#ff79c6">$</span>features, old_young <span style="color:#ff79c6">=</span> cy.sig<span style="color:#ff79c6">$</span>features)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggvenn</span>(sets_list)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">intersect</span>(ad.sig<span style="color:#ff79c6">$</span>features,cy.sig<span style="color:#ff79c6">$</span>features) <span style="color:#6272a4">## common differential proteins</span>
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] &#34;HEL111&#34;      &#34;CFHR5&#34;       &#34;APOC4.APOC2&#34; &#34;ACTC1&#34;
+</code></pre><p>There are 35 differential proteins compared AD and old group, and there are 50 differential proteins compared old and young group. 4 Shared proteins are HEL111, CFHR5, APOC4-APOC2, ACTC1. The article show 4 shared platelet DEPs are STOM, MMRN1, TMSB4X, and GMPR. I think of some reasons why I have different results.</p>
+<ol>
+<li>I do not normalize the logged data.I think logged data doesn&rsquo;t have to be in a specific range such as (0-1 or -1-1). Logged data has the same unit and satisfies the normal distribution for following linear regression.</li>
+<li>GMPR is dropped during QA step.</li>
+</ol>
+<h3 id="visualization">
+  visualization
+  <a class="anchor" href="#visualization">#</a>
+</h3>
+<p>Here, I do not analyze old VS young because</p>
+<ol>
+<li>The data quality is not good. After QA, only remains 218 proteins per sample.</li>
+<li>Only 4 shared proteins between AD vs old and old VS young.</li>
+</ol>
+<p>boxplot of shared proteins</p>
+<p>I use original value of proteins for boxplot, which is more understandable easily.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>diff.shared <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;HEL111&#34;</span>, <span style="color:#f1fa8c">&#34;CFHR5&#34;</span>, <span style="color:#f1fa8c">&#34;APOC4-APOC2&#34;</span>, <span style="color:#f1fa8c">&#34;ACTC1&#34;</span>, <span style="color:#f1fa8c">&#34;STOM&#34;</span>, <span style="color:#f1fa8c">&#34;MMRN1&#34;</span>, <span style="color:#f1fa8c">&#34;TMSB4X&#34;</span>, <span style="color:#f1fa8c">&#34;GMPR&#34;</span>)
+</span></span><span style="display:flex;"><span>genes.df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rbind</span>(ad.genes.df, cy.genes.df)
+</span></span><span style="display:flex;"><span>shared <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(genes.df[genes.df<span style="color:#ff79c6">$</span>gene <span style="color:#ff79c6">%in%</span> diff.shared,]<span style="color:#ff79c6">$</span>raw)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>diff.shared.ad <span style="color:#ff79c6">&lt;-</span> data.ad1[data.ad1<span style="color:#ff79c6">$</span>Gene.names <span style="color:#ff79c6">%in%</span> shared,]
+</span></span><span style="display:flex;"><span>diff.shared.ad1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">t</span>(diff.shared.ad[,<span style="color:#bd93f9">-1</span>]))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(diff.shared.ad1) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(diff.shared.ad<span style="color:#ff79c6">$</span>Gene.names)
+</span></span><span style="display:flex;"><span>diff.shared.ad1<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>,<span style="color:#bd93f9">10</span>), <span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>,<span style="color:#bd93f9">9</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>palette <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;#00aba9&#34;</span>, <span style="color:#f1fa8c">&#34;#fa6800&#34;</span>, <span style="color:#f1fa8c">&#34;#647687&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">par</span>(mfrow <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">4</span>, <span style="color:#bd93f9">2</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>plot_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(diff.shared.ad1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(diff.shared.ad1)]) {
+</span></span><span style="display:flex;"><span>  base <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ggplot</span>(diff.shared.ad1,
+</span></span><span style="display:flex;"><span>                 <span style="color:#50fa7b">aes_string</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, y <span style="color:#ff79c6">=</span> i)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">geom_violin</span>(<span style="color:#50fa7b">aes</span>(colour <span style="color:#ff79c6">=</span> group, fill <span style="color:#ff79c6">=</span> group), trim <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">geom_boxplot</span>(<span style="color:#50fa7b">aes</span>(fill <span style="color:#ff79c6">=</span> group), width <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>, colour <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;black&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">stat_compare_means</span>(label <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.signif&#34;</span>, 
+</span></span><span style="display:flex;"><span>                       method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;t.test&#34;</span>)<span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">theme</span>(legend.position <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;none&#34;</span>) 
+</span></span><span style="display:flex;"><span>  plot_list[<span style="color:#50fa7b">[length</span>(plot_list) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>]] <span style="color:#ff79c6">&lt;-</span> base
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#print(base)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(grobs <span style="color:#ff79c6">=</span> plot_list, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>)  
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#########################################################################</span>
+</span></span><span style="display:flex;"><span>diff.shared.cy <span style="color:#ff79c6">&lt;-</span> data.cy1[data.cy1<span style="color:#ff79c6">$</span>Gene.names <span style="color:#ff79c6">%in%</span> shared,]
+</span></span><span style="display:flex;"><span>diff.shared.cy1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">t</span>(diff.shared.cy[,<span style="color:#bd93f9">-1</span>]))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(diff.shared.cy1) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(diff.shared.cy<span style="color:#ff79c6">$</span>Gene.names)
+</span></span><span style="display:flex;"><span>diff.shared.cy1<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>,<span style="color:#bd93f9">9</span>), <span style="color:#50fa7b">rep</span>(<span style="color:#f1fa8c">&#34;CY&#34;</span>,<span style="color:#bd93f9">10</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>plot_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(diff.shared.cy1)[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(diff.shared.cy1)]) {
+</span></span><span style="display:flex;"><span>  base <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ggplot</span>(diff.shared.cy1,
+</span></span><span style="display:flex;"><span>                 <span style="color:#50fa7b">aes_string</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, y <span style="color:#ff79c6">=</span> i)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">geom_violin</span>(<span style="color:#50fa7b">aes</span>(colour <span style="color:#ff79c6">=</span> group, fill <span style="color:#ff79c6">=</span> group), trim <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">geom_boxplot</span>(<span style="color:#50fa7b">aes</span>(fill <span style="color:#ff79c6">=</span> group), width <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>, colour <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;black&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">stat_compare_means</span>(label <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.signif&#34;</span>, 
+</span></span><span style="display:flex;"><span>                       method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;t.test&#34;</span>)<span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">theme</span>(legend.position <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;none&#34;</span>) 
+</span></span><span style="display:flex;"><span> <span style="color:#6272a4"># print(base)</span>
+</span></span><span style="display:flex;"><span>    plot_list[<span style="color:#50fa7b">[length</span>(plot_list) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>]] <span style="color:#ff79c6">&lt;-</span> base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(grobs <span style="color:#ff79c6">=</span> plot_list, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>)  
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-2.png" width="672" />
+<p>heatmap for 35 significant proteins (AD VS old)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>genes.df<span style="color:#ff79c6">$</span>unique <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(genes.df<span style="color:#ff79c6">$</span>gene,unique <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(ad.imp) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">make.names</span>(genes,unique <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span>ad.sig.imp <span style="color:#ff79c6">&lt;-</span> ad.imp<span style="color:#50fa7b">[rownames</span>(ad.imp) <span style="color:#ff79c6">%in%</span> ad.sig<span style="color:#ff79c6">$</span>features,<span style="color:#ff79c6">-</span><span style="color:#50fa7b">ncol</span>(ad.imp)]
+</span></span><span style="display:flex;"><span>ad.sig.scale <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(ad.sig.imp,<span style="color:#bd93f9">1</span>,scale)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(ad.sig.scale) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(ad.sig.imp)
+</span></span><span style="display:flex;"><span>ad.sig.scale1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(ad.sig.scale)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">Heatmap</span>(ad.sig.scale1,
+</span></span><span style="display:flex;"><span>        column_split <span style="color:#ff79c6">=</span> ad.met<span style="color:#ff79c6">$</span>group,
+</span></span><span style="display:flex;"><span>        cluster_column_slices <span style="color:#ff79c6">=</span> F,
+</span></span><span style="display:flex;"><span>        column_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4</span>),
+</span></span><span style="display:flex;"><span>        row_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">6</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<p>The heatmap shows that the significant differences between AD and old.</p>
+<p>volcano plot (AD VS old)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>ad.imp<span style="color:#ff79c6">$</span>logFC <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NULL</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">nrow</span>(ad.imp))){
+</span></span><span style="display:flex;"><span>  ad.imp<span style="color:#ff79c6">$</span>logFC[i] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">mean</span>(<span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">as.character</span>(ad.imp[i,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#50fa7b">colnames</span>(ad.imp))])))<span style="color:#ff79c6">-</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">mean</span>(<span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">as.character</span>(ad.imp[i,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;CO&#34;</span>, <span style="color:#50fa7b">colnames</span>(ad.imp))])))
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ad.imp<span style="color:#ff79c6">$</span>features <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rownames</span>(ad.imp)  
+</span></span><span style="display:flex;"><span>ad.lm_df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">left_join</span>(ad.lm_df, ad.imp[,<span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;features&#34;</span>, <span style="color:#f1fa8c">&#34;logFC&#34;</span>)])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">EnhancedVolcano</span>(ad.lm_df,
+</span></span><span style="display:flex;"><span>    lab <span style="color:#ff79c6">=</span> ad.lm_df<span style="color:#ff79c6">$</span>features,
+</span></span><span style="display:flex;"><span>    x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;logFC&#39;</span>,
+</span></span><span style="display:flex;"><span>    y <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;p&#39;</span>,
+</span></span><span style="display:flex;"><span>    pCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>,
+</span></span><span style="display:flex;"><span>    FCcutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.01</span>,
+</span></span><span style="display:flex;"><span>    xlim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">-3.5</span>, <span style="color:#bd93f9">3.5</span>),
+</span></span><span style="display:flex;"><span>    ylim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">6</span>),
+</span></span><span style="display:flex;"><span>    labSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4.0</span>,
+</span></span><span style="display:flex;"><span>    legendLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">8</span>,
+</span></span><span style="display:flex;"><span>    legendIconSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>,
+</span></span><span style="display:flex;"><span>    legendLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;NS&#34;</span>, <span style="color:#f1fa8c">&#34;Coefficient&#34;</span>, <span style="color:#f1fa8c">&#34;FDR&#34;</span>, <span style="color:#f1fa8c">&#34;FDR and Coefficient&#34;</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<p>The Volcano plot shows 414 proteins because of replicated proteins exist in 421 qualified proteins.</p>
+<h3 id="functional-analysis">
+  functional analysis
+  <a class="anchor" href="#functional-analysis">#</a>
+</h3>
+<p>To get more pathways , use the proteins those of p &lt; 0.1.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## KEGG</span>
+</span></span><span style="display:flex;"><span>ad.sig <span style="color:#ff79c6">&lt;-</span> ad.lm_df <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">filter</span>(p <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ad.sig.pro <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(genes.df[genes.df<span style="color:#ff79c6">$</span>colnames <span style="color:#ff79c6">%in%</span> ad.sig<span style="color:#ff79c6">$</span>features,]<span style="color:#ff79c6">$</span>gene)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## to acquire more pathways, I set p.value cutoff is 0.2.</span>
+</span></span><span style="display:flex;"><span>eg <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bitr</span>(ad.sig.pro, fromType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>, toType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>, OrgDb<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>)
+</span></span><span style="display:flex;"><span>kegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(eg<span style="color:#ff79c6">$</span>ENTREZID, organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;hsa&#39;</span>,
+</span></span><span style="display:flex;"><span>                   pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(kegg, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## GO</span>
+</span></span><span style="display:flex;"><span>go <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(
+</span></span><span style="display:flex;"><span>  eg<span style="color:#ff79c6">$</span>ENTREZID,
+</span></span><span style="display:flex;"><span>  <span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>,
+</span></span><span style="display:flex;"><span>  keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>  ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>,
+</span></span><span style="display:flex;"><span>  pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#universe,</span>
+</span></span><span style="display:flex;"><span>  qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#minGSSize = 10,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#maxGSSize = 500,</span>
+</span></span><span style="display:flex;"><span>  readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>  pool <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(go, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-10-2.png" width="672" />
+<h3 id="wgcna">
+  WGCNA
+  <a class="anchor" href="#wgcna">#</a>
+</h3>
+<p>Next shows WGCNA for proteomics data.</p>
+<h4 id="load-library">
+  Load Library
+  <a class="anchor" href="#load-library">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(WGCNA)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tibble)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(dplyr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(rstatix)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(corrplot)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ComplexHeatmap)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(stringr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(readxl)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#library(ggstatsplot)</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(rstatix)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#library(propr)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#library(robCompositions)</span>
+</span></span></code></pre></div><h4 id="data-preprocessing">
+  data preprocessing
+  <a class="anchor" href="#data-preprocessing">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>datExpr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(ad.imp[,<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;LFQ&#34;</span>,<span style="color:#50fa7b">colnames</span>(ad.imp))])
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(datExpr) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity.&#34;</span>,<span style="color:#f1fa8c">&#34;&#34;</span>,<span style="color:#50fa7b">rownames</span>(datExpr))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">skim</span>(datExpr[,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>])
+</span></span></code></pre></div><p>Table: <span id="tab:unnamed-chunk-12"></span>Table 1: Data summary</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Name</td>
+<td style="text-align:left">datExpr[, 1:10]</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of rows</td>
+<td style="text-align:left">19</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of columns</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">_______________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Column type frequency:</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">numeric</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">________________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Group variables</td>
+<td style="text-align:left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">skim_variable</th>
+<th style="text-align:right">n_missing</th>
+<th style="text-align:right">complete_rate</th>
+<th style="text-align:right">mean</th>
+<th style="text-align:right">sd</th>
+<th style="text-align:right">p0</th>
+<th style="text-align:right">p25</th>
+<th style="text-align:right">p50</th>
+<th style="text-align:right">p75</th>
+<th style="text-align:right">p100</th>
+<th style="text-align:left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ALDOC</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">25.94</td>
+<td style="text-align:right">0.91</td>
+<td style="text-align:right">23.71</td>
+<td style="text-align:right">25.71</td>
+<td style="text-align:right">26.01</td>
+<td style="text-align:right">26.39</td>
+<td style="text-align:right">28.00</td>
+<td style="text-align:left">▂▁▇▃▁</td>
+</tr>
+<tr>
+<td style="text-align:left">VCL</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">31.16</td>
+<td style="text-align:right">1.08</td>
+<td style="text-align:right">29.16</td>
+<td style="text-align:right">30.74</td>
+<td style="text-align:right">31.42</td>
+<td style="text-align:right">31.80</td>
+<td style="text-align:right">33.41</td>
+<td style="text-align:left">▃▃▇▇▁</td>
+</tr>
+<tr>
+<td style="text-align:left">HIST1H2AH</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">26.22</td>
+<td style="text-align:right">1.73</td>
+<td style="text-align:right">23.42</td>
+<td style="text-align:right">25.10</td>
+<td style="text-align:right">26.07</td>
+<td style="text-align:right">27.14</td>
+<td style="text-align:right">30.18</td>
+<td style="text-align:left">▅▇▇▂▂</td>
+</tr>
+<tr>
+<td style="text-align:left">C9</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">28.74</td>
+<td style="text-align:right">0.98</td>
+<td style="text-align:right">26.14</td>
+<td style="text-align:right">28.49</td>
+<td style="text-align:right">28.95</td>
+<td style="text-align:right">29.25</td>
+<td style="text-align:right">30.03</td>
+<td style="text-align:left">▂▁▂▇▅</td>
+</tr>
+<tr>
+<td style="text-align:left">GNB1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">26.11</td>
+<td style="text-align:right">0.84</td>
+<td style="text-align:right">24.62</td>
+<td style="text-align:right">25.65</td>
+<td style="text-align:right">25.67</td>
+<td style="text-align:right">26.54</td>
+<td style="text-align:right">28.03</td>
+<td style="text-align:left">▂▇▇▁▂</td>
+</tr>
+<tr>
+<td style="text-align:left">CAPZA1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">26.78</td>
+<td style="text-align:right">1.09</td>
+<td style="text-align:right">24.53</td>
+<td style="text-align:right">26.41</td>
+<td style="text-align:right">26.75</td>
+<td style="text-align:right">27.38</td>
+<td style="text-align:right">29.00</td>
+<td style="text-align:left">▂▂▇▆▁</td>
+</tr>
+<tr>
+<td style="text-align:left">TGFB1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">24.13</td>
+<td style="text-align:right">1.26</td>
+<td style="text-align:right">22.37</td>
+<td style="text-align:right">23.67</td>
+<td style="text-align:right">23.78</td>
+<td style="text-align:right">24.36</td>
+<td style="text-align:right">27.80</td>
+<td style="text-align:left">▃▇▂▁▂</td>
+</tr>
+<tr>
+<td style="text-align:left">NAPA</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">27.44</td>
+<td style="text-align:right">1.08</td>
+<td style="text-align:right">25.82</td>
+<td style="text-align:right">26.87</td>
+<td style="text-align:right">27.41</td>
+<td style="text-align:right">27.76</td>
+<td style="text-align:right">30.38</td>
+<td style="text-align:left">▃▇▂▂▁</td>
+</tr>
+<tr>
+<td style="text-align:left">APOC1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">31.08</td>
+<td style="text-align:right">1.02</td>
+<td style="text-align:right">28.89</td>
+<td style="text-align:right">30.39</td>
+<td style="text-align:right">31.11</td>
+<td style="text-align:right">31.68</td>
+<td style="text-align:right">32.95</td>
+<td style="text-align:left">▁▇▇▃▅</td>
+</tr>
+<tr>
+<td style="text-align:left">VASP</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">27.33</td>
+<td style="text-align:right">0.81</td>
+<td style="text-align:right">25.37</td>
+<td style="text-align:right">26.85</td>
+<td style="text-align:right">27.30</td>
+<td style="text-align:right">27.69</td>
+<td style="text-align:right">29.34</td>
+<td style="text-align:left">▁▅▇▃▁</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;APPA-participants.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span> traits[traits<span style="color:#ff79c6">$</span>New.ID <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">rownames</span>(datExpr),]
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span>traits<span style="color:#50fa7b">[match</span>(<span style="color:#50fa7b">rownames</span>(datExpr), traits<span style="color:#ff79c6">$</span>New.ID),]
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ifelse</span>(traits<span style="color:#ff79c6">$</span>AD<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;Yes&#34;</span>, <span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#f1fa8c">&#34;old&#34;</span>)
+</span></span></code></pre></div><h4 id="construction-of-co-expression-network">
+  Construction of co-expression network
+  <a class="anchor" href="#construction-of-co-expression-network">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">enableWGCNAThreads</span>()
+</span></span></code></pre></div><pre tabindex="0"><code>## Allowing parallel execution with up to 7 working processes.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>powers <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>,<span style="color:#50fa7b">seq</span>(<span style="color:#bd93f9">12</span>,<span style="color:#bd93f9">20</span>,<span style="color:#bd93f9">2</span>))
+</span></span><span style="display:flex;"><span>sft <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">pickSoftThreshold</span>(datExpr, powerVector <span style="color:#ff79c6">=</span> powers, verbose <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>,networkType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## pickSoftThreshold: will use block size 421.
+##  pickSoftThreshold: calculating connectivity for given powers...
+##    ..working on genes 1 through 421 of 421
+##    Power SFT.R.sq     slope truncated.R.sq mean.k. median.k. max.k.
+## 1      1 6.20e-02  1.550000         0.8710  226.00    248.00  264.0
+## 2      2 8.38e-02  1.190000         0.6710  150.00    169.00  202.0
+## 3      3 3.16e-02  0.335000         0.0923  111.00    123.00  167.0
+## 4      4 5.40e-02  0.222000        -0.2030   85.60     92.10  142.0
+## 5      5 4.21e-02  0.131000        -0.1030   68.40     70.70  123.0
+## 6      6 1.15e-06 -0.000518         0.4290   55.80     55.50  108.0
+## 7      7 1.00e-01 -0.146000         0.8180   46.30     44.20   96.9
+## 8      8 3.06e-01 -0.269000         0.9290   39.00     36.00   87.5
+## 9      9 4.11e-01 -0.380000         0.8280   33.10     29.80   79.8
+## 10    10 5.18e-01 -0.452000         0.9290   28.50     24.80   73.4
+## 11    12 6.67e-01 -0.674000         0.8420   21.60     18.10   63.5
+## 12    14 7.24e-01 -0.818000         0.8190   16.90     13.40   56.4
+## 13    16 7.96e-01 -0.969000         0.7970   13.50     10.30   50.9
+## 14    18 8.55e-01 -1.040000         0.8360   11.10      7.88   46.5
+## 15    20 8.81e-01 -1.110000         0.8500    9.22      6.13   42.9
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>cex1 <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.9</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Scale-free topology fit index as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], 
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Scale Free Topology Model Fit,signed R^2&#34;</span>,type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Scale independence&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     labels<span style="color:#ff79c6">=</span>powers,cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#Mean connectivity as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Mean Connectivity&#34;</span>, type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Mean connectivity&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>], labels<span style="color:#ff79c6">=</span>powers, cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-13-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sft<span style="color:#ff79c6">$</span>powerEstimate
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 18
+</code></pre><p>To achieve a highest R^2 and mean connectivity，assume Soft power is 18. Meanwhile, the &ldquo;complete&rdquo; method for distance calculation shows a better performance.</p>
+<h4 id="network-construction-and-module-detection">
+  Network construction and module detection
+  <a class="anchor" href="#network-construction-and-module-detection">#</a>
+</h4>
+<p><strong>softPower = 18; minModuleSize = 20; hclust : complete</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## adjacency matrix</span>
+</span></span><span style="display:flex;"><span>softPower <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">18</span>
+</span></span><span style="display:flex;"><span>adjacency <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">adjacency</span>(datExpr, power <span style="color:#ff79c6">=</span> softPower, type <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## TOM matrix</span>
+</span></span><span style="display:flex;"><span>TOM <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">TOMsimilarity</span>(adjacency, TOMType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## ..connectivity..
+## ..matrix multiplication (system BLAS)..
+## ..normalization..
+## ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dissTOM <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">-</span>TOM
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Create a dendogram using a hierarchical clustering tree</span>
+</span></span><span style="display:flex;"><span>TaxaTree <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">hclust</span>(<span style="color:#50fa7b">as.dist</span>(dissTOM), method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;complete&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Module identification using dynamic tree cut</span>
+</span></span><span style="display:flex;"><span>minModuleSize <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dynamicMods <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cutreeDynamic</span>(dendro <span style="color:#ff79c6">=</span> TaxaTree, distM <span style="color:#ff79c6">=</span> dissTOM, 
+</span></span><span style="display:flex;"><span>                             deepSplit <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, pamRespectsDendro <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>                             minClusterSize <span style="color:#ff79c6">=</span> minModuleSize)
+</span></span></code></pre></div><pre tabindex="0"><code>##  ..cutHeight not given, setting it to 0.995  ===&gt;  99% of the (truncated) height range in dendro.
+##  ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Convert numeric labels into colors</span>
+</span></span><span style="display:flex;"><span>dynamicColors <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">labels2colors</span>(dynamicMods)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotDendroAndColors</span>(TaxaTree, dynamicColors, <span style="color:#f1fa8c">&#34;Dynamic Tree Cut&#34;</span>,
+</span></span><span style="display:flex;"><span>                    dendroLabels <span style="color:#ff79c6">=</span> F, hang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.03</span>,
+</span></span><span style="display:flex;"><span>                    addGuide <span style="color:#ff79c6">=</span> T, guideHang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>,
+</span></span><span style="display:flex;"><span>                    main <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dendrogram and module colors&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-14-1.png" width="1536" />
+<p>The hierarchical tree shows 10 modules.</p>
+<p>Find the relationships modules and clinical traits</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>nTaxa <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ncol</span>(datExpr)
+</span></span><span style="display:flex;"><span>nSamples <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">nrow</span>(datExpr)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;APPA-participants.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span> traits[traits<span style="color:#ff79c6">$</span>New.ID <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">rownames</span>(datExpr),]
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span>traits<span style="color:#50fa7b">[match</span>(<span style="color:#50fa7b">rownames</span>(datExpr), traits<span style="color:#ff79c6">$</span>New.ID),]
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>group <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ifelse</span>(traits<span style="color:#ff79c6">$</span>AD<span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;Yes&#34;</span>, <span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#f1fa8c">&#34;old&#34;</span>)
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>group<span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">factor</span>(traits<span style="color:#ff79c6">$</span>group, levels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#f1fa8c">&#34;old&#34;</span>)))
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>Gender  <span style="color:#ff79c6">&lt;-</span>  <span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">factor</span>(traits<span style="color:#ff79c6">$</span>Gender,levels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;Female&#34;</span>,<span style="color:#f1fa8c">&#34;Male&#34;</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>moduleColors <span style="color:#ff79c6">&lt;-</span> dynamicColors
+</span></span><span style="display:flex;"><span>MEs0 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">moduleEigengenes</span>(datExpr, moduleColors,softPower <span style="color:#ff79c6">=</span> softPower)<span style="color:#ff79c6">$</span>eigengenes
+</span></span><span style="display:flex;"><span>MEs <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">orderMEs</span>(MEs0)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>moduleTraitCor <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cor</span>(MEs, traits[,<span style="color:#bd93f9">3</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">5</span>], use <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p&#34;</span>)
+</span></span><span style="display:flex;"><span>moduleTraitPvalue <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">corPvalueStudent</span>(moduleTraitCor, nSamples)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## visualize it</span>
+</span></span><span style="display:flex;"><span>textMatrix <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">paste</span>(<span style="color:#50fa7b">signif</span>(moduleTraitCor, <span style="color:#bd93f9">2</span>), 
+</span></span><span style="display:flex;"><span>                    <span style="color:#f1fa8c">&#34;\n(&#34;</span>, <span style="color:#50fa7b">signif</span>(moduleTraitPvalue, <span style="color:#bd93f9">1</span>), <span style="color:#f1fa8c">&#34;)&#34;</span>, sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(textMatrix) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">dim</span>(moduleTraitCor)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">labeledHeatmap</span>(Matrix <span style="color:#ff79c6">=</span> moduleTraitCor, 
+</span></span><span style="display:flex;"><span>               xLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(traits[3<span style="color:#ff79c6">:</span><span style="color:#bd93f9">5</span>]), yLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), 
+</span></span><span style="display:flex;"><span>               ySymbols <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), colorLabels <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>, 
+</span></span><span style="display:flex;"><span>               colors <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">blueWhiteRed</span>(<span style="color:#bd93f9">50</span>), textMatrix <span style="color:#ff79c6">=</span> textMatrix, 
+</span></span><span style="display:flex;"><span>               setStdMargins <span style="color:#ff79c6">=</span> T, cex.text <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>, 
+</span></span><span style="display:flex;"><span>               main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Module-trait relationships&#34;</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-15-1.png" width="1344" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>df.2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(traits[<span style="color:#f1fa8c">&#34;group&#34;</span>], MEs0)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(df.2) <span style="color:#ff79c6">&lt;-</span> traits<span style="color:#ff79c6">$</span>New.ID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>palettes <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;#00aba9&#34;</span>, <span style="color:#f1fa8c">&#34;#fa6800&#34;</span>, <span style="color:#f1fa8c">&#34;#647687&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(df.2)[<span style="color:#bd93f9">-1</span>]) {
+</span></span><span style="display:flex;"><span>  stat.test <span style="color:#ff79c6">&lt;-</span> df.2 <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">pairwise_wilcox_test</span>(<span style="color:#50fa7b">as.formula</span>(<span style="color:#50fa7b">paste</span>(i, <span style="color:#f1fa8c">&#34;group&#34;</span>, sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34; ~ &#34;</span>)), p.adjust.method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">add_xy_position</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p_list[[i]] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ggboxplot</span>(df.2, 
+</span></span><span style="display:flex;"><span>          x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, y <span style="color:#ff79c6">=</span> i,
+</span></span><span style="display:flex;"><span>          color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;black&#34;</span>, 
+</span></span><span style="display:flex;"><span>         palette <span style="color:#ff79c6">=</span> palettes,
+</span></span><span style="display:flex;"><span>          add <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;jitter&#34;</span>,
+</span></span><span style="display:flex;"><span>          xlab <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>,
+</span></span><span style="display:flex;"><span>          ylab <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;engine proteins&#34;</span>,
+</span></span><span style="display:flex;"><span>          title <span style="color:#ff79c6">=</span> i,
+</span></span><span style="display:flex;"><span>          width <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.3</span>,
+</span></span><span style="display:flex;"><span>          add.params <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">list</span>(color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, shape<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>, size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1.5</span>,jitter <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.07</span>)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;none&#39;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">stat_pvalue_manual</span>(stat.test, label <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.adj.signif&#34;</span>, hide.ns <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>, size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">7</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(plot.title <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_text</span>(hjust <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>))
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggarrange</span>(plotlist <span style="color:#ff79c6">=</span> p_list)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-16-1.png" width="672" />
+<p>In term of the correlation with group, MEred module is significant, which p value is 0.05.
+Next apply enrichment analysis for proteins in MEred module.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>mod_conn <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">intramodularConnectivity</span>(adjacency, moduleColors, scaleByMax <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>mod_con <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(mod_conn, protein<span style="color:#ff79c6">=</span><span style="color:#50fa7b">rownames</span>(mod_conn),moduleColors<span style="color:#ff79c6">=</span>moduleColors,
+</span></span><span style="display:flex;"><span>                      .before <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(mod_conn)[1])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>red.pro <span style="color:#ff79c6">&lt;-</span> mod_con[mod_con<span style="color:#ff79c6">$</span>moduleColors <span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;red&#34;</span>,]<span style="color:#ff79c6">$</span>protein
+</span></span><span style="display:flex;"><span>red.pro1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(genes.df[genes.df<span style="color:#ff79c6">$</span>colnames <span style="color:#ff79c6">%in%</span> red.pro,]<span style="color:#ff79c6">$</span>gene)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>eg <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bitr</span>(red.pro1, fromType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>, toType<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>, OrgDb<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>)
+</span></span><span style="display:flex;"><span>kegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(eg<span style="color:#ff79c6">$</span>ENTREZID, organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;hsa&#39;</span>,
+</span></span><span style="display:flex;"><span>                   pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(kegg, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-17-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## GO</span>
+</span></span><span style="display:flex;"><span>go <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(
+</span></span><span style="display:flex;"><span>  eg<span style="color:#ff79c6">$</span>ENTREZID,
+</span></span><span style="display:flex;"><span>  <span style="color:#f1fa8c">&#34;org.Hs.eg.db&#34;</span>,
+</span></span><span style="display:flex;"><span>  keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>  ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>,
+</span></span><span style="display:flex;"><span>  pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BH&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#universe,</span>
+</span></span><span style="display:flex;"><span>  qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#minGSSize = 10,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">#maxGSSize = 500,</span>
+</span></span><span style="display:flex;"><span>  readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>  pool <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">barplot</span>(go, drop <span style="color:#ff79c6">=</span> F, showCategory <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">12</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-17-2.png" width="672" />
+<p>The kegg pathways are African Trypanosomiasis and Malaria, which are also exist in functional analysis after linear regression. However, only 2 proteins are on the pathways.</p>
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 <no value></p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://bencuan.me">Website</a></li><li><a href="https://blog.bencuan.me">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#libraries">Libraries</a></li>
+        <li><a href="#proteomics-data-introduction">Proteomics data introduction</a></li>
+        <li><a href="#input-preprocessing">input preprocessing</a></li>
+        <li><a href="#differential-analysis-using-linear-regression">differential analysis using linear regression</a></li>
+        <li><a href="#visualization">visualization</a></li>
+        <li><a href="#functional-analysis">functional analysis</a></li>
+        <li><a href="#wgcna">WGCNA</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

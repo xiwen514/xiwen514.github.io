@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis" />
+<meta property="og:description" content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly integrate transccriptomes and proteomics data to identify a highly correlated multi-omics signature that discriminates AD and old group.
+Load libraries # library(annotables) library(mixOmics) library(dplyr) library(DescTools) library(readxl) library(tibble) library(stringr) library(BiocParallel) library(tidyselect) Data preparation # Regarding the preprocessing, all of methods in mixOmics assume the right preprocessing method has been applied." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-10-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-10-23T00:00:00+00:00" />
+<title>Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis | </title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly integrate transccriptomes and proteomics data to identify a highly correlated multi-omics signature that discriminates AD and old group.
+Load libraries # library(annotables) library(mixOmics) library(dplyr) library(DescTools) library(readxl) library(tibble) library(stringr) library(BiocParallel) library(tidyselect) Data preparation # Regarding the preprocessing, all of methods in mixOmics assume the right preprocessing method has been applied."
+/>
+<title>
+  Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/"></a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" class="active">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" class="">The platelet transcriptome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" class="">The platelet proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/64bitpandas/amethyst"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<p>I borrow the data from this article ( 
+<a href="https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full" rel="noopener">https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full</a> ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly integrate transccriptomes and proteomics data to identify a highly correlated multi-omics signature that discriminates AD and old group.</p>
+<h3 id="load-libraries">
+  Load libraries
+  <a class="anchor" href="#load-libraries">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(annotables)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(mixOmics)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(dplyr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(DescTools)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(readxl)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tibble)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(stringr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(BiocParallel)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tidyselect)
+</span></span></code></pre></div><h3 id="data-preparation">
+  Data preparation
+  <a class="anchor" href="#data-preparation">#</a>
+</h3>
+<p>Regarding the preprocessing, all of methods in mixOmics assume the right preprocessing method has been applied.</p>
+<p>Here, for transcriptome data, I use rlog data by DESeq2.For proteomic data, I use log2 data. Additionally, 200 features with highest variance in each dataset are selected for saving runtime.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>met1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;APPA-participants.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>met2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read_excel</span>(<span style="color:#f1fa8c">&#34;Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(met2)[1] <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;New.ID&#34;</span>
+</span></span><span style="display:flex;"><span>met <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">inner_join</span>(met1,met2)
+</span></span><span style="display:flex;"><span>met <span style="color:#ff79c6">&lt;-</span> met[<span style="color:#ff79c6">-</span><span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#39;CY&#39;</span>, met<span style="color:#ff79c6">$</span>New.ID),]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rna <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;bulk_RNA_deseq2_normalized_afterQC_rlogged.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>rna1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(rna[,<span style="color:#bd93f9">-1</span>]) 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(rna1) <span style="color:#ff79c6">&lt;-</span> rna<span style="color:#ff79c6">$</span>X
+</span></span><span style="display:flex;"><span>rna1 <span style="color:#ff79c6">&lt;-</span> rna1<span style="color:#50fa7b">[rownames</span>(rna1) <span style="color:#ff79c6">%in%</span> met<span style="color:#ff79c6">$</span>New.ID,]
+</span></span><span style="display:flex;"><span>rna1 <span style="color:#ff79c6">&lt;-</span> rna1<span style="color:#50fa7b">[match</span>(met<span style="color:#ff79c6">$</span>New.ID, <span style="color:#50fa7b">rownames</span>(rna1)),]
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## select 100 genes with the highest variance among all genes</span>
+</span></span><span style="display:flex;"><span>rna.var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(rna1,<span style="color:#bd93f9">2</span>,var)
+</span></span><span style="display:flex;"><span>rna.var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sort</span>(rna.var,decreasing <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span>rna2 <span style="color:#ff79c6">&lt;-</span> rna1[,<span style="color:#50fa7b">colnames</span>(rna1) <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">names</span>(rna.var)[1<span style="color:#ff79c6">:</span><span style="color:#bd93f9">500</span>]]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Return the IDs for the gene symbols in the DE results</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(grch37)
+</span></span></code></pre></div><pre tabindex="0"><code>## # A tibble: 6 × 9
+##   ensgene         entrez symbol   chr       start     end strand biotype descr…¹
+##   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;int&gt;   &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;  
+## 1 ENSG00000000003   7105 TSPAN6   X      99883667  9.99e7     -1 protei… tetras…
+## 2 ENSG00000000005  64102 TNMD     X      99839799  9.99e7      1 protei… tenomo…
+## 3 ENSG00000000419   8813 DPM1     20     49551404  4.96e7     -1 protei… dolich…
+## 4 ENSG00000000457  57147 SCYL3    1     169818772  1.70e8     -1 protei… SCY1-l…
+## 5 ENSG00000000460  55732 C1orf112 1     169631245  1.70e8      1 protei… chromo…
+## 6 ENSG00000000938   2268 FGR      1      27938575  2.80e7     -1 protei… feline…
+## # … with abbreviated variable name ¹​description
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>idx <span style="color:#ff79c6">&lt;-</span> grch37<span style="color:#ff79c6">$</span>ensgene <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">colnames</span>(rna2)
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> grch37[idx, ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## The gene names can map to more than one Ensembl ID (some genes change ID over time),</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## so we need to remove duplicate IDs </span>
+</span></span><span style="display:flex;"><span>non_duplicates <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">which</span>(<span style="color:#50fa7b">duplicated</span>(ids<span style="color:#ff79c6">$</span>symbol) <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> ids[non_duplicates, ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rna2 <span style="color:#ff79c6">&lt;-</span> rna2[,<span style="color:#50fa7b">colnames</span>(rna2) <span style="color:#ff79c6">%in%</span> ids<span style="color:#ff79c6">$</span>ensgene]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">all</span>(<span style="color:#50fa7b">colnames</span>(rna2)<span style="color:#ff79c6">==</span> ids<span style="color:#ff79c6">$</span>ensgene)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] TRUE
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(rna2) <span style="color:#ff79c6">&lt;-</span> ids<span style="color:#ff79c6">$</span>symbol
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(rna2)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1]  15 476
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pro <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;protein_after_QC_log2_KNNimputation.csv&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(pro) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;LFQ.intensity.&#34;</span>,<span style="color:#f1fa8c">&#34;&#34;</span>, pro<span style="color:#ff79c6">$</span>X)
+</span></span><span style="display:flex;"><span>pro1 <span style="color:#ff79c6">&lt;-</span> pro<span style="color:#50fa7b">[rownames</span>(pro) <span style="color:#ff79c6">%in%</span> met<span style="color:#ff79c6">$</span>New.ID, <span style="color:#bd93f9">-1</span>]
+</span></span><span style="display:flex;"><span>pro1 <span style="color:#ff79c6">&lt;-</span> pro1<span style="color:#50fa7b">[match</span>(met<span style="color:#ff79c6">$</span>New.ID,<span style="color:#50fa7b">rownames</span>(pro1)),]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## select 100 proteins with the highest variance among all proteins</span>
+</span></span><span style="display:flex;"><span>pro.var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(pro1,<span style="color:#bd93f9">2</span>,var)
+</span></span><span style="display:flex;"><span>pro.var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sort</span>(pro.var,decreasing <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span>pro2 <span style="color:#ff79c6">&lt;-</span> pro1[,<span style="color:#50fa7b">colnames</span>(pro1) <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">names</span>(pro.var)[1<span style="color:#ff79c6">:</span><span style="color:#bd93f9">500</span>]]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(pro2)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1]  15 421
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">all</span>(<span style="color:#50fa7b">rownames</span>(rna2)<span style="color:#ff79c6">==</span><span style="color:#50fa7b">rownames</span>(pro2))
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] TRUE
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## data design</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">list</span>(transcriptome <span style="color:#ff79c6">=</span> rna2,
+</span></span><span style="display:flex;"><span>            proteome <span style="color:#ff79c6">=</span> pro2)
+</span></span><span style="display:flex;"><span>Y <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">factor</span>(met<span style="color:#ff79c6">$</span>Condition)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## design matrix</span>
+</span></span><span style="display:flex;"><span>design <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">matrix</span>(<span style="color:#bd93f9">0.1</span>, ncol <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">length</span>(data), nrow <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">length</span>(data), 
+</span></span><span style="display:flex;"><span>              dimnames <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">list</span>(<span style="color:#50fa7b">names</span>(data), <span style="color:#50fa7b">names</span>(data)))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">diag</span>(design) <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Tuning the number of components</span>
+</span></span><span style="display:flex;"><span>sgccda.res <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">block.splsda</span>(X <span style="color:#ff79c6">=</span> data, Y <span style="color:#ff79c6">=</span> Y, ncomp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>, 
+</span></span><span style="display:flex;"><span>                         design <span style="color:#ff79c6">=</span> design)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">set.seed</span>(<span style="color:#bd93f9">123</span>) 
+</span></span><span style="display:flex;"><span>perf.diablo <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf</span>(sgccda.res, validation <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;Mfold&#39;</span>, folds <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>, nrepeat <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(perf.diablo)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<p>From above plot, 2 PC has the lowerst error rate of mahalanobis.dist calculation. But I choose centroids distance calculation for more understandable comprehension and faster calculation. In addition, the data does not have large samples and features so that I set folds is 5 for validation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># set the optimal ncomp value</span>
+</span></span><span style="display:flex;"><span>ncomp <span style="color:#ff79c6">=</span> perf.diablo<span style="color:#ff79c6">$</span>choice.ncomp<span style="color:#ff79c6">$</span>WeightedVote[<span style="color:#f1fa8c">&#34;Overall.BER&#34;</span>, <span style="color:#f1fa8c">&#34;centroids.dist&#34;</span>] 
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># show the optimal choice for ncomp for each dist metric</span>
+</span></span><span style="display:flex;"><span>perf.diablo<span style="color:#ff79c6">$</span>choice.ncomp<span style="color:#ff79c6">$</span>WeightedVote 
+</span></span></code></pre></div><pre tabindex="0"><code>##             max.dist centroids.dist mahalanobis.dist
+## Overall.ER         1              1                1
+## Overall.BER        1              1                1
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Tuning keepX</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">set.seed</span>(<span style="color:#bd93f9">123</span>)
+</span></span><span style="display:flex;"><span>test.keepX <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">list</span>(transcriptome <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">seq</span>(<span style="color:#bd93f9">10</span>,<span style="color:#bd93f9">50</span>,<span style="color:#bd93f9">5</span>)),
+</span></span><span style="display:flex;"><span>                proteome <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">seq</span>(<span style="color:#bd93f9">10</span>,<span style="color:#bd93f9">50</span>,<span style="color:#bd93f9">5</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Y
+</span></span></code></pre></div><pre tabindex="0"><code>##  [1] Old Old Old Old Old Old AD  AD  AD  AD  AD  AD  AD  AD  AD 
+## Levels: AD Old
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>tune.TCGA <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">tune.block.splsda</span>(X <span style="color:#ff79c6">=</span> data, Y <span style="color:#ff79c6">=</span> Y, ncomp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>,
+</span></span><span style="display:flex;"><span>                             test.keepX <span style="color:#ff79c6">=</span> test.keepX, design <span style="color:#ff79c6">=</span> design,
+</span></span><span style="display:flex;"><span>                             validation <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;Mfold&#39;</span>, folds <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>, nrepeat <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                            dist <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;centroids.dist&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## list.keepX</span>
+</span></span><span style="display:flex;"><span>list.keepX <span style="color:#ff79c6">=</span> tune.TCGA<span style="color:#ff79c6">$</span>choice.keepX <span style="color:#6272a4"># set the optimal values of features to retain</span>
+</span></span><span style="display:flex;"><span>list.keepX<span style="color:#ff79c6">$</span>transcriptome
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 20 10
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>list.keepX<span style="color:#ff79c6">$</span>proteome
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 10 30
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Final model</span>
+</span></span><span style="display:flex;"><span>sgccda.res <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">block.splsda</span>(X <span style="color:#ff79c6">=</span> data, Y <span style="color:#ff79c6">=</span> Y, ncomp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, 
+</span></span><span style="display:flex;"><span>                        keepX <span style="color:#ff79c6">=</span> list.keepX, design <span style="color:#ff79c6">=</span> design)
+</span></span></code></pre></div><p>We can see from above results that the optimal features number is 10 in PC1 and PC2 in each omics data.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># the features selected to form the first component</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">selectVar</span>(sgccda.res, block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;transcriptome&#39;</span>, comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">$</span>transcriptome<span style="color:#ff79c6">$</span>value
+</span></span></code></pre></div><pre tabindex="0"><code>##                 value.var
+## HMOX2          0.46792977
+## CSNK2B         0.40781994
+## PBX2          -0.31405520
+## SLC39A7       -0.30168835
+## RP11-958N24.1 -0.28663687
+## ABHD16A        0.27505066
+## CXCL5          0.27310683
+## THRB           0.21602778
+## CATSPERB       0.20611244
+## GMPR2          0.20277692
+## DISP2         -0.17867785
+## REEP1         -0.10297366
+## PDGFRA         0.09515494
+## SIK1           0.06325613
+## RP11-203J24.9 -0.05524005
+## FAM60A         0.04428573
+## LY6E          -0.02420327
+## PKIB           0.02372416
+## NEXN           0.01968624
+## LONRF1        -0.01656365
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sel.rna <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">selectVar</span>(sgccda.res, block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;transcriptome&#39;</span>, comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">$</span>transcriptome<span style="color:#ff79c6">$</span>name
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">selectVar</span>(sgccda.res, block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;proteome&#39;</span>, comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">$</span>proteome<span style="color:#ff79c6">$</span>value
+</span></span></code></pre></div><pre tabindex="0"><code>##                  value.var
+## S100A6         -0.60610829
+## A30             0.41131318
+## KNG1            0.38445985
+## RBP4            0.32364220
+## CFI.1           0.30044365
+## HBA2           -0.26009559
+## DKFZp686C11235  0.16921710
+## ALAD           -0.09620698
+## HBB            -0.09251638
+## HEL.S.2a       -0.08083907
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sel.pro <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">selectVar</span>(sgccda.res, block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;proteome&#39;</span>, comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">$</span>proteome<span style="color:#ff79c6">$</span>name
+</span></span></code></pre></div><p>Here shows the selected features on PC1 from two data sets.</p>
+<h3 id="plot-results">
+  Plot results
+  <a class="anchor" href="#plot-results">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotDiablo</span>(sgccda.res, ncomp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotDiablo</span>(sgccda.res, ncomp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-2.png" width="672" />
+<p>As we can see, the first components from two data set are highly correlated to each other.The colours and ellipses related to the sample subtypes indicate the discriminative power of each component to separate AD and old group.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotIndiv</span>(sgccda.res, ind.names <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>, legend <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<p>Clustering of the samples can be better assessed with this plot. It seems that the quality of clustering of the RNA data and proteomics  is similar. This suggests that two data sets ikely to hold similar discriminative power within the model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotVar</span>(sgccda.res, var.names <span style="color:#ff79c6">=</span>T, style <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;graphics&#39;</span>, cutoff<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0.5</span>, legend <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-9-1.png" width="864" />
+<p>These first two components correlate highly with the selected variables from the proteomics and transcriptomes dataset.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">circosPlot</span>(sgccda.res,  cutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>, line <span style="color:#ff79c6">=</span> F,size.variables<span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.6</span>, size.labels <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,size.legend <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<p>We can see that each RNA and proteins are correlated whether they are negative or postiive correlated.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotLoadings</span>(sgccda.res, <span style="color:#bd93f9">1</span>,comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, contrib <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;max&#39;</span>, method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;median&#39;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotLoadings</span>(sgccda.res, <span style="color:#bd93f9">2</span>,comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, contrib <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;max&#39;</span>, method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;median&#39;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-11-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">par</span>(mar <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">5</span>, <span style="color:#bd93f9">4</span>, <span style="color:#bd93f9">2</span>, <span style="color:#bd93f9">2</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">cimDiablo</span>(sgccda.res,legend.position <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;topright&#34;</span>,size.legend <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.7</span>,cluster <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;column&#34;</span>,comp<span style="color:#ff79c6">=</span><span style="color:#bd93f9">1</span>,margins <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">5</span>, <span style="color:#bd93f9">5</span>))
+</span></span></code></pre></div><pre tabindex="0"><code>## 
+## trimming values to [-3, 3] range for cim visualisation. See &#39;trim&#39; arg in ?cimDiablo
+</code></pre><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-12-1.png" width="960" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">cimDiablo</span>(sgccda.res,legend.position <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;topright&#34;</span>,size.legend <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.7</span>,cluster <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;column&#34;</span>, comp<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span>,<span style="color:#bd93f9">2</span>),margins <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">5</span>, <span style="color:#bd93f9">5</span>))
+</span></span></code></pre></div><pre tabindex="0"><code>## 
+## trimming values to [-3, 3] range for cim visualisation. See &#39;trim&#39; arg in ?cimDiablo
+</code></pre><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-12-2.png" width="960" />
+<h3 id="performance-of-the-model">
+  Performance of the model
+  <a class="anchor" href="#performance-of-the-model">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># run repeated CV performance evaluation</span>
+</span></span><span style="display:flex;"><span>perf.diablo <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf</span>(sgccda.res, validation <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;Mfold&#39;</span>, 
+</span></span><span style="display:flex;"><span>                   M <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>, nrepeat <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>, 
+</span></span><span style="display:flex;"><span>                   dist <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;centroids.dist&#39;</span>) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>perf.diablo<span style="color:#ff79c6">$</span>MajorityVote.error.rate
+</span></span></code></pre></div><pre tabindex="0"><code>## $centroids.dist
+##                 comp1     comp2
+## AD          0.6555556 0.6555556
+## Old         0.7500000 0.8000000
+## Overall.ER  0.6933333 0.7133333
+## Overall.BER 0.7027778 0.7277778
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>perf.diablo<span style="color:#ff79c6">$</span>WeightedVote.error.rate
+</span></span></code></pre></div><pre tabindex="0"><code>## $centroids.dist
+##                 comp1     comp2
+## AD          0.4888889 0.5444444
+## Old         0.5666667 0.6166667
+## Overall.ER  0.5200000 0.5733333
+## Overall.BER 0.5277778 0.5805556
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>auc.splsda <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">auroc</span>(sgccda.res, roc.block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;transcriptome&#34;</span>, 
+</span></span><span style="display:flex;"><span>                   roc.comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, print <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-14-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>auc.splsda <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">auroc</span>(sgccda.res, roc.block <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;proteome&#34;</span>, 
+</span></span><span style="display:flex;"><span>                   roc.comp <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, print <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-14-2.png" width="672" />
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 <no value></p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://bencuan.me">Website</a></li><li><a href="https://blog.bencuan.me">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#load-libraries">Load libraries</a></li>
+        <li><a href="#data-preparation">Data preparation</a></li>
+        <li><a href="#plot-results">Plot results</a></li>
+        <li><a href="#performance-of-the-model">Performance of the model</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

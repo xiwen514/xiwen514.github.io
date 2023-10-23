@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="The platelet transcriptome in Alzheimer’s disease and aging data analysis" />
+<meta property="og:description" content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze Bulk RNA data by comparing AD VS old to identify differential genes and explore their functions.
+This article provides DESeq2-normalized counts using Median of ratios method by 4 steps ( https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html):
+creates a pseudo-reference sample (row-wise geometric mean) calculates ratio of each sample to the reference calculate the normalization factor for each sample (size factor) calculate the normalized count values using the normalization factor This data has 27 samples, 3 groups(AD, old and young), each group has 9 samples." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-10-23T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-10-23T00:00:00+00:00" />
+<title>The platelet transcriptome in Alzheimer’s disease and aging data analysis | </title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze Bulk RNA data by comparing AD VS old to identify differential genes and explore their functions.
+This article provides DESeq2-normalized counts using Median of ratios method by 4 steps ( https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html):
+creates a pseudo-reference sample (row-wise geometric mean) calculates ratio of each sample to the reference calculate the normalization factor for each sample (size factor) calculate the normalized count values using the normalization factor This data has 27 samples, 3 groups(AD, old and young), each group has 9 samples."
+/>
+<title>
+  The platelet transcriptome in Alzheimer’s disease and aging data analysis
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/"></a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" class="">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" class="active">The platelet transcriptome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" class="">The platelet proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/64bitpandas/amethyst"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">The platelet transcriptome in Alzheimer’s disease and aging data analysis</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<p>I borrow the data from this article ( 
+<a href="https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full" rel="noopener">https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full</a> ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze Bulk RNA data by comparing AD VS old to identify differential genes and explore their functions.</p>
+<p>This article provides DESeq2-normalized counts using Median of ratios method by 4 steps (
+<a href="https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html%29" rel="noopener">https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html)</a>:</p>
+<ol>
+<li>creates a pseudo-reference sample (row-wise geometric mean)</li>
+<li>calculates ratio of each sample to the reference</li>
+<li>calculate the normalization factor for each sample (size factor)</li>
+<li>calculate the normalized count values using the normalization factor</li>
+</ol>
+<p>This data has 27 samples, 3 groups(AD, old and young), each group has 9 samples. Here, I compare AD vs old only.</p>
+<ul>
+<li>AD : AD</li>
+<li>CO: old</li>
+<li>CY: young</li>
+</ul>
+<h3 id="libraries">
+  libraries
+  <a class="anchor" href="#libraries">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(readxl)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(DESeq2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(apeglm)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(org.Hs.eg.db)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(DOSE)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(pathview)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(clusterProfiler)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(AnnotationHub)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ensembldb)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tidyverse)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(annotables)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(RColorBrewer)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggplot2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(scales) 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(viridis)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ComplexHeatmap)
+</span></span></code></pre></div><h3 id="dataset-pre-filterring">
+  dataset pre-filterring
+  <a class="anchor" href="#dataset-pre-filterring">#</a>
+</h3>
+<p>Before data exploration, quality control the data. While it is not strictly necessary, it is good to do some preliminary filtering of the data before running the differential expression analysis. This will reduce the size of the DEseq2DataSet object and speed up the runtime of the algorithm. The filtering criteria:</p>
+<ol>
+<li>genes should have more than a sum total of 5 reads of support in all samples</li>
+<li>number of 0 of each gene have to less than 9</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read_excel</span>(<span style="color:#f1fa8c">&#34;Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX&#34;</span>, sheet <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;DESeq2_normalized_counts&#34;</span>) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">data.frame</span>()
+</span></span><span style="display:flex;"><span>dat1<span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(dat[,<span style="color:#bd93f9">-1</span>],<span style="color:#bd93f9">2</span>, as.numeric)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(dat1) <span style="color:#ff79c6">&lt;-</span> dat<span style="color:#ff79c6">$</span>Ensembl_ID
+</span></span><span style="display:flex;"><span>dat1 <span style="color:#ff79c6">&lt;-</span> dat1[,<span style="color:#ff79c6">-</span><span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">grep</span>(<span style="color:#f1fa8c">&#34;CY&#34;</span>, <span style="color:#50fa7b">colnames</span>(dat1)))]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sumzero <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rowSums</span>(dat1<span style="color:#ff79c6">==</span><span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>dat1 <span style="color:#ff79c6">&lt;-</span> dat1[sumzero <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">9</span>,]
+</span></span><span style="display:flex;"><span>dat1 <span style="color:#ff79c6">&lt;-</span> dat1<span style="color:#50fa7b">[rowSums</span>(dat1) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">5</span>,] 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(dat1)
+</span></span></code></pre></div><pre tabindex="0"><code>##  [1] &#34;AD2&#34;  &#34;AD3&#34;  &#34;AD4&#34;  &#34;AD5&#34;  &#34;AD6&#34;  &#34;AD7&#34;  &#34;AD8&#34;  &#34;AD9&#34;  &#34;AD10&#34; &#34;CO1&#34; 
+## [11] &#34;CO2&#34;  &#34;CO3&#34;  &#34;CO4&#34;  &#34;CO5&#34;  &#34;CO9&#34;  &#34;CO10&#34; &#34;CO13&#34; &#34;CO14&#34;
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(dat1)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 17656    18
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dat1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(dat1)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#write.csv(dat1,&#34;bulk_RNA_deseq2_normalized_afterQC.csv&#34;,col.names = F)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>meta <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read_excel</span>(<span style="color:#f1fa8c">&#34;Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(meta)[1] <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;sample&#34;</span>
+</span></span><span style="display:flex;"><span>meta1 <span style="color:#ff79c6">&lt;-</span> meta[meta<span style="color:#ff79c6">$</span>sample <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">colnames</span>(dat1),]
+</span></span><span style="display:flex;"><span>meta1<span style="color:#ff79c6">$</span>Condition <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.factor</span>(meta1<span style="color:#ff79c6">$</span>Condition)
+</span></span><span style="display:flex;"><span>meta1<span style="color:#ff79c6">$</span>Condition <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">factor</span>(meta1<span style="color:#ff79c6">$</span>Condition,labels<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;Old&#34;</span>, <span style="color:#f1fa8c">&#34;AD&#34;</span>), levels<span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;Old&#34;</span>, <span style="color:#f1fa8c">&#34;AD&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(meta1) <span style="color:#ff79c6">&lt;-</span> meta1<span style="color:#ff79c6">$</span>sample 
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Check that sample names match in both data</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">all</span>(<span style="color:#50fa7b">colnames</span>(dat1) <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">rownames</span>(meta1))
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] TRUE
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">all</span>(<span style="color:#50fa7b">colnames</span>(dat1) <span style="color:#ff79c6">==</span> <span style="color:#50fa7b">rownames</span>(meta1))
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] TRUE
+</code></pre><h3 id="data-exploration">
+  data exploration
+  <a class="anchor" href="#data-exploration">#</a>
+</h3>
+<h4 id="pca">
+  PCA
+  <a class="anchor" href="#pca">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">### data has been normalized, so it has non-integer values. Use round() to create a DESeq2 subject</span>
+</span></span><span style="display:flex;"><span>dds <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DESeqDataSetFromMatrix</span>(countData <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">round</span>(dat1), colData <span style="color:#ff79c6">=</span> meta1, design <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">~</span> Condition)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### normalization, here omit this step</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#dds &lt;- estimateSizeFactors(dds)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#normalized_counts &lt;- counts(dds, normalized=TRUE)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Transform counts for data visualization</span>
+</span></span><span style="display:flex;"><span>rld <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rlog</span>(dds, blind<span style="color:#ff79c6">=</span><span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Plot PCA </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotPCA</span>(rld, intgroup<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Condition&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotPCA</span>(rld, intgroup<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Sex&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-3-2.png" width="672" />
+<p>The variation on PC1 and PC2 cannot be explained by condition or sex factor.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># Input is a matrix of log transformed values</span>
+</span></span><span style="display:flex;"><span>rld_mat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">assay</span>(rld)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">write.csv</span>(rld_mat,<span style="color:#f1fa8c">&#34;bulk_RNA_deseq2_normalized_afterQC_rlogged.csv&#34;</span>,col.names <span style="color:#ff79c6">=</span> F)
+</span></span><span style="display:flex;"><span>pca <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">prcomp</span>(<span style="color:#50fa7b">t</span>(rld_mat))
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Create data frame with metadata and PC3 and PC4 values for input to ggplot</span>
+</span></span><span style="display:flex;"><span>df <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(meta1, pca<span style="color:#ff79c6">$</span>x)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggplot</span>(df) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">geom_point</span>(<span style="color:#50fa7b">aes</span>(x<span style="color:#ff79c6">=</span>PC3, y<span style="color:#ff79c6">=</span>PC4, color <span style="color:#ff79c6">=</span> Condition))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">ggplot</span>(df) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">geom_point</span>(<span style="color:#50fa7b">aes</span>(x<span style="color:#ff79c6">=</span>PC3, y<span style="color:#ff79c6">=</span>PC4, color <span style="color:#ff79c6">=</span> Sex))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-4-2.png" width="672" />
+<p>The variation on PC3 and PC4 still cannot be explained by  condition or sex factor.</p>
+<h4 id="hierarchical-tree">
+  hierarchical tree
+  <a class="anchor" href="#hierarchical-tree">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">### Compute pairwise correlation values</span>
+</span></span><span style="display:flex;"><span>rld_cor <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cor</span>(rld_mat)    
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Plot heatmap</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">pheatmap</span>(rld_cor)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">### PCA for samples</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggplot</span>(df,<span style="color:#50fa7b">aes</span>(x<span style="color:#ff79c6">=</span>PC1, y<span style="color:#ff79c6">=</span>PC2, color <span style="color:#ff79c6">=</span> sample)) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">geom_point</span>()<span style="color:#ff79c6">+</span><span style="color:#50fa7b">geom_label</span>(label<span style="color:#ff79c6">=</span>df<span style="color:#ff79c6">$</span>sample)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-5-2.png" width="672" />
+<p>Since the majority of genes are not differentially expressed, samples generally have high correlations with each other (values higher than 0.80). In the heatmap, CO1, AD7, CO14, AD4, CO9 have lower correlations by each other. In the PCA plot, these samples are not in the same cluster. I think they are not outliers.</p>
+<h3 id="differential-analysis">
+  differential analysis
+  <a class="anchor" href="#differential-analysis">#</a>
+</h3>
+<p><strong>The data has been normalized. If you want to use normalized count data, you need to normalize manually by this: normalized_counts &lt;- counts(dds, normalized=TRUE).</strong></p>
+<p>I would perform the differential analysis by these steps, which are integrated by DESeq function.</p>
+<ol>
+<li>estimation of size factors: estimateSizeFactors</li>
+<li>estimation of dispersion: estimateDispersions</li>
+<li>Negative Binomial GLM fitting and Wald statistics: nbinomWaldTest</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dds <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DESeq</span>(dds)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotDispEsts</span>(dds)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<p>Genes with low dispersion estimates are shrunken towards the curve, and the more accurate, higher shrunken values are output for fitting of the model and differential expression testing.</p>
+<p>The plot shows data generally scatter around the curve, with the dispersion decreasing with increasing mean expression levels. I think this dataset is a good fit for the DESeq2 model.</p>
+<h4 id="building-the-results-table">
+  building the results table
+  <a class="anchor" href="#building-the-results-table">#</a>
+</h4>
+<p>The shrinkage method in DESeq2 is particularly important to reduce false positives in the differential expression analysis. In the most recent versions of DESeq2, the shrinkage of LFC estimates is not performed by default. Shrinkage of the LFC estimates toward zero when the information for a gene is low, which could include:</p>
+<ul>
+<li>Low counts</li>
+<li>High dispersion values</li>
+</ul>
+<p><strong>Here omit lfcShrink() step for selecting more differential genes.</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>contrast_oe <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;Condition&#34;</span>, <span style="color:#f1fa8c">&#34;AD&#34;</span>,<span style="color:#f1fa8c">&#34;Old&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>res_tableOE_unshrunken <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">results</span>(dds, contrast<span style="color:#ff79c6">=</span>contrast_oe, alpha <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.1</span>)
+</span></span><span style="display:flex;"><span>res_tableOE <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">lfcShrink</span>(dds, coef <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Condition_AD_vs_Old&#34;</span>, res<span style="color:#ff79c6">=</span>res_tableOE_unshrunken)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotMA</span>(res_tableOE_unshrunken)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">plotMA</span>(res_tableOE)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-7-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>res_tableOE_tb <span style="color:#ff79c6">&lt;-</span> res_tableOE_unshrunken <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">data.frame</span>() <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">rownames_to_column</span>(var<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;gene&#34;</span>) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">as_tibble</span>()
+</span></span></code></pre></div><p>NOTE: on p-values set to NA</p>
+<ul>
+<li>If within a row, all samples have zero counts, the baseMean column will be zero, and the log2 fold change estimates, p-value and adjusted p-value will all be set to NA.</li>
+<li>If a row contains a sample with an extreme count outlier then the p-value and adjusted p-value will be set to NA. These outlier counts are detected by Cook’s distance.</li>
+<li>If a row is filtered by automatic independent filtering, for having a low mean normalized count, then only the adjusted p-value will be set to NA.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># Set a boolean column for significance</span>
+</span></span><span style="display:flex;"><span>res_tableOE_tb<span style="color:#ff79c6">$</span>significant <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ifelse</span>(res_tableOE_tb<span style="color:#ff79c6">$</span>pvalue <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">.1</span>, <span style="color:#f1fa8c">&#34;Significant&#34;</span>, <span style="color:#ff79c6">NA</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Plot the results similar to DEseq2</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggplot</span>(res_tableOE_tb, <span style="color:#50fa7b">aes</span>(baseMean, log2FoldChange, colour<span style="color:#ff79c6">=</span>significant)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">geom_point</span>(size<span style="color:#ff79c6">=</span><span style="color:#bd93f9">1</span>) <span style="color:#ff79c6">+</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_y_continuous</span>(limits<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">-3</span>, <span style="color:#bd93f9">3</span>), oob<span style="color:#ff79c6">=</span>squish) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">scale_x_log10</span>() <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">geom_hline</span>(yintercept <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, colour<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;tomato1&#34;</span>, size<span style="color:#ff79c6">=</span><span style="color:#bd93f9">2</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">labs</span>(x<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;mean of normalized counts&#34;</span>, y<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;log fold change&#34;</span>) <span style="color:#ff79c6">+</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_colour_manual</span>(name<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;q-value&#34;</span>, values<span style="color:#ff79c6">=</span>(<span style="color:#f1fa8c">&#34;Significant&#34;</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>), na.value<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;grey50&#34;</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">theme_bw</span>()
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># Let&#39;s add some more detail</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggplot</span>(res_tableOE_tb, <span style="color:#50fa7b">aes</span>(baseMean, log2FoldChange, colour<span style="color:#ff79c6">=</span>pvalue)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">geom_point</span>(size<span style="color:#ff79c6">=</span><span style="color:#bd93f9">1</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">scale_y_continuous</span>(limits<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">-3</span>, <span style="color:#bd93f9">3</span>), oob<span style="color:#ff79c6">=</span>squish) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_x_log10</span>() <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">geom_hline</span>(yintercept <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, colour<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;darkorchid4&#34;</span>, size<span style="color:#ff79c6">=</span><span style="color:#bd93f9">1</span>, linetype<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;longdash&#34;</span>) <span style="color:#ff79c6">+</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">labs</span>(x<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;mean of normalized counts&#34;</span>, y<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;log fold change&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_colour_viridis</span>(direction<span style="color:#ff79c6">=</span><span style="color:#bd93f9">-1</span>, trans<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;sqrt&#39;</span>) <span style="color:#ff79c6">+</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme_bw</span>() <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">geom_density_2d</span>(colour<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;black&#34;</span>, size<span style="color:#ff79c6">=</span><span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-8-2.png" width="672" />
+<p>In general we would expect the expression of genes to remain consistent between conditions and so the MA plot should be similar to the shape of a trumpet with most points residing on a y intercept of 0. We can see from the above plots that they are in the characteristic trumpet shape of MA plots. Further we have overlayed density contours in the second plot and, as expected, these density contours are centered around a y-intercept of 0. We can further see that as the average counts increase there is more power to call a gene as differentially expressed based on the fold change.</p>
+<h3 id="visualization">
+  visualization
+  <a class="anchor" href="#visualization">#</a>
+</h3>
+<p>Here cutoff for significant genes</p>
+<ul>
+<li>pvalue&lt; 0.05</li>
+<li>abs(log2FoldChange) &gt; 1</li>
+</ul>
+<h4 id="heatmap">
+  heatmap
+  <a class="anchor" href="#heatmap">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sigOE <span style="color:#ff79c6">&lt;-</span>  res_tableOE_tb <span style="color:#ff79c6">%&gt;%</span> dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">filter</span>(pvalue<span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span> <span style="color:#ff79c6">&amp;</span> <span style="color:#50fa7b">abs</span>(log2FoldChange) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>dat2 <span style="color:#ff79c6">&lt;-</span> rld_mat<span style="color:#50fa7b">[rownames</span>(rld_mat) <span style="color:#ff79c6">%in%</span> sigOE<span style="color:#ff79c6">$</span>gene,]
+</span></span><span style="display:flex;"><span>dat3 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">t</span>(<span style="color:#50fa7b">apply</span>(dat2,<span style="color:#bd93f9">1</span>,scale))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(dat3) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">colnames</span>(dat2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(dat3) <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NULL</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Set a color palette</span>
+</span></span><span style="display:flex;"><span>heat_colors <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">brewer.pal</span>(<span style="color:#bd93f9">6</span>, <span style="color:#f1fa8c">&#34;YlOrRd&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Run pheatmap</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">Heatmap</span>(dat3,
+</span></span><span style="display:flex;"><span>        column_split <span style="color:#ff79c6">=</span> meta1<span style="color:#ff79c6">$</span>Condition,
+</span></span><span style="display:flex;"><span>        cluster_column_slices <span style="color:#ff79c6">=</span> F,
+</span></span><span style="display:flex;"><span>        column_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4</span>),
+</span></span><span style="display:flex;"><span>        row_names_gp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">gpar</span>(fontsize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">6</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<p>286 significant genes are showed in the heatmap.</p>
+<h3 id="functional-analysis">
+  functional analysis
+  <a class="anchor" href="#functional-analysis">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Return the IDs for the gene symbols in the DE results</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(grch37)
+</span></span></code></pre></div><pre tabindex="0"><code>## # A tibble: 6 × 9
+##   ensgene         entrez symbol   chr       start     end strand biotype descr…¹
+##   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;int&gt;   &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;  
+## 1 ENSG00000000003   7105 TSPAN6   X      99883667  9.99e7     -1 protei… tetras…
+## 2 ENSG00000000005  64102 TNMD     X      99839799  9.99e7      1 protei… tenomo…
+## 3 ENSG00000000419   8813 DPM1     20     49551404  4.96e7     -1 protei… dolich…
+## 4 ENSG00000000457  57147 SCYL3    1     169818772  1.70e8     -1 protei… SCY1-l…
+## 5 ENSG00000000460  55732 C1orf112 1     169631245  1.70e8      1 protei… chromo…
+## 6 ENSG00000000938   2268 FGR      1      27938575  2.80e7     -1 protei… feline…
+## # … with abbreviated variable name ¹​description
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>idx <span style="color:#ff79c6">&lt;-</span> grch37<span style="color:#ff79c6">$</span>ensgene <span style="color:#ff79c6">%in%</span> res_tableOE_tb<span style="color:#ff79c6">$</span>gene
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> grch37[idx, ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## The gene names can map to more than one Ensembl ID (some genes change ID over time), </span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## so we need to remove duplicate IDs prior to assessing enriched GO terms</span>
+</span></span><span style="display:flex;"><span>non_duplicates <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">which</span>(<span style="color:#50fa7b">duplicated</span>(ids<span style="color:#ff79c6">$</span>symbol) <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> ids[non_duplicates, ] 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Merge the IDs with the results </span>
+</span></span><span style="display:flex;"><span>res_ids <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">inner_join</span>(res_tableOE_tb, ids, by<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;gene&#34;</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;ensgene&#34;</span>))   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Create background dataset for hypergeometric testing using all genes tested for significance in the results</span>
+</span></span><span style="display:flex;"><span>allOE_genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.character</span>(res_ids<span style="color:#ff79c6">$</span>gene)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Extract significant results</span>
+</span></span><span style="display:flex;"><span>sigOE <span style="color:#ff79c6">&lt;-</span> res_ids <span style="color:#ff79c6">%&gt;%</span> dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">filter</span>(pvalue<span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span> <span style="color:#ff79c6">&amp;</span> <span style="color:#50fa7b">abs</span>(log2FoldChange) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>sigOE.order<span style="color:#ff79c6">&lt;-</span> sigOE<span style="color:#50fa7b">[order</span>(sigOE<span style="color:#ff79c6">$</span>pvalue,decreasing <span style="color:#ff79c6">=</span> F),]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(sigOE.order)
+</span></span></code></pre></div><pre tabindex="0"><code>## # A tibble: 6 × 16
+##   gene    baseM…¹ log2F…² lfcSE  stat  pvalue   padj signi…³ entrez symbol chr  
+##   &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;
+## 1 ENSG00…   19.9    -1.51 0.327 -4.62 3.81e-6 0.0440 Signif…   9283 GPR37… 1    
+## 2 ENSG00…   23.1     1.39 0.305  4.57 4.98e-6 0.0440 Signif…  11067 C10or… 10   
+## 3 ENSG00…   39.8    -3.12 0.715 -4.36 1.29e-5 0.0570 Signif…  85455 DISP2  15   
+## 4 ENSG00…   17.2    -1.83 0.436 -4.20 2.73e-5 0.0962 Signif… 619279 ZNF704 8    
+## 5 ENSG00…   23.7     2.07 0.525  3.95 7.81e-5 0.222  Signif…   5069 PAPPA  9    
+## 6 ENSG00…    9.38   -3.00 0.765 -3.92 8.79e-5 0.222  Signif…  55089 SLC38… 12   
+## # … with 5 more variables: start &lt;int&gt;, end &lt;int&gt;, strand &lt;int&gt;, biotype &lt;chr&gt;,
+## #   description &lt;chr&gt;, and abbreviated variable names ¹​baseMean,
+## #   ²​log2FoldChange, ³​significant
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sigOE_genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.character</span>(sigOE<span style="color:#ff79c6">$</span>gene)
+</span></span></code></pre></div><h4 id="kegg-terms">
+  KEGG terms
+  <a class="anchor" href="#kegg-terms">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Run KEGG enrichment analysis </span>
+</span></span><span style="display:flex;"><span>ekegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(gene <span style="color:#ff79c6">=</span> sigOE<span style="color:#ff79c6">$</span>entrez, 
+</span></span><span style="display:flex;"><span>                organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;hsa&#34;</span>,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;kegg&#34;</span>,
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>,
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> res_ids<span style="color:#ff79c6">$</span>entrez,
+</span></span><span style="display:flex;"><span>                minGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>,
+</span></span><span style="display:flex;"><span>                maxGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">500</span>,
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                use_internal_data <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ekegg, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pvalue&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<h4 id="go-terms">
+  GO terms
+  <a class="anchor" href="#go-terms">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Run GO enrichment analysis </span>
+</span></span><span style="display:flex;"><span>ego <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(gene <span style="color:#ff79c6">=</span> sigOE_genes, 
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> allOE_genes,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENSEMBL&#34;</span>,
+</span></span><span style="display:flex;"><span>                OrgDb <span style="color:#ff79c6">=</span> org.Hs.eg.db, 
+</span></span><span style="display:flex;"><span>                ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, 
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ego, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pvalue&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<h4 id="gsea">
+  GSEA
+  <a class="anchor" href="#gsea">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Remove any NA values</span>
+</span></span><span style="display:flex;"><span>res_entrez <span style="color:#ff79c6">&lt;-</span> dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">filter</span>(res_ids, entrez <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;NA&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Remove any Entrez duplicates</span>
+</span></span><span style="display:flex;"><span>res_entrez <span style="color:#ff79c6">&lt;-</span> res_entrez<span style="color:#50fa7b">[which</span>(<span style="color:#50fa7b">duplicated</span>(res_entrez<span style="color:#ff79c6">$</span>entrez) <span style="color:#ff79c6">==</span> F), ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Extract the foldchanges</span>
+</span></span><span style="display:flex;"><span>foldchanges <span style="color:#ff79c6">&lt;-</span> res_entrez<span style="color:#ff79c6">$</span>log2FoldChange
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Name each fold change with the corresponding Entrez ID</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">names</span>(foldchanges) <span style="color:#ff79c6">&lt;-</span> res_entrez<span style="color:#ff79c6">$</span>entrez
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Sort fold changes in decreasing order</span>
+</span></span><span style="display:flex;"><span>foldchanges <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sort</span>(foldchanges, decreasing <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(foldchanges)
+</span></span></code></pre></div><pre tabindex="0"><code>##    54996     1770     5475    79820     6549     2842 
+## 3.043742 2.867605 2.703314 2.683883 2.641870 2.584722
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## GSEA using gene sets from KEGG pathways</span>
+</span></span><span style="display:flex;"><span>gseaKEGG <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gseKEGG</span>(geneList <span style="color:#ff79c6">=</span> foldchanges, <span style="color:#6272a4"># ordered named vector of fold changes </span>
+</span></span><span style="display:flex;"><span>              organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;hsa&#34;</span>, <span style="color:#6272a4"># supported organisms listed below</span>
+</span></span><span style="display:flex;"><span>              nPerm <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1000</span>, <span style="color:#6272a4"># default number permutations</span>
+</span></span><span style="display:flex;"><span>              minGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">20</span>, <span style="color:#6272a4"># minimum gene set size (# genes in set) </span>
+</span></span><span style="display:flex;"><span>              pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, <span style="color:#6272a4"># padj cutoff value</span>
+</span></span><span style="display:flex;"><span>              pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>,
+</span></span><span style="display:flex;"><span>              verbose <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Extract the GSEA results</span>
+</span></span><span style="display:flex;"><span>gseaKEGG_results <span style="color:#ff79c6">&lt;-</span> gseaKEGG<span style="color:#ff79c6">@</span>result
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">gseaplot</span>(gseaKEGG, geneSetID <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;hsa04810&#39;</span>) <span style="color:#6272a4"># Regulation of actin cytoskeleton</span>
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">### gseGO</span>
+</span></span><span style="display:flex;"><span>gseaGO <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gseGO</span>(geneList <span style="color:#ff79c6">=</span> foldchanges, 
+</span></span><span style="display:flex;"><span>              OrgDb <span style="color:#ff79c6">=</span> org.Hs.eg.db, 
+</span></span><span style="display:flex;"><span>              ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;BP&#39;</span>, 
+</span></span><span style="display:flex;"><span>              nPerm <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1000</span>, 
+</span></span><span style="display:flex;"><span>              minGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">20</span>, 
+</span></span><span style="display:flex;"><span>              pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>              verbose <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>gseaGO_results <span style="color:#ff79c6">&lt;-</span> gseaGO<span style="color:#ff79c6">@</span>result
+</span></span></code></pre></div><p>geneSetID = &lsquo;hsa04810&rsquo; is Regulation of actin cytoskeleton, which is enriched in the KEGG proven by the article.</p>
+<p>Platelet function strongly relies on a dynamic cytoskeleton, as platelet shape change is involved in granule release, platelet adhesion, and aggregation. In AD, previous platelet proteomic studies showed dysregulation of several actin cytoskeleton binding proteins.</p>
+<p>Here, the gseaplot shows that this pathway is actually meaningful, although its p value is 0.24.</p>
+<h3 id="wgcna">
+  WGCNA
+  <a class="anchor" href="#wgcna">#</a>
+</h3>
+<p>Next shows WGCNA for bulk RNA data. To reduce the run time, I choose 5000 genes with highest variance among all genes.</p>
+<h4 id="load-libraries">
+  Load Libraries
+  <a class="anchor" href="#load-libraries">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(WGCNA)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(tibble)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(dplyr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(rstatix)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(corrplot)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ComplexHeatmap)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(stringr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(readxl)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggpubr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(rstatix)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(skimr)
+</span></span></code></pre></div><h4 id="data-preprocessing">
+  Data preprocessing
+  <a class="anchor" href="#data-preprocessing">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">apply</span>(dat1,<span style="color:#bd93f9">1</span>,var)
+</span></span><span style="display:flex;"><span>var <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sort</span>(var,decreasing <span style="color:#ff79c6">=</span> T)
+</span></span><span style="display:flex;"><span>datExpr <span style="color:#ff79c6">&lt;-</span> dat1<span style="color:#50fa7b">[rownames</span>(dat1) <span style="color:#ff79c6">%in%</span> <span style="color:#50fa7b">names</span>(var)[1<span style="color:#ff79c6">:</span><span style="color:#bd93f9">5000</span>],] <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">t</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">skim</span>(datExpr[,<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>])
+</span></span></code></pre></div><p>Table: <span id="tab:unnamed-chunk-15"></span>Table 1: Data summary</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Name</td>
+<td style="text-align:left">datExpr[, 1:10]</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of rows</td>
+<td style="text-align:left">18</td>
+</tr>
+<tr>
+<td style="text-align:left">Number of columns</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">_______________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Column type frequency:</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">numeric</td>
+<td style="text-align:left">10</td>
+</tr>
+<tr>
+<td style="text-align:left">________________________</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">Group variables</td>
+<td style="text-align:left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">skim_variable</th>
+<th style="text-align:right">n_missing</th>
+<th style="text-align:right">complete_rate</th>
+<th style="text-align:right">mean</th>
+<th style="text-align:right">sd</th>
+<th style="text-align:right">p0</th>
+<th style="text-align:right">p25</th>
+<th style="text-align:right">p50</th>
+<th style="text-align:right">p75</th>
+<th style="text-align:right">p100</th>
+<th style="text-align:left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ENSG00000000460</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">272.27</td>
+<td style="text-align:right">121.36</td>
+<td style="text-align:right">94.89</td>
+<td style="text-align:right">216.22</td>
+<td style="text-align:right">241.52</td>
+<td style="text-align:right">314.75</td>
+<td style="text-align:right">491.48</td>
+<td style="text-align:left">▅▇▅▁▅</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000000938</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">876.55</td>
+<td style="text-align:right">200.42</td>
+<td style="text-align:right">619.91</td>
+<td style="text-align:right">753.09</td>
+<td style="text-align:right">822.05</td>
+<td style="text-align:right">963.21</td>
+<td style="text-align:right">1404.22</td>
+<td style="text-align:left">▆▇▅▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000001461</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">299.29</td>
+<td style="text-align:right">71.72</td>
+<td style="text-align:right">202.52</td>
+<td style="text-align:right">246.94</td>
+<td style="text-align:right">278.86</td>
+<td style="text-align:right">334.22</td>
+<td style="text-align:right">451.29</td>
+<td style="text-align:left">▇▇▃▁▃</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000001629</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">492.39</td>
+<td style="text-align:right">218.38</td>
+<td style="text-align:right">188.62</td>
+<td style="text-align:right">336.75</td>
+<td style="text-align:right">488.04</td>
+<td style="text-align:right">594.56</td>
+<td style="text-align:right">1134.29</td>
+<td style="text-align:left">▇▇▅▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000001631</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">254.12</td>
+<td style="text-align:right">82.70</td>
+<td style="text-align:right">88.58</td>
+<td style="text-align:right">217.85</td>
+<td style="text-align:right">258.38</td>
+<td style="text-align:right">302.66</td>
+<td style="text-align:right">400.88</td>
+<td style="text-align:left">▃▂▇▅▂</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000002586</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">3028.06</td>
+<td style="text-align:right">1840.10</td>
+<td style="text-align:right">1157.23</td>
+<td style="text-align:right">1763.71</td>
+<td style="text-align:right">2695.92</td>
+<td style="text-align:right">3950.94</td>
+<td style="text-align:right">8800.71</td>
+<td style="text-align:left">▇▅▂▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000002834</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1597.10</td>
+<td style="text-align:right">327.60</td>
+<td style="text-align:right">1089.40</td>
+<td style="text-align:right">1384.16</td>
+<td style="text-align:right">1637.35</td>
+<td style="text-align:right">1798.25</td>
+<td style="text-align:right">2420.96</td>
+<td style="text-align:left">▂▅▇▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000003056</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">541.26</td>
+<td style="text-align:right">70.53</td>
+<td style="text-align:right">426.13</td>
+<td style="text-align:right">507.32</td>
+<td style="text-align:right">522.66</td>
+<td style="text-align:right">564.46</td>
+<td style="text-align:right">727.09</td>
+<td style="text-align:left">▃▇▅▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000003402</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">2101.26</td>
+<td style="text-align:right">306.63</td>
+<td style="text-align:right">1790.41</td>
+<td style="text-align:right">1851.98</td>
+<td style="text-align:right">1999.45</td>
+<td style="text-align:right">2288.40</td>
+<td style="text-align:right">2956.85</td>
+<td style="text-align:left">▇▂▃▁▁</td>
+</tr>
+<tr>
+<td style="text-align:left">ENSG00000003436</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1809.30</td>
+<td style="text-align:right">780.81</td>
+<td style="text-align:right">396.38</td>
+<td style="text-align:right">1209.75</td>
+<td style="text-align:right">1844.49</td>
+<td style="text-align:right">2406.72</td>
+<td style="text-align:right">2960.53</td>
+<td style="text-align:left">▅▃▇▆▆</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(datExpr)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1]   18 5000
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(meta1) <span style="color:#ff79c6">&lt;-</span> meta1<span style="color:#ff79c6">$</span>sample
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">all</span>(<span style="color:#50fa7b">rownames</span>(meta1)<span style="color:#ff79c6">==</span><span style="color:#50fa7b">rownames</span>(datExpr))
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] TRUE
+</code></pre><h4 id="construction-of-co-expression-network">
+  Construction of co-expression network
+  <a class="anchor" href="#construction-of-co-expression-network">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">enableWGCNAThreads</span>()
+</span></span></code></pre></div><pre tabindex="0"><code>## Allowing parallel execution with up to 7 working processes.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>powers <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">10</span>,<span style="color:#50fa7b">seq</span>(<span style="color:#bd93f9">12</span>,<span style="color:#bd93f9">20</span>,<span style="color:#bd93f9">2</span>))
+</span></span><span style="display:flex;"><span>sft <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">pickSoftThreshold</span>(datExpr, powerVector <span style="color:#ff79c6">=</span> powers, verbose <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">5</span>,networkType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## pickSoftThreshold: will use block size 5000.
+##  pickSoftThreshold: calculating connectivity for given powers...
+##    ..working on genes 1 through 5000 of 5000
+##    Power SFT.R.sq   slope truncated.R.sq mean.k. median.k. max.k.
+## 1      1  0.87900  4.0800          0.920  2670.0    2730.0   3120
+## 2      2  0.00432  0.0563         -0.034  1590.0    1600.0   2230
+## 3      3  0.54800 -0.8330          0.481  1040.0     990.0   1740
+## 4      4  0.67500 -1.0900          0.645   715.0     644.0   1420
+## 5      5  0.73700 -1.1700          0.731   517.0     437.0   1190
+## 6      6  0.74600 -1.2200          0.762   388.0     309.0   1020
+## 7      7  0.76700 -1.2300          0.799   299.0     225.0    888
+## 8      8  0.76700 -1.2600          0.814   236.0     169.0    779
+## 9      9  0.78000 -1.2700          0.842   190.0     128.0    690
+## 10    10  0.78400 -1.2900          0.857   155.0      99.0    616
+## 11    12  0.82300 -1.3100          0.900   108.0      61.6    498
+## 12    14  0.82700 -1.3400          0.913    77.6      40.3    410
+## 13    16  0.84500 -1.3600          0.934    57.7      26.8    343
+## 14    18  0.85000 -1.3800          0.943    44.0      18.6    290
+## 15    20  0.85600 -1.4100          0.948    34.3      13.1    247
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>cex1 <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.9</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Scale-free topology fit index as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], 
+</span></span><span style="display:flex;"><span>     <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Scale Free Topology Model Fit,signed R^2&#34;</span>,type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Scale independence&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], <span style="color:#ff79c6">-</span><span style="color:#50fa7b">sign</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">3</span>])<span style="color:#ff79c6">*</span>sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>     labels<span style="color:#ff79c6">=</span>powers,cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-16-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#Mean connectivity as a function of the soft-thresholding power</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plot</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>],
+</span></span><span style="display:flex;"><span>     xlab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Soft Threshold (power)&#34;</span>,
+</span></span><span style="display:flex;"><span>     ylab<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;Mean Connectivity&#34;</span>, type<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;n&#34;</span>,
+</span></span><span style="display:flex;"><span>     main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Mean connectivity&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">text</span>(sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">1</span>], sft<span style="color:#ff79c6">$</span>fitIndices[,<span style="color:#bd93f9">5</span>], labels<span style="color:#ff79c6">=</span>powers, cex<span style="color:#ff79c6">=</span>cex1,col<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;red&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-16-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sft<span style="color:#ff79c6">$</span>powerEstimate
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 1
+</code></pre><p>To achieve a highest R^2 and mean connectivity，assume Soft power is 7. Meanwhile, the &ldquo;ward.D2&rdquo; method for distance calculation shows a better performance.</p>
+<h4 id="network-construction-and-module-detection">
+  Network construction and module detection
+  <a class="anchor" href="#network-construction-and-module-detection">#</a>
+</h4>
+<p><strong>softPower = 7; minModuleSize = 20; hclust : ward.D2</strong></p>
+<ul>
+<li>Ward: the original Ward&rsquo;s method essentially tried to minimize the increase in total within-cluster variance at each step using the Euclidean distance itself, not its square.</li>
+<li>Ward.D2: the D2 refers to the square of the Euclidean distance. This method considers the square of the distance rather than just the distance itself.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## adjacency matrix</span>
+</span></span><span style="display:flex;"><span>softPower <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">7</span>
+</span></span><span style="display:flex;"><span>adjacency <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">adjacency</span>(datExpr, power <span style="color:#ff79c6">=</span> softPower, type <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## TOM matrix</span>
+</span></span><span style="display:flex;"><span>TOM <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">TOMsimilarity</span>(adjacency, TOMType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;signed&#34;</span>)
+</span></span></code></pre></div><pre tabindex="0"><code>## ..connectivity..
+## ..matrix multiplication (system BLAS)..
+## ..normalization..
+## ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>dissTOM <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">-</span>TOM
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Create a dendogram using a hierarchical clustering tree</span>
+</span></span><span style="display:flex;"><span>TaxaTree <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">hclust</span>(<span style="color:#50fa7b">as.dist</span>(dissTOM), method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ward.D2&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Module identification using dynamic tree cut</span>
+</span></span><span style="display:flex;"><span>minModuleSize <span style="color:#ff79c6">&lt;-</span> <span style="color:#bd93f9">20</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>dynamicMods <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cutreeDynamic</span>(dendro <span style="color:#ff79c6">=</span> TaxaTree, distM <span style="color:#ff79c6">=</span> dissTOM, 
+</span></span><span style="display:flex;"><span>                             deepSplit <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>, pamRespectsDendro <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>,
+</span></span><span style="display:flex;"><span>                             minClusterSize <span style="color:#ff79c6">=</span> minModuleSize)
+</span></span></code></pre></div><pre tabindex="0"><code>##  ..cutHeight not given, setting it to 19.2  ===&gt;  99% of the (truncated) height range in dendro.
+##  ..done.
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Convert numeric labels into colors</span>
+</span></span><span style="display:flex;"><span>dynamicColors <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">labels2colors</span>(dynamicMods)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">plotDendroAndColors</span>(TaxaTree, dynamicColors, <span style="color:#f1fa8c">&#34;Dynamic Tree Cut&#34;</span>,
+</span></span><span style="display:flex;"><span>                    dendroLabels <span style="color:#ff79c6">=</span> F, hang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.03</span>,
+</span></span><span style="display:flex;"><span>                    addGuide <span style="color:#ff79c6">=</span> T, guideHang <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>,
+</span></span><span style="display:flex;"><span>                    main <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dendrogram and module colors&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-17-1.png" width="1536" />
+<p>The hierarchical tree shows 12 modules.</p>
+<p>Find the relationships modules and clinical traits</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>nTaxa <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ncol</span>(datExpr)
+</span></span><span style="display:flex;"><span>nSamples <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">nrow</span>(datExpr)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>traits <span style="color:#ff79c6">&lt;-</span> meta1
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>group<span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">factor</span>(traits<span style="color:#ff79c6">$</span>Condition, levels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#f1fa8c">&#34;Old&#34;</span>)))
+</span></span><span style="display:flex;"><span>traits<span style="color:#ff79c6">$</span>Gender  <span style="color:#ff79c6">&lt;-</span>  <span style="color:#50fa7b">as.numeric</span>(<span style="color:#50fa7b">factor</span>(traits<span style="color:#ff79c6">$</span>Sex,levels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;F&#34;</span>,<span style="color:#f1fa8c">&#34;M&#34;</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>moduleColors <span style="color:#ff79c6">&lt;-</span> dynamicColors
+</span></span><span style="display:flex;"><span>MEs0 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">moduleEigengenes</span>(datExpr, moduleColors,softPower <span style="color:#ff79c6">=</span> softPower)<span style="color:#ff79c6">$</span>eigengenes
+</span></span><span style="display:flex;"><span>MEs <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">orderMEs</span>(MEs0)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>moduleTraitCor <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cor</span>(MEs, traits[,<span style="color:#bd93f9">5</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">6</span>], use <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p&#34;</span>)
+</span></span><span style="display:flex;"><span>moduleTraitPvalue <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">corPvalueStudent</span>(moduleTraitCor, nSamples)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## visualize it</span>
+</span></span><span style="display:flex;"><span>textMatrix <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">paste</span>(<span style="color:#50fa7b">signif</span>(moduleTraitCor, <span style="color:#bd93f9">2</span>), 
+</span></span><span style="display:flex;"><span>                    <span style="color:#f1fa8c">&#34;\n(&#34;</span>, <span style="color:#50fa7b">signif</span>(moduleTraitPvalue, <span style="color:#bd93f9">1</span>), <span style="color:#f1fa8c">&#34;)&#34;</span>, sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(textMatrix) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">dim</span>(moduleTraitCor)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">labeledHeatmap</span>(Matrix <span style="color:#ff79c6">=</span> moduleTraitCor, 
+</span></span><span style="display:flex;"><span>               xLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(traits[5<span style="color:#ff79c6">:</span><span style="color:#bd93f9">6</span>]), yLabels <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), 
+</span></span><span style="display:flex;"><span>               ySymbols <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(MEs), colorLabels <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>, 
+</span></span><span style="display:flex;"><span>               colors <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">blueWhiteRed</span>(<span style="color:#bd93f9">50</span>), textMatrix <span style="color:#ff79c6">=</span> textMatrix, 
+</span></span><span style="display:flex;"><span>               setStdMargins <span style="color:#ff79c6">=</span> T, cex.text <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.7</span>, 
+</span></span><span style="display:flex;"><span>               main <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">paste</span>(<span style="color:#f1fa8c">&#34;Module-trait relationships&#34;</span>))
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-18-1.png" width="1344" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>df.2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">cbind</span>(traits[<span style="color:#f1fa8c">&#34;group&#34;</span>], MEs0)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">rownames</span>(df.2) <span style="color:#ff79c6">&lt;-</span> traits<span style="color:#ff79c6">$</span>New.ID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>palettes <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;#00aba9&#34;</span>, <span style="color:#f1fa8c">&#34;#fa6800&#34;</span>, <span style="color:#f1fa8c">&#34;#647687&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">colnames</span>(df.2)[<span style="color:#bd93f9">-1</span>]) {
+</span></span><span style="display:flex;"><span>  stat.test <span style="color:#ff79c6">&lt;-</span> df.2 <span style="color:#ff79c6">%&gt;%</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">pairwise_wilcox_test</span>(<span style="color:#50fa7b">as.formula</span>(<span style="color:#50fa7b">paste</span>(i, <span style="color:#f1fa8c">&#34;group&#34;</span>, sep <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34; ~ &#34;</span>)), p.adjust.method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>) <span style="color:#ff79c6">%&gt;%</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">add_xy_position</span>(x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p_list[[i]] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ggboxplot</span>(df.2, 
+</span></span><span style="display:flex;"><span>          x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, y <span style="color:#ff79c6">=</span> i,
+</span></span><span style="display:flex;"><span>          color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;black&#34;</span>, 
+</span></span><span style="display:flex;"><span>         palette <span style="color:#ff79c6">=</span> palettes,
+</span></span><span style="display:flex;"><span>          add <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;jitter&#34;</span>,
+</span></span><span style="display:flex;"><span>          xlab <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>,
+</span></span><span style="display:flex;"><span>          ylab <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;engine genes&#34;</span>,
+</span></span><span style="display:flex;"><span>          title <span style="color:#ff79c6">=</span> i,
+</span></span><span style="display:flex;"><span>          width <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.3</span>,
+</span></span><span style="display:flex;"><span>          add.params <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">list</span>(color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group&#34;</span>, shape<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>, size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1.5</span>,jitter <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.07</span>)) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#39;none&#39;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">stat_pvalue_manual</span>(stat.test, label <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.adj.signif&#34;</span>, hide.ns <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>, size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">7</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(plot.title <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_text</span>(hjust <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>))
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">ggarrange</span>(plotlist <span style="color:#ff79c6">=</span> p_list)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-19-1.png" width="768" />
+<p>From above heatmap and boxplot, we can see that the correlation between MEturquoise and group is significant, which p value is 0.03.</p>
+<p>Next apply enrichment analysis for proteins in this module.</p>
+<p><strong>KEGG terms</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>mod_conn <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">intramodularConnectivity</span>(adjacency, moduleColors, scaleByMax <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>mod_con <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">add_column</span>(mod_conn, gene<span style="color:#ff79c6">=</span><span style="color:#50fa7b">rownames</span>(mod_conn),moduleColors<span style="color:#ff79c6">=</span>moduleColors,
+</span></span><span style="display:flex;"><span>                      .before <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">colnames</span>(mod_conn)[1])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mod.sig <span style="color:#ff79c6">&lt;-</span> mod_con[mod_con<span style="color:#ff79c6">$</span>moduleColors <span style="color:#ff79c6">==</span><span style="color:#f1fa8c">&#34;turquoise&#34;</span>,]<span style="color:#ff79c6">$</span>gene
+</span></span><span style="display:flex;"><span>eg <span style="color:#ff79c6">&lt;-</span> res_ids[res_ids<span style="color:#ff79c6">$</span>gene <span style="color:#ff79c6">%in%</span> mod.sig,]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>uni <span style="color:#ff79c6">&lt;-</span> res_ids[res_ids<span style="color:#ff79c6">$</span>gene <span style="color:#ff79c6">%in%</span> mod_con<span style="color:#ff79c6">$</span>gene,]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ekegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(gene <span style="color:#ff79c6">=</span> eg<span style="color:#ff79c6">$</span>entrez, 
+</span></span><span style="display:flex;"><span>                organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;hsa&#34;</span>,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;kegg&#34;</span>,
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>,
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> uni<span style="color:#ff79c6">$</span>entrez,
+</span></span><span style="display:flex;"><span>                minGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>,
+</span></span><span style="display:flex;"><span>                maxGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">500</span>,
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                use_internal_data <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ekegg, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.adjust&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-20-1.png" width="672" />
+<p>From the plot, we can see AD is enriched.</p>
+<p><strong>GO terms</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Run GO enrichment analysis </span>
+</span></span><span style="display:flex;"><span>ego <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(gene <span style="color:#ff79c6">=</span> eg<span style="color:#ff79c6">$</span>entrez, 
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> uni<span style="color:#ff79c6">$</span>entrez,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;ENTREZID&#34;</span>,
+</span></span><span style="display:flex;"><span>                OrgDb <span style="color:#ff79c6">=</span> org.Hs.eg.db, 
+</span></span><span style="display:flex;"><span>                ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.05</span>, 
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.2</span>,
+</span></span><span style="display:flex;"><span>                readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ego, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;p.adjust&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/index_files/figure-html/unnamed-chunk-21-1.png" width="672" />
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 <no value></p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://bencuan.me">Website</a></li><li><a href="https://blog.bencuan.me">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#libraries">libraries</a></li>
+        <li><a href="#dataset-pre-filterring">dataset pre-filterring</a></li>
+        <li><a href="#data-exploration">data exploration</a></li>
+        <li><a href="#differential-analysis">differential analysis</a></li>
+        <li><a href="#visualization">visualization</a></li>
+        <li><a href="#functional-analysis">functional analysis</a></li>
+        <li><a href="#wgcna">WGCNA</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
