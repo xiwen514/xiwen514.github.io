@@ -1,0 +1,603 @@
+---
+title: The platelet transcriptome in Alzheimer’s disease and aging data analysis
+author: Package Build
+date: '2023-10-23'
+slug: []
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE,warning=FALSE,message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning =FALSE, message=FALSE)
+```
+
+
+I borrow the data from this article ( https://www.frontiersin.org/articles/10.3389/fmolb.2023.1196083/full ) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze Bulk RNA data by comparing AD VS old to identify differential genes and explore their functions. 
+
+
+This article provides DESeq2-normalized counts using Median of ratios method by 4 steps (https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html):
+
+1. creates a pseudo-reference sample (row-wise geometric mean)
+2. calculates ratio of each sample to the reference
+3. calculate the normalization factor for each sample (size factor)
+4. calculate the normalized count values using the normalization factor
+
+
+This data has 27 samples, 3 groups(AD, old and young), each group has 9 samples. Here, I compare AD vs old only.
+
+- AD : AD
+- CO: old
+- CY: young
+
+### libraries
+```{r}
+library(readxl)
+library(DESeq2)
+library(apeglm)
+library(org.Hs.eg.db)
+library(DOSE)
+library(pathview)
+library(clusterProfiler)
+library(AnnotationHub)
+library(ensembldb)
+library(tidyverse)
+library(annotables)
+library(RColorBrewer)
+library(ggplot2)
+library(scales) 
+library(viridis)
+library(ComplexHeatmap)
+
+```
+
+
+
+### dataset pre-filterring
+
+Before data exploration, quality control the data. While it is not strictly necessary, it is good to do some preliminary filtering of the data before running the differential expression analysis. This will reduce the size of the DEseq2DataSet object and speed up the runtime of the algorithm. The filtering criteria:
+
+1. genes should have more than a sum total of 5 reads of support in all samples
+2. number of 0 of each gene have to less than 9
+
+```{r}
+dat <- read_excel("Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX", sheet = "DESeq2_normalized_counts") %>% data.frame()
+dat1<- apply(dat[,-1],2, as.numeric)
+rownames(dat1) <- dat$Ensembl_ID
+dat1 <- dat1[,-c(grep("CY", colnames(dat1)))]
+
+sumzero <- rowSums(dat1==0)
+dat1 <- dat1[sumzero < 9,]
+dat1 <- dat1[rowSums(dat1) > 5,] 
+colnames(dat1)
+dim(dat1)
+dat1 <- data.frame(dat1)
+#write.csv(dat1,"bulk_RNA_deseq2_normalized_afterQC.csv",col.names = F)
+
+meta <- read_excel("Table3_The platelet transcriptome and proteome in Alzheimer_s disease and aging_ an exploratory cross-sectional study.XLSX")
+colnames(meta)[1] <- "sample"
+meta1 <- meta[meta$sample %in% colnames(dat1),]
+meta1$Condition <- as.factor(meta1$Condition)
+meta1$Condition <- factor(meta1$Condition,labels=c("Old", "AD"), levels= c("Old", "AD"))
+rownames(meta1) <- meta1$sample 
+### Check that sample names match in both data
+all(colnames(dat1) %in% rownames(meta1))
+all(colnames(dat1) == rownames(meta1))
+```
+
+
+
+
+### data exploration
+#### PCA
+
+```{r}
+### data has been normalized, so it has non-integer values. Use round() to create a DESeq2 subject
+dds <- DESeqDataSetFromMatrix(countData = round(dat1), colData = meta1, design = ~ Condition)
+### normalization, here omit this step
+#dds <- estimateSizeFactors(dds)
+#normalized_counts <- counts(dds, normalized=TRUE)
+
+### Transform counts for data visualization
+rld <- rlog(dds, blind=TRUE)
+### Plot PCA 
+plotPCA(rld, intgroup="Condition")
+plotPCA(rld, intgroup="Sex")
+```
+
+The variation on PC1 and PC2 cannot be explained by condition or sex factor.
+
+```{r}
+# Input is a matrix of log transformed values
+rld_mat <- assay(rld)
+write.csv(rld_mat,"bulk_RNA_deseq2_normalized_afterQC_rlogged.csv",col.names = F)
+pca <- prcomp(t(rld_mat))
+# Create data frame with metadata and PC3 and PC4 values for input to ggplot
+df <- cbind(meta1, pca$x)
+ggplot(df) + geom_point(aes(x=PC3, y=PC4, color = Condition))
+ggplot(df) + geom_point(aes(x=PC3, y=PC4, color = Sex))
+
+```
+
+The variation on PC3 and PC4 still cannot be explained by  condition or sex factor.
+
+
+#### hierarchical tree
+
+```{r}
+### Compute pairwise correlation values
+rld_cor <- cor(rld_mat)    
+### Plot heatmap
+pheatmap(rld_cor)
+### PCA for samples
+ggplot(df,aes(x=PC1, y=PC2, color = sample)) + geom_point()+geom_label(label=df$sample)
+```
+
+Since the majority of genes are not differentially expressed, samples generally have high correlations with each other (values higher than 0.80). In the heatmap, CO1, AD7, CO14, AD4, CO9 have lower correlations by each other. In the PCA plot, these samples are not in the same cluster. I think they are not outliers.
+
+
+
+### differential analysis
+
+**The data has been normalized. If you want to use normalized count data, you need to normalize manually by this: normalized_counts <- counts(dds, normalized=TRUE).**
+
+I would perform the differential analysis by these steps, which are integrated by DESeq function.
+
+1. estimation of size factors: estimateSizeFactors 
+2. estimation of dispersion: estimateDispersions
+3. Negative Binomial GLM fitting and Wald statistics: nbinomWaldTest
+
+```{r}
+dds <- DESeq(dds)
+plotDispEsts(dds)
+```
+
+Genes with low dispersion estimates are shrunken towards the curve, and the more accurate, higher shrunken values are output for fitting of the model and differential expression testing.
+
+The plot shows data generally scatter around the curve, with the dispersion decreasing with increasing mean expression levels. I think this dataset is a good fit for the DESeq2 model.
+
+
+
+#### building the results table
+
+The shrinkage method in DESeq2 is particularly important to reduce false positives in the differential expression analysis. In the most recent versions of DESeq2, the shrinkage of LFC estimates is not performed by default. Shrinkage of the LFC estimates toward zero when the information for a gene is low, which could include:
+
+- Low counts
+- High dispersion values
+
+**Here omit lfcShrink() step for selecting more differential genes.**
+
+```{r}
+contrast_oe <- c("Condition", "AD","Old")
+
+res_tableOE_unshrunken <- results(dds, contrast=contrast_oe, alpha = 0.1)
+res_tableOE <- lfcShrink(dds, coef = "Condition_AD_vs_Old", res=res_tableOE_unshrunken)
+
+plotMA(res_tableOE_unshrunken)
+plotMA(res_tableOE)
+
+res_tableOE_tb <- res_tableOE_unshrunken %>%
+  data.frame() %>%
+  rownames_to_column(var="gene") %>% 
+  as_tibble()
+
+
+```
+
+NOTE: on p-values set to NA
+
+- If within a row, all samples have zero counts, the baseMean column will be zero, and the log2 fold change estimates, p-value and adjusted p-value will all be set to NA.
+- If a row contains a sample with an extreme count outlier then the p-value and adjusted p-value will be set to NA. These outlier counts are detected by Cook’s distance.
+- If a row is filtered by automatic independent filtering, for having a low mean normalized count, then only the adjusted p-value will be set to NA.
+
+
+```{r}
+# Set a boolean column for significance
+res_tableOE_tb$significant <- ifelse(res_tableOE_tb$pvalue < .1, "Significant", NA)
+
+# Plot the results similar to DEseq2
+ggplot(res_tableOE_tb, aes(baseMean, log2FoldChange, colour=significant)) +
+  geom_point(size=1) + 
+  scale_y_continuous(limits=c(-3, 3), oob=squish) + scale_x_log10() +
+  geom_hline(yintercept = 0, colour="tomato1", size=2) + labs(x="mean of normalized counts", y="log fold change") + 
+  scale_colour_manual(name="q-value", values=("Significant"="red"), na.value="grey50") + theme_bw()
+
+# Let's add some more detail
+ggplot(res_tableOE_tb, aes(baseMean, log2FoldChange, colour=pvalue)) +
+  geom_point(size=1) + scale_y_continuous(limits=c(-3, 3), oob=squish) +
+  scale_x_log10() + geom_hline(yintercept = 0, colour="darkorchid4", size=1, linetype="longdash") + 
+  labs(x="mean of normalized counts", y="log fold change") +
+  scale_colour_viridis(direction=-1, trans='sqrt') + 
+  theme_bw() +
+  geom_density_2d(colour="black", size=2)
+```
+
+In general we would expect the expression of genes to remain consistent between conditions and so the MA plot should be similar to the shape of a trumpet with most points residing on a y intercept of 0. We can see from the above plots that they are in the characteristic trumpet shape of MA plots. Further we have overlayed density contours in the second plot and, as expected, these density contours are centered around a y-intercept of 0. We can further see that as the average counts increase there is more power to call a gene as differentially expressed based on the fold change.
+
+### visualization
+
+Here cutoff for significant genes
+- pvalue< 0.05
+- abs(log2FoldChange) > 1
+
+#### heatmap
+```{r}
+
+sigOE <-  res_tableOE_tb %>% dplyr::filter(pvalue< 0.05 & abs(log2FoldChange) > 1)
+dat2 <- rld_mat[rownames(rld_mat) %in% sigOE$gene,]
+dat3 <- t(apply(dat2,1,scale))
+colnames(dat3) <- colnames(dat2)
+rownames(dat3) <- NULL
+### Set a color palette
+heat_colors <- brewer.pal(6, "YlOrRd")
+
+### Run pheatmap
+Heatmap(dat3,
+        column_split = meta1$Condition,
+        cluster_column_slices = F,
+        column_names_gp = gpar(fontsize = 4),
+        row_names_gp = gpar(fontsize = 6))
+
+```
+
+286 significant genes are showed in the heatmap.
+
+### functional analysis
+```{r}
+## Return the IDs for the gene symbols in the DE results
+head(grch37)
+idx <- grch37$ensgene %in% res_tableOE_tb$gene
+ids <- grch37[idx, ]
+
+## The gene names can map to more than one Ensembl ID (some genes change ID over time), 
+## so we need to remove duplicate IDs prior to assessing enriched GO terms
+non_duplicates <- which(duplicated(ids$symbol) == FALSE)
+ids <- ids[non_duplicates, ] 
+
+## Merge the IDs with the results 
+res_ids <- inner_join(res_tableOE_tb, ids, by=c("gene"="ensgene"))   
+
+
+## Create background dataset for hypergeometric testing using all genes tested for significance in the results
+allOE_genes <- as.character(res_ids$gene)
+## Extract significant results
+sigOE <- res_ids %>% dplyr::filter(pvalue< 0.05 & abs(log2FoldChange) > 1)
+sigOE.order<- sigOE[order(sigOE$pvalue,decreasing = F),]
+head(sigOE.order)
+sigOE_genes <- as.character(sigOE$gene)
+
+```
+
+
+
+#### KEGG terms
+```{r,fig.width= 7,fig.height=8}
+## Run KEGG enrichment analysis 
+ekegg <- enrichKEGG(gene = sigOE$entrez, 
+                organism = "hsa",
+                keyType = "kegg",
+                pvalueCutoff = 1,
+                pAdjustMethod = "fdr",
+                universe = res_ids$entrez,
+                minGSSize = 10,
+                maxGSSize = 500,
+                qvalueCutoff = 1,
+                use_internal_data = FALSE)
+                
+
+## Dotplot 
+dotplot(ekegg, color = "pvalue",showCategory=20)
+
+
+```
+
+
+#### GO terms
+
+```{r,fig.width= 7,fig.height=8}
+
+## Run GO enrichment analysis 
+ego <- enrichGO(gene = sigOE_genes, 
+                universe = allOE_genes,
+                keyType = "ENSEMBL",
+                OrgDb = org.Hs.eg.db, 
+                ont = "BP", 
+                pAdjustMethod = "fdr", 
+                pvalueCutoff = 1, 
+                qvalueCutoff = 1,
+                readable = TRUE)
+                
+
+## Dotplot 
+dotplot(ego, color = "pvalue",showCategory=20)
+
+
+```
+
+
+
+
+#### GSEA 
+```{r}
+## Remove any NA values
+res_entrez <- dplyr::filter(res_ids, entrez != "NA")
+
+## Remove any Entrez duplicates
+res_entrez <- res_entrez[which(duplicated(res_entrez$entrez) == F), ]
+
+## Extract the foldchanges
+foldchanges <- res_entrez$log2FoldChange
+
+## Name each fold change with the corresponding Entrez ID
+names(foldchanges) <- res_entrez$entrez
+## Sort fold changes in decreasing order
+foldchanges <- sort(foldchanges, decreasing = TRUE)
+
+head(foldchanges)
+
+## GSEA using gene sets from KEGG pathways
+gseaKEGG <- gseKEGG(geneList = foldchanges, # ordered named vector of fold changes 
+              organism = "hsa", # supported organisms listed below
+              nPerm = 1000, # default number permutations
+              minGSSize = 20, # minimum gene set size (# genes in set) 
+              pvalueCutoff = 1, # padj cutoff value
+              pAdjustMethod = "fdr",
+              verbose = FALSE)
+
+## Extract the GSEA results
+gseaKEGG_results <- gseaKEGG@result
+
+gseaplot(gseaKEGG, geneSetID = 'hsa04810') # Regulation of actin cytoskeleton
+
+### gseGO
+gseaGO <- gseGO(geneList = foldchanges, 
+              OrgDb = org.Hs.eg.db, 
+              ont = 'BP', 
+              nPerm = 1000, 
+              minGSSize = 20, 
+              pvalueCutoff = 1,
+              verbose = FALSE) 
+
+gseaGO_results <- gseaGO@result
+```
+
+geneSetID = 'hsa04810' is Regulation of actin cytoskeleton, which is enriched in the KEGG proven by the article.
+
+Platelet function strongly relies on a dynamic cytoskeleton, as platelet shape change is involved in granule release, platelet adhesion, and aggregation. In AD, previous platelet proteomic studies showed dysregulation of several actin cytoskeleton binding proteins.
+
+Here, the gseaplot shows that this pathway is actually meaningful, although its p value is 0.24.
+
+
+
+
+### WGCNA
+Next shows WGCNA for bulk RNA data. To reduce the run time, I choose 5000 genes with highest variance among all genes.
+
+#### Load Libraries
+```{r,message=FALSE,warning=FALSE}
+library(WGCNA)
+library(tibble)
+library(dplyr)
+library(rstatix)
+library(corrplot)
+library(ComplexHeatmap)
+library(ggpubr)
+library(stringr)
+library(readxl)
+library(ggpubr)
+library(rstatix)
+library(skimr)
+``` 
+
+#### Data preprocessing
+```{r}
+var <- apply(dat1,1,var)
+var <- sort(var,decreasing = T)
+datExpr <- dat1[rownames(dat1) %in% names(var)[1:5000],] %>% t()
+skim(datExpr[,1:10])
+dim(datExpr)
+rownames(meta1) <- meta1$sample
+all(rownames(meta1)==rownames(datExpr))
+
+
+```
+
+#### Construction of co-expression network
+
+```{r,message=FALSE,warning=FALSE}
+enableWGCNAThreads()
+powers <- c(1:10,seq(12,20,2))
+sft <- pickSoftThreshold(datExpr, powerVector = powers, verbose = 5,networkType = "signed")
+
+cex1 = 0.9
+# Scale-free topology fit index as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], 
+     -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     xlab="Soft Threshold (power)",
+     ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+     main = paste("Scale independence"))
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     labels=powers,cex=cex1,col="red")
+
+#Mean connectivity as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], sft$fitIndices[,5],
+     xlab="Soft Threshold (power)",
+     ylab="Mean Connectivity", type="n",
+     main = paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+sft$powerEstimate
+```
+
+
+
+
+To achieve a highest R^2 and mean connectivity，assume Soft power is 7. Meanwhile, the "ward.D2" method for distance calculation shows a better performance.
+
+#### Network construction and module detection
+
+**softPower = 7; minModuleSize = 20; hclust : ward.D2**
+
+- Ward: the original Ward's method essentially tried to minimize the increase in total within-cluster variance at each step using the Euclidean distance itself, not its square. 
+- Ward.D2: the D2 refers to the square of the Euclidean distance. This method considers the square of the distance rather than just the distance itself.
+
+```{r,message=FALSE,warning=FALSE,fig.width=16,fig.height=7}
+## adjacency matrix
+softPower <- 7
+adjacency <- adjacency(datExpr, power = softPower, type = "signed")
+
+## TOM matrix
+TOM = TOMsimilarity(adjacency, TOMType = "signed")
+dissTOM <- 1-TOM
+
+## Create a dendogram using a hierarchical clustering tree
+TaxaTree <- hclust(as.dist(dissTOM), method = "ward.D2")
+
+## Module identification using dynamic tree cut
+minModuleSize <- 20
+
+dynamicMods <- cutreeDynamic(dendro = TaxaTree, distM = dissTOM, 
+                             deepSplit = 2, pamRespectsDendro = FALSE,
+                             minClusterSize = minModuleSize)
+
+## Convert numeric labels into colors
+dynamicColors <- labels2colors(dynamicMods)
+plotDendroAndColors(TaxaTree, dynamicColors, "Dynamic Tree Cut",
+                    dendroLabels = F, hang = 0.03,
+                    addGuide = T, guideHang = 0.05,
+                    main = "Dendrogram and module colors")
+
+```
+
+
+
+
+
+The hierarchical tree shows 12 modules.
+
+Find the relationships modules and clinical traits
+
+```{r,message=FALSE,warning=FALSE,fig.width=14,fig.height=8}
+nTaxa = ncol(datExpr)
+nSamples = nrow(datExpr)
+
+traits <- meta1
+traits$group<- as.numeric(factor(traits$Condition, levels = c("AD", "Old")))
+traits$Gender  <-  as.numeric(factor(traits$Sex,levels = c("F","M")))
+
+moduleColors <- dynamicColors
+MEs0 <- moduleEigengenes(datExpr, moduleColors,softPower = softPower)$eigengenes
+MEs <- orderMEs(MEs0)
+
+moduleTraitCor <- cor(MEs, traits[,5:6], use = "p")
+moduleTraitPvalue <- corPvalueStudent(moduleTraitCor, nSamples)
+
+## visualize it
+textMatrix <- paste(signif(moduleTraitCor, 2), 
+                    "\n(", signif(moduleTraitPvalue, 1), ")", sep = "")
+dim(textMatrix) <- dim(moduleTraitCor)
+
+labeledHeatmap(Matrix = moduleTraitCor, 
+               xLabels = colnames(traits[5:6]), yLabels = names(MEs), 
+               ySymbols = names(MEs), colorLabels = FALSE, 
+               colors = blueWhiteRed(50), textMatrix = textMatrix, 
+               setStdMargins = T, cex.text = 0.7, 
+               main = paste("Module-trait relationships"))
+```
+
+
+
+
+
+```{r,fig.width=8,fig.height=6}
+df.2 <- cbind(traits["group"], MEs0)
+rownames(df.2) <- traits$New.ID
+
+palettes = c("#00aba9", "#fa6800", "#647687")
+
+p_list <- list()
+for (i in colnames(df.2)[-1]) {
+  stat.test <- df.2 %>%
+  pairwise_wilcox_test(as.formula(paste(i, "group", sep = " ~ ")), p.adjust.method = "fdr") %>% 
+  add_xy_position(x = "group")
+
+  p_list[[i]] <- ggboxplot(df.2, 
+          x = "group", y = i,
+          color = "black", 
+         palette = palettes,
+          add = "jitter",
+          xlab = "group",
+          ylab = "engine genes",
+          title = i,
+          width = 0.3,
+          add.params = list(color = "group", shape=20, size = 1.5,jitter = 0.07)) +
+  theme(legend.position='none') +
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", hide.ns = TRUE, size = 7) +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+}
+
+ggarrange(plotlist = p_list)
+```
+
+
+
+
+From above heatmap and boxplot, we can see that the correlation between MEturquoise and group is significant, which p value is 0.03.
+
+Next apply enrichment analysis for proteins in this module.
+
+
+**KEGG terms**
+
+```{r,fig.width= 7,fig.height=8}
+mod_conn <- intramodularConnectivity(adjacency, moduleColors, scaleByMax = FALSE)
+mod_con <- add_column(mod_conn, gene=rownames(mod_conn),moduleColors=moduleColors,
+                      .before = colnames(mod_conn)[1])
+
+mod.sig <- mod_con[mod_con$moduleColors =="turquoise",]$gene
+eg <- res_ids[res_ids$gene %in% mod.sig,]
+
+uni <- res_ids[res_ids$gene %in% mod_con$gene,]
+
+ekegg <- enrichKEGG(gene = eg$entrez, 
+                organism = "hsa",
+                keyType = "kegg",
+                pvalueCutoff = 0.2,
+                pAdjustMethod = "fdr",
+                universe = uni$entrez,
+                minGSSize = 10,
+                maxGSSize = 500,
+                qvalueCutoff = 1,
+                use_internal_data = FALSE)
+                
+
+## Dotplot 
+dotplot(ekegg, color = "p.adjust",showCategory=20)
+
+```
+
+From the plot, we can see AD is enriched.
+
+**GO terms**
+
+```{r,fig.width= 7,fig.height=8}
+
+## Run GO enrichment analysis 
+ego <- enrichGO(gene = eg$entrez, 
+                universe = uni$entrez,
+                keyType = "ENTREZID",
+                OrgDb = org.Hs.eg.db, 
+                ont = "BP", 
+                pAdjustMethod = "fdr", 
+                pvalueCutoff = 0.05, 
+                qvalueCutoff = 0.2,
+                readable = TRUE)
+                
+
+## Dotplot 
+dotplot(ego, color = "p.adjust",showCategory=20)
+
+
+```
+
+
