@@ -6,7 +6,18 @@
     <description>Recent content in Posts on Personal Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 23 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 25 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Single nucleus analysis</title>
+      <link>https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/</link>
+      <pubDate>Wed, 25 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/</guid>
+      <description>I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze single nucleus RNA seq data of prefrontal cortex from 12 AD and 9 NC to identify differential signatures and explore these signatures&amp;rsquo; functions.
+The data is prepossessed by Cell Ranger (version 3.0.1) with the default settings.
+Libraries # library(Seurat) library(ggplot2) library(gridExtra) library(ggprism) library(SeuratObject) library(future) library(future.</description>
+    </item>
+    
     <item>
       <title>Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</title>
       <link>https://xiwen514.github.io/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/</link>

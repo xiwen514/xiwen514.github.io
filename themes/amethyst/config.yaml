@@ -85,10 +85,11 @@ params:
   
   # Footer links
   links:
-    - link_name: Website
-      link: https://xiwen514.github.io
-    - link_name: Blog
-      link: https://xiwen514.github.io
+    - link_name: Home
+      link: https://xiwen514.github.io/
+    - link_name: Linkdin
+      link: https://www.linkedin.com/in/xiwen-zhao-a478581a3/
+   
 
   # (Optional, default true) Controls table of contents visibility on right side of pages.
   # Start and end levels can be controlled with markup.tableOfContents setting.

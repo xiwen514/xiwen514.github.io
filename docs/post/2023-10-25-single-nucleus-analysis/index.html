@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="Single nucleus analysis" />
+<meta property="og:description" content="I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze single nucleus RNA seq data of prefrontal cortex from 12 AD and 9 NC to identify differential signatures and explore these signatures&rsquo; functions.
+The data is prepossessed by Cell Ranger (version 3.0.1) with the default settings.
+Libraries # library(Seurat) library(ggplot2) library(gridExtra) library(ggprism) library(SeuratObject) library(future) library(future." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-10-25T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-10-25T00:00:00+00:00" />
+<title>Single nucleus analysis | </title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze single nucleus RNA seq data of prefrontal cortex from 12 AD and 9 NC to identify differential signatures and explore these signatures&rsquo; functions.
+The data is prepossessed by Cell Ranger (version 3.0.1) with the default settings.
+Libraries # library(Seurat) library(ggplot2) library(gridExtra) library(ggprism) library(SeuratObject) library(future) library(future."
+/>
+<title>
+  Single nucleus analysis
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  false 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       true 
+    )
+    
+
+    
+    const footer = document.getElementById("footer")
+    if (footer) {
+      const container = document.getElementById("graph-container")
+      
+      if (!container) return requestAnimationFrame(render)
+      
+      container.textContent = ""
+
+      const drawGlobal = isHome &&  true ;
+      drawGraph(
+          "https://xiwen514.github.io",
+          drawGlobal,
+          [{"/moc":"#4388cc"}],
+          drawGlobal ? {"centerForce":1,"depth":-1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.5,"linkDistance":1,"opacityScale":3,"repelForce":1,"scale":1.4} : {"centerForce":1,"depth":1,"enableDrag":true,"enableLegend":false,"enableZoom":true,"fontSize":0.6,"linkDistance":1,"opacityScale":3,"repelForce":2,"scale":1.2}
+        );
+
+      }
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/"></a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-25-single-nucleus-analysis/" class="active">Single nucleus analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" class="">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" class="">The platelet transcriptome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" class="">The platelet proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/xiwen514/xiwen514.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">Single nucleus analysis</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<p>I borrow the data from this article (
+<a href="https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability" rel="noopener">https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability</a>) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. This report mainly analyze single nucleus RNA seq data of prefrontal cortex from 12 AD and 9 NC to identify differential signatures and explore these signatures&rsquo; functions.</p>
+<p>The data is prepossessed by Cell Ranger (version 3.0.1) with the default settings.</p>
+<h3 id="libraries">
+  Libraries
+  <a class="anchor" href="#libraries">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(Seurat)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggplot2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(gridExtra)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(ggprism)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(SeuratObject)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(future)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(future.apply)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(patchwork)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#library(scMayoMap)</span>
+</span></span></code></pre></div><h3 id="geo-data-preprocessing">
+  GEO Data preprocessing
+  <a class="anchor" href="#geo-data-preprocessing">#</a>
+</h3>
+<p>Create directories for each sample and each directory should have three files: show barcodes.tsv.gz, features.tsv.gz, and matrix.mtx.gz.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># For output from CellRanger &gt;= 3.0 with multiple data types</span>
+</span></span><span style="display:flex;"><span>files <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list.files</span>() <span style="color:#6272a4"># Should show barcodes.tsv.gz, features.tsv.gz, and matrix.mtx.gz</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sample_names <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(<span style="color:#50fa7b">sub</span>(<span style="color:#f1fa8c">&#34;_(barcodes|features|matrix).+$&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, files))
+</span></span><span style="display:flex;"><span>sample_names <span style="color:#ff79c6">&lt;-</span> sample_names[<span style="color:#bd93f9">-22</span>]
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># create directories for each sample</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">lapply</span>(sample_names, dir.create)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># move corresponding files to each dir and rename each file.</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(file in files) {
+</span></span><span style="display:flex;"><span>  sample_name <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sub</span>(<span style="color:#f1fa8c">&#34;_(barcodes|features|matrix).+$&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, file)
+</span></span><span style="display:flex;"><span>  new.file <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">sub</span>(<span style="color:#50fa7b">paste0</span>(sample_name,<span style="color:#f1fa8c">&#34;_&#34;</span>), <span style="color:#f1fa8c">&#34;&#34;</span>,file)
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">file.rename</span>(file, <span style="color:#50fa7b">file.path</span>(sample_name, new.file))
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>There are 21 samples totally, here I use the first three samples per group.</p>
+<h4 id="initialize-the-seurat-object-with-the-raw-non-normalized-data">
+  Initialize the Seurat object with the raw (non-normalized data).
+  <a class="anchor" href="#initialize-the-seurat-object-with-the-raw-non-normalized-data">#</a>
+</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># Should show barcodes.tsv.gz, features.tsv.gz, and matrix.mtx.gz</span>
+</span></span><span style="display:flex;"><span>files <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list.files</span>() 
+</span></span><span style="display:flex;"><span>files <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;GSM4775561_AD1&#34;</span>, <span style="color:#f1fa8c">&#34;GSM4775562_AD2&#34;</span>, <span style="color:#f1fa8c">&#34;GSM4775563_AD4&#34;</span>, 
+</span></span><span style="display:flex;"><span>           <span style="color:#f1fa8c">&#34;GSM4775573_NC3&#34;</span>, <span style="color:#f1fa8c">&#34;GSM4775574_NC7&#34;</span>, <span style="color:#f1fa8c">&#34;GSM4775575_NC11&#34;</span> )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># filenames extraction</span>
+</span></span><span style="display:flex;"><span>sample_names <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(<span style="color:#50fa7b">sub</span>(<span style="color:#f1fa8c">&#34;_(barcodes|features|matrix).+$&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>, files))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sce <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(sample in sample_names){
+</span></span><span style="display:flex;"><span>  s <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">Read10X</span>(sample)
+</span></span><span style="display:flex;"><span>  sce[sample] <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">CreateSeuratObject</span>(counts <span style="color:#ff79c6">=</span>s, min.cells <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>, min.features <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">200</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pbmc  <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">merge</span>(x <span style="color:#ff79c6">=</span> sce[[1]], y <span style="color:#ff79c6">=</span> sce[2<span style="color:#ff79c6">:</span><span style="color:#bd93f9">6</span>], add.cell.ids <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">names</span>(sce), merge.data <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">@</span>meta.data<span style="color:#ff79c6">$</span>group_id <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">NA</span>
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">@</span>meta.data<span style="color:#ff79c6">$</span>group_id<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))] <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;AD&#34;</span>
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">@</span>meta.data<span style="color:#ff79c6">$</span>group_id<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;NC&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))] <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;NC&#34;</span>
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">@</span>meta.data<span style="color:#ff79c6">$</span>orig.ident<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;.*_(AD\\d+)_.*&#34;</span>, <span style="color:#f1fa8c">&#34;\\1&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data)<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))])
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">@</span>meta.data<span style="color:#ff79c6">$</span>orig.ident<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;NC&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))] <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">gsub</span>(<span style="color:#f1fa8c">&#34;.*_(NC\\d+)_.*&#34;</span>, <span style="color:#f1fa8c">&#34;\\1&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data)<span style="color:#50fa7b">[grep</span>(<span style="color:#f1fa8c">&#34;NC&#34;</span>, <span style="color:#50fa7b">rownames</span>(pbmc<span style="color:#ff79c6">@</span>meta.data))])
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#saveRDS(pbmc,file= &#34;../GSE157827_seurat.RDS&#34;)</span>
+</span></span></code></pre></div><h3 id="quality-control">
+  Quality control
+  <a class="anchor" href="#quality-control">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pbmc <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">readRDS</span>(<span style="color:#f1fa8c">&#34;GSE157827_seurat.RDS&#34;</span>)
+</span></span><span style="display:flex;"><span>pbmc<span style="color:#ff79c6">$</span>percent.mt <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">PercentageFeatureSet</span>(pbmc, pattern <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;^MT-&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## nFeature_RNA</span>
+</span></span><span style="display:flex;"><span>qc.p1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nFeature_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nFeature_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p1, qc.p2, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## nCount_RNA</span>
+</span></span><span style="display:flex;"><span>qc.p3 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p4 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p3, qc.p4, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## percent_mt</span>
+</span></span><span style="display:flex;"><span>qc.p5 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;percent.mt&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p6 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;percent.mt&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p5, qc.p6, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+<p>From above plots, we can see that there are around 10000 features, 10000 counts in each cell. Cells of NC11 sample have  higher mitochondrial percents, which means the sample quality is lower than others.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>plot1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">FeatureScatter</span>(pbmc, feature1 <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, feature2 <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;percent.mt&#34;</span>)
+</span></span><span style="display:flex;"><span>plot2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">FeatureScatter</span>(pbmc, feature1 <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, feature2 <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nFeature_RNA&#34;</span>)
+</span></span><span style="display:flex;"><span>plot1 <span style="color:#ff79c6">+</span> plot2
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-7-1.png" width="768" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(pbmc)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 27231 44137
+</code></pre><p>Select cells for further analysis with three criteria:</p>
+<ol>
+<li>filter cells that more than three median absolute deviations (MADs) of the log10 read counts below the median.</li>
+<li>filter cells that more than three MADs of the log10 genes detected below the median.</li>
+<li>filtered out nuclei that have more than 2% mitochondrial unique molecular identifiers (UMI). Here the median is 0.8 and 3*MAD mito percent is 2.18.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>min.nfeatures.thr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">median</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA)) <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">3</span><span style="color:#ff79c6">*</span><span style="color:#50fa7b">mad</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA))
+</span></span><span style="display:flex;"><span>max.nfeatures.thr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">median</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA)) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">3</span><span style="color:#ff79c6">*</span><span style="color:#50fa7b">mad</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>min.ncount.thr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">median</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA)) <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">3</span><span style="color:#ff79c6">*</span><span style="color:#50fa7b">mad</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA))
+</span></span><span style="display:flex;"><span>max.ncount.thr <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">median</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA)) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">3</span><span style="color:#ff79c6">*</span><span style="color:#50fa7b">mad</span>(<span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>nfeatures.passed <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA) <span style="color:#ff79c6">&gt;</span> min.nfeatures.thr <span style="color:#ff79c6">&amp;</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nFeature_RNA) <span style="color:#ff79c6">&lt;</span> max.nfeatures.thr
+</span></span><span style="display:flex;"><span>ncount.passed <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA) <span style="color:#ff79c6">&gt;</span> min.ncount.thr <span style="color:#ff79c6">&amp;</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">log10</span>(pbmc<span style="color:#ff79c6">$</span>nCount_RNA) <span style="color:#ff79c6">&lt;</span> max.ncount.thr
+</span></span><span style="display:flex;"><span>mito.passed <span style="color:#ff79c6">&lt;-</span> pbmc<span style="color:#ff79c6">$</span>percent.mt <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> pbmc[,<span style="color:#50fa7b">which</span>(nfeatures.passed <span style="color:#ff79c6">&amp;</span> ncount.passed <span style="color:#ff79c6">&amp;</span> mito.passed)]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dim</span>(pbmc.sel)
+</span></span></code></pre></div><pre tabindex="0"><code>## [1] 27231 32376
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## nFeature_RNA</span>
+</span></span><span style="display:flex;"><span>qc.p1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nFeature_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nFeature_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p1, qc.p2, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## nCount_RNA</span>
+</span></span><span style="display:flex;"><span>qc.p3 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p4 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;nCount_RNA&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p3, qc.p4, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## percent.mt</span>
+</span></span><span style="display:flex;"><span>qc.p5 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;percent.mt&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        raster<span style="color:#ff79c6">=</span><span style="color:#ff79c6">FALSE</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;floral&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>qc.p6 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VlnPlot</span>(pbmc.sel, 
+</span></span><span style="display:flex;"><span>        features <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;percent.mt&#34;</span>, 
+</span></span><span style="display:flex;"><span>        ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">scale_fill_prism</span>(palette <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;prism_dark&#34;</span>) <span style="color:#ff79c6">+</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">theme</span>(legend.position<span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;none&#34;</span>,
+</span></span><span style="display:flex;"><span>        axis.title.x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">element_blank</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">grid.arrange</span>(qc.p5, qc.p6, ncol <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<p>From above plots, NC11 sample is not perform well. Only reamins less than 5000 fearures.</p>
+<h3 id="dimensionally-reduction">
+  Dimensionally reduction
+  <a class="anchor" href="#dimensionally-reduction">#</a>
+</h3>
+<p>Here, Normalization the data use Log.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">NormalizeData</span>(pbmc.sel, normalization.method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;LogNormalize&#34;</span>, scale.factor <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">### Identification of highly variable features (modeling the mean-variance relationship)</span>
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">FindVariableFeatures</span>(pbmc.sel, selection.method <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;vst&#34;</span>, nfeatures <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2000</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#### Identify the 10 most highly variable genes</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">readRDS</span>(<span style="color:#f1fa8c">&#34;Seu_PCA_UMAP_annotated.RDS&#34;</span>)
+</span></span><span style="display:flex;"><span>top10 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">head</span>(<span style="color:#50fa7b">VariableFeatures</span>(pbmc.sel), <span style="color:#bd93f9">10</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#### plot variable features with and without labels</span>
+</span></span><span style="display:flex;"><span>plot1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">VariableFeaturePlot</span>(pbmc.sel)
+</span></span><span style="display:flex;"><span>plot2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">LabelPoints</span>(plot <span style="color:#ff79c6">=</span> plot1, points <span style="color:#ff79c6">=</span> top10, repel <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>plot1 
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>plot2
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-12-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">### Scaling the data</span>
+</span></span><span style="display:flex;"><span>all.genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rownames</span>(pbmc.sel)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#plan(&#34;multiprocess&#34;, workers = 10)</span>
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">ScaleData</span>(pbmc.sel, features <span style="color:#ff79c6">=</span> all.genes)
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">RunPCA</span>(pbmc.sel, features <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">VariableFeatures</span>(object <span style="color:#ff79c6">=</span> pbmc.sel), npcs <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">50</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>all.genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rownames</span>(pbmc.sel)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">VizDimLoadings</span>(pbmc.sel, dims <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">5</span>, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pca&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-14-1.png" width="768" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pca.p1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DimPlot</span>(object <span style="color:#ff79c6">=</span> pbmc.sel, 
+</span></span><span style="display:flex;"><span>        reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pca&#34;</span>, 
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>        cols <span style="color:#ff79c6">=</span> ggprism_data<span style="color:#ff79c6">$</span>colour_palettes<span style="color:#ff79c6">$</span>floral2[1<span style="color:#ff79c6">:</span><span style="color:#bd93f9">12</span>]) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pca.p2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DimPlot</span>(object <span style="color:#ff79c6">=</span> pbmc.sel, 
+</span></span><span style="display:flex;"><span>        reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pca&#34;</span>, 
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>,
+</span></span><span style="display:flex;"><span>        pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>        cols <span style="color:#ff79c6">=</span> ggprism_data<span style="color:#ff79c6">$</span>colour_palettes<span style="color:#ff79c6">$</span>prism_dark2[1<span style="color:#ff79c6">:</span><span style="color:#bd93f9">4</span>]) 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pca.p1 <span style="color:#ff79c6">|</span> pca.p2 
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-15-1.png" width="960" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">DimHeatmap</span>(pbmc.sel, dims <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">15</span>, cells <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1000</span>, balanced <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-16-1.png" width="768" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">FindNeighbors</span>(pbmc.sel, dims <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">30</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">FindClusters</span>(pbmc.sel, resolution <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.04</span>)
+</span></span><span style="display:flex;"><span>pbmc.sel <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">RunUMAP</span>(pbmc.sel, dims <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#bd93f9">30</span>)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">#saveRDS(pbmc.sel, file = &#34;Seu_PCA_UMAP.RDS&#34;)</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>umap.p1 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DimPlot</span>(pbmc.sel, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>umap.p2 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DimPlot</span>(pbmc.sel, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>,
+</span></span><span style="display:flex;"><span>        group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>, pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>umap.p3 <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DimPlot</span>(pbmc.sel, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>,group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>,
+</span></span><span style="display:flex;"><span>        split.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>,pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(umap.p1 <span style="color:#ff79c6">|</span> umap.p2) <span style="color:#ff79c6">/</span>
+</span></span><span style="display:flex;"><span>      umap.p3
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-18-1.png" width="672" />
+<p>Show in New Window
+Error in DimPlot(pbmc.mer, reduction = &ldquo;umap&rdquo;, group.by = &ldquo;orig.ident&rdquo;,  :
+could not find function &ldquo;DimPlot&rdquo;</p>
+<p>R version 4.3.1 (2023-06-16 ucrt) &ndash; &ldquo;Beagle Scouts&rdquo;
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)</p>
+<p>R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type &rsquo;license()&rsquo; or &rsquo;licence()&rsquo; for distribution details.</p>
+<p>R is a collaborative project with</p>
+<p>The UMAP shows 10 clusters, which all present in AD and NC group.</p>
+<h3 id="cell-type-annotation">
+  Cell type annotation
+  <a class="anchor" href="#cell-type-annotation">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4"># pbmc.sel &lt;- readRDS(&#34;Seu_PCA_UMAP.RDS&#34;)</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># seurat.markers &lt;- FindAllMarkers(pbmc.sel,  method = &#39;MAST&#39;)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>seurat.markers <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">readRDS</span>(<span style="color:#f1fa8c">&#34;seurat_markers.RDS&#34;</span>)
+</span></span><span style="display:flex;"><span>scMayoMap.obj <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">scMayoMap</span>(data <span style="color:#ff79c6">=</span> seurat.markers, 
+</span></span><span style="display:flex;"><span>                           database<span style="color:#ff79c6">=</span>scMayoMapDatabase, 
+</span></span><span style="display:flex;"><span>                           tissue <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;brain&#39;</span>)
+</span></span><span style="display:flex;"><span>plt <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">scMayoMap.plot</span>(scMayoMap.object <span style="color:#ff79c6">=</span> scMayoMap.obj)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>res <span style="color:#ff79c6">&lt;-</span> scMayoMap.obj<span style="color:#ff79c6">$</span>res
+</span></span><span style="display:flex;"><span>pbmc.mer <span style="color:#ff79c6">&lt;-</span> pbmc.sel
+</span></span><span style="display:flex;"><span>pbmc.mer<span style="color:#ff79c6">$</span>cell_type <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>clus <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">unique</span>(pbmc.sel<span style="color:#ff79c6">$</span>seurat_clusters)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">length</span>(clus)) {
+</span></span><span style="display:flex;"><span>  pbmc.mer<span style="color:#ff79c6">$</span>cell_type[pbmc.mer<span style="color:#ff79c6">$</span>seurat_clusters <span style="color:#ff79c6">==</span> clus[i]] <span style="color:#ff79c6">&lt;-</span> res<span style="color:#ff79c6">$</span>celltype[res<span style="color:#ff79c6">$</span>cluster <span style="color:#ff79c6">==</span> clus[i]]
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>new.cluster.ids <span style="color:#ff79c6">&lt;-</span> res<span style="color:#ff79c6">$</span>celltype
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">names</span>(new.cluster.ids) <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">levels</span>(pbmc.mer)
+</span></span><span style="display:flex;"><span>pbmc.mer <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">RenameIdents</span>(pbmc.mer, new.cluster.ids)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>pbmc.mer <span style="color:#ff79c6">&lt;-</span> pbmc.sel
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(pbmc.mer, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, label <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>, pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>) <span style="color:#ff79c6">+</span> <span style="color:#50fa7b">NoLegend</span>()
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-20-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(pbmc.mer, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>, split.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>, label <span style="color:#ff79c6">=</span> F, pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-21-1.png" width="960" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(pbmc.mer, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>, split.by <span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;group_id&#34;</span>,   label <span style="color:#ff79c6">=</span> F, pt.size <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.5</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/index_files/figure-html/unnamed-chunk-22-1.png" width="768" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">#saveRDS(pbmc.mer, file = &#34;Seu_PCA_UMAP_annotated.RDS&#34;)</span>
+</span></span></code></pre></div><p>From above UMAP, all clusters are annotated by scMayoMapDatabse.</p>
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 <no value></p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://xiwen514.github.io">Website</a></li><li><a href="https://xiwen514.github.io">Blog</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#libraries">Libraries</a></li>
+        <li><a href="#geo-data-preprocessing">GEO Data preprocessing</a></li>
+        <li><a href="#quality-control">Quality control</a></li>
+        <li><a href="#dimensionally-reduction">Dimensionally reduction</a></li>
+        <li><a href="#cell-type-annotation">Cell type annotation</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
