@@ -420,22 +420,7 @@ umap.p3 <- DimPlot(pbmc.sel, reduction = "umap",group.by = "group_id",
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-18-1.png" width="672" />
 
-Show in New Window
-Error in DimPlot(pbmc.mer, reduction = "umap", group.by = "orig.ident",  : 
-  could not find function "DimPlot"
-
-R version 4.3.1 (2023-06-16 ucrt) -- "Beagle Scouts"
-Copyright (C) 2023 The R Foundation for Statistical Computing
-Platform: x86_64-w64-mingw32/x64 (64-bit)
-
-R is free software and comes with ABSOLUTELY NO WARRANTY.
-You are welcome to redistribute it under certain conditions.
-Type 'license()' or 'licence()' for distribution details.
-
-R is a collaborative project with
-
 The UMAP shows 10 clusters, which all present in AD and NC group.
-
 
 ### Cell type annotation
 

@@ -375,9 +375,7 @@ umap.p3 <- DimPlot(pbmc.sel, reduction = "umap",group.by = "group_id",
 
 ```
 
-
 The UMAP shows 10 clusters, which all present in AD and NC group.
-
 
 ### Cell type annotation
 ```{r, eval=F}

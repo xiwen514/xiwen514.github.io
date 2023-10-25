@@ -30,8 +30,8 @@ menu:
 
 params:
 
-  #name: Xiwen Zhao
-  #title: 📓 Sivan's blog
+  name: 
+  title: 📓 Sivan's blog
 
   # OPTIONAL: custom favicon location
   # favicon: 'location/to/favicon.png'
@@ -74,13 +74,13 @@ params:
 
   # Search (WIP)
   search:
-    enableSemanticSearch: false
-    operandApiKey: "REPLACE-WITH-YOUR-OPERAND-API-KEY"
-    operandIndexId: "REPLACE-WITH-YOUR-OPERAND-INDEX-ID"
+  enableSemanticSearch: false
+  operandApiKey: "REPLACE-WITH-YOUR-OPERAND-API-KEY"
+  operandIndexId: "REPLACE-WITH-YOUR-OPERAND-INDEX-ID"
 
   # Site description and title
   description:
-    Notes, hosted by bencuan
+    Notes, hosted by sivan
 
   
   # Footer links
@@ -124,7 +124,7 @@ params:
   # Enable "Edit this page" links for 'doc' page type.
   # Disabled by default. Uncomment to enable. Requires 'BookRepo' param.
   # Edit path must point to root directory of repo.
-  BookEditPath: edit/main/exampleSite
+  #BookEditPath: edit/main/exampleSite
 
   # Configure the date format used on the pages
   # - In git information
