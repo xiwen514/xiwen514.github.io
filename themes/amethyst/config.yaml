@@ -53,11 +53,11 @@ params:
   enableCallouts: true
 
   # Show footer, including backlinks and graph view
-  enableFooter: true
+  enableFooter: false
 
   # whether backlinks of pages should show the context in which
   # they were mentioned
-  enableContextualBacklinks: true
+  enableContextualBacklinks: false
 
   # whether to show a section of recent notes on the home page
   enableRecentNotes: false
