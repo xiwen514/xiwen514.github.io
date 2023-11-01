@@ -1,0 +1,138 @@
+---
+title: Differential abundance analysis 
+author: Package Build
+date: '2023-10-30'
+slug: []
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE,warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I borrow the data from this article (https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data. This blog further analyzes the data for differential abundance analysis.
+
+
+### Libraries
+```{r,warning=FALSE,results='hide',message=FALSE}
+library(Seurat)
+library(dplyr)
+library(ggplot2)
+library(edgeR)
+```
+
+
+
+### Abundance visualization
+```{r}
+seu <- readRDS("../../../../../transcriptome_protein_AD_plat/sc_RNA/Seu_PCA_UMAP_annotated.RDS")
+Seurat::DimPlot(seu, reduction="umap",label = TRUE)+NoLegend()
+Seurat::DimPlot(seu, reduction="umap", group.by="group_id")
+
+```
+
+```{r}
+# Create single cell experiment object
+sce <- as.SingleCellExperiment(seu, assays="RNA")
+
+n_cells <- table(sce$cell_type, sce$orig.ident) 
+freqs <- prop.table(n_cells, margin = 2)
+
+coldata <- data.frame(sce@colData)
+coldata <- coldata[!duplicated(coldata$orig.ident),]
+colnames(coldata)[1] <- "Sample"
+
+df <- as.data.frame(t(freqs))
+colnames(df)[1:3] <- c("Sample", "cluster_id", "frequency")
+df <- left_join(df, coldata[,c("Sample", "group_id")])
+colnames(df)[4] <- "diagnosis_id"
+
+df$diagnosis_id <- factor(df$diagnosis_id, levels = c("AD","NC"))
+
+ggplot(df, aes(x = Sample, y = frequency, fill = cluster_id)) +
+    geom_bar(stat = "identity", position = "fill") + 
+    facet_wrap(~ diagnosis_id, scales = "free_x", ncol = 4) +
+    theme_classic() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+ggplot(df, aes(x = diagnosis_id, y = frequency, fill = cluster_id)) +
+    geom_bar(stat = "identity", position = "fill") + 
+    theme_classic() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+par(mfrow = c(4, 2))
+
+ggplot(df, aes(x = diagnosis_id, y = frequency, color = diagnosis_id)) +
+    geom_boxplot(outlier.colour = NA) +  geom_jitter() +
+    facet_wrap(~ cluster_id, scales = "free_y", ncol = 3) +
+    theme_classic() +
+    theme(legend.position = "none")
+```
+
+
+### Use EdgeR to perform differential abundance analysis
+
+```{r}
+abundances <- unclass(n_cells) 
+abundances <-  abundances[,-4] # delete NC11, assume NC11 as a outlier
+#Attaching some column metadata.
+extra.info <- sce@colData[match(colnames(abundances), sce$orig.ident),]
+
+# Creates a DGEList object from a table of counts
+y.ab <- DGEList(abundances, samples=extra.info)
+summary(y.ab$samples$lib.size)
+# Filter out low-abundance labels
+keep <- filterByExpr(y.ab, group=y.ab$samples$seurat_clusters)
+y.ab <- y.ab[keep,]
+```
+
+For a DA analysis of cluster abundances, filtering is generally not required as most clusters will not be of low-abundance (otherwise there would not have been enough evidence to define the cluster in the first place).
+
+
+```{r}
+sample <- as.factor(y.ab$samples$orig.ident)
+plotMDS(y.ab, pch=16, col=c(2:8)[sample], main="MDS")
+ legend("topright", legend= levels(sample),pch=16, col=2:8, cex=0.8)
+
+
+# Formulate the design matrix
+design <- model.matrix(~factor(group), y.ab$samples)
+
+
+# Estimate the NB dispersion for each cluster
+y.ab <- estimateDisp(y.ab, design, trend="none")
+y.ab$common.dispersion
+plotBCV(y.ab)
+```
+
+Biological coefficient of variation (BCV) for each label with respect to its average abundance. BCVs are defined as the square root of the NB dispersion. Common dispersion estimates are shown in red.
+
+```{r}
+# QL dispersion
+fit.ab <- glmQLFit(y.ab, design, robust=TRUE, abundance.trend=FALSE)
+plotQLDisp(fit.ab)
+```
+
+QL dispersion estimates for each label with respect to its average abundance. Quarter-root values of the raw estimates are shown in black while the shrunken estimates are shown in red. Shrinkage is performed towards the common dispersion in blue.
+
+
+```{r}
+
+# Test for differences in abundance
+res <- glmQLFTest(fit.ab, coef=ncol(design))
+res_df <- topTags(res, n = Inf)$table %>% round(2)
+res_df
+
+
+summary(decideTests(res))
+
+```
+None of clusters are significant between AD and NC.
+
+
+
+
+

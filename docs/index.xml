@@ -6,7 +6,17 @@
     <description>Recent content in 💜 Welcome to Sivan&#39;s blog! on Personal Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 25 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 30 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://xiwen514.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Differential abundance analysis</title>
+      <link>https://xiwen514.github.io/post/2023-10-30-diff-abun-analysis/</link>
+      <pubDate>Mon, 30 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://xiwen514.github.io/post/2023-10-30-diff-abun-analysis/</guid>
+      <description>I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data. This blog further analyzes the data for differential abundance analysis.
+Libraries # library(Seurat) library(dplyr) library(ggplot2) library(edgeR) Abundance visualization # seu &amp;lt;- readRDS(&amp;#34;../../../../../transcriptome_protein_AD_plat/sc_RNA/Seu_PCA_UMAP_annotated.RDS&amp;#34;) Seurat::DimPlot(seu, reduction=&amp;#34;umap&amp;#34;,label = TRUE)+NoLegend() Seurat::DimPlot(seu, reduction=&amp;#34;umap&amp;#34;, group.</description>
+    </item>
+    
     <item>
       <title>Single nucleus analysis</title>
       <link>https://xiwen514.github.io/post/2023-10-25-single-nucleus-analysis/</link>
