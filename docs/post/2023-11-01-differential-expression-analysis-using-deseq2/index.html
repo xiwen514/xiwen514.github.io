@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta property="og:title" content="Differential expression analysis using DEseq2" />
+<meta property="og:description" content="I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data, and further analyzes the data for differential abundance analysis. Here, I apply DEseq2 for differential expression analysis to identify significant genes and explore their functions." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/" /><meta property="og:image" content="https://xiwen514.github.io/47"/><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2023-11-01T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-11-01T00:00:00+00:00" /><meta property="og:site_name" content="📓 Sivan&#39;s blog" />
+<title>Differential expression analysis using DEseq2 | 📓 Sivan&#39;s blog</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="stylesheet" href="/book.min.45ec1f6261e17c6488824ac77b6b8a0c11eef38eaed587cfecad4b284f57ee79.css" integrity="sha256-RewfYmHhfGSIgkrHe2uKDBHu846u1YfP7K1LKE9X7nk=" crossorigin="anonymous">
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+  
+
+
+
+<meta charset="UTF-8" />
+<meta
+  name="description"
+  content="I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data, and further analyzes the data for differential abundance analysis. Here, I apply DEseq2 for differential expression analysis to identify significant genes and explore their functions."
+/>
+<title>
+  Differential expression analysis using DEseq2
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+
+
+
+<link rel="shortcut icon" type="image/png"  href="https://xiwen514.github.io//favicon.png" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+<link href="https://xiwen514.github.io/styles.e08ceb33360cec132feb69cfb982e2a4.min.css" rel="stylesheet" />
+
+
+<link href="https://xiwen514.github.io/quartz/styles/_light_syntax.86a48a52faebeaaf42158b72922b1c90.min.css" rel="stylesheet" id="theme-link">
+
+  
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+      integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"
+        integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+        crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/copy-tex.min.js"
+        integrity="sha384-ww/583aHhxWkz5DEVn6OKtNiIaLi2iBRNZXfJRiY1Ai7tnJ9UXpEsyvOITVpTl4A"
+        crossorigin="anonymous"></script>
+
+  
+
+
+
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/darkmode.b187bc80fd41724185e768ddede977f5.min.js"></script>
+
+
+
+<script src="https://xiwen514.github.io/quartz/js/util.c69e233dc1cc331a30b0f670e657b425.min.js"></script>
+
+
+
+<script async src="https://unpkg.com/@floating-ui/core@0.7.3"></script>
+<script async src="https://unpkg.com/@floating-ui/dom@0.5.4"></script>
+
+<script src="https://xiwen514.github.io/quartz/js/popover.f03552ccb84d99ca615d1cfb9abde59e.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/code-title.ce4a43f09239a9efb48fee342e8ef2df.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/clipboard.2913da76d3cb21c5deaa4bae7da38c9f.min.js"></script>
+
+
+
+
+<script defer src="https://xiwen514.github.io/quartz/js/callouts.7723cac461d613d118ee8bb8216b9838.min.js"></script>
+
+
+
+ 
+<script>
+  const SEARCH_ENABLED =  null 
+  const LATEX_ENABLED =  true 
+  const PRODUCTION =  true 
+  const BASE_URL = "https://xiwen514.github.io/"
+  const fetchData = Promise.all([
+        fetch("https:\/\/xiwen514.github.io\/indices\/linkIndex.f6425e3c9c5a78cb1a57d6271bd0c88d.min.json")
+          .then(data => data.json())
+          .then(data => ({
+            index: data.index,
+            links: data.links,
+          })),
+        fetch("https:\/\/xiwen514.github.io\/indices\/contentIndex.56753ef950db2332e50166167e5b613e.min.json")
+          .then(data => data.json()),
+      ])
+      .then(([{index, links}, content]) => ({
+        index,
+        links,
+        content,
+      }))
+
+    const render = () => {
+    
+    const siteBaseURL = new URL(BASE_URL);
+    const pathBase = siteBaseURL.pathname;
+    const pathWindow = window.location.pathname;
+    const isHome = pathBase == pathWindow;
+
+    addCopyButtons();
+    
+
+    
+
+    addCollapsibleCallouts();
+    
+
+    
+    initPopover(
+      "https://xiwen514.github.io",
+       false 
+    )
+    
+
+    
+
+    
+      var els = document.getElementsByClassName("mermaid");
+      if (els.length > 0) {
+        import('https://unpkg.com/mermaid@9/dist/mermaid.esm.min.mjs').then(
+          (obj) => {
+            
+            
+            obj.default.init();
+          }
+        )
+      }
+    
+  }
+
+  const init = (doc = document) => {
+    
+    addCopyButtons();
+    
+
+    addTitleToCodeBlocks();
+    renderMathInElement(doc.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+      ],
+      macros: {
+        '’': "'"
+      },
+      throwOnError : false
+    });
+    
+  };
+</script>
+
+<script>
+  window.Million = {
+    navigate: (url) => (window.location.href = url),
+    prefetch: () => {},
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    init()
+    render()
+  })
+</script>
+
+
+</head>
+<div id="search-container">
+  <div id="search-space">
+    <input autocomplete="off" id="search-bar" name="search" type="text" aria-label="Search"
+      placeholder="Search for something..." dir="">
+    <div id="results-container">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.js"
+  integrity="sha256-i3A0NZGkhsKjVMzFxv3ksk0DZh3aXqu0l49Bbh0MdjE=" crossorigin="anonymous" defer></script>
+
+<script defer src="https://xiwen514.github.io/quartz/js/full-text-search.e6e2e0c213187ca0c703d6e2c7a77fcd.min.js"></script>
+
+
+
+<header class="book-header">
+    
+    <label for="menu-control">
+      <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+    </label>
+    <h1 id="page-title"><a href="https://xiwen514.github.io/">📓 Sivan&#39;s blog</a></h1>
+    <div class="spacer"></div>
+    <div id="search-icon" class="quartz-search">
+      <p>Search</p>
+      <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7"><title id="title">Search Icon</title><desc id="desc">Icon to open search</desc><g class="search-path" fill="none"><path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4"/><circle cx="8" cy="8" r="7"/></g></svg>
+    </div>
+    <div class='darkmode'>
+    <input class='toggle' id='darkmode-toggle' type='checkbox' tabindex="-1">
+    <label id="toggle-label-light" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="dayIcon" x="0px" y="0px" viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+            <title>Light Mode</title>
+            <path d="M6,17.5C6,16.672,5.328,16,4.5,16h-3C0.672,16,0,16.672,0,17.5    S0.672,19,1.5,19h3C5.328,19,6,18.328,6,17.5z M7.5,26c-0.414,0-0.789,0.168-1.061,0.439l-2,2C4.168,28.711,4,29.086,4,29.5    C4,30.328,4.671,31,5.5,31c0.414,0,0.789-0.168,1.06-0.44l2-2C8.832,28.289,9,27.914,9,27.5C9,26.672,8.329,26,7.5,26z M17.5,6    C18.329,6,19,5.328,19,4.5v-3C19,0.672,18.329,0,17.5,0S16,0.672,16,1.5v3C16,5.328,16.671,6,17.5,6z M27.5,9    c0.414,0,0.789-0.168,1.06-0.439l2-2C30.832,6.289,31,5.914,31,5.5C31,4.672,30.329,4,29.5,4c-0.414,0-0.789,0.168-1.061,0.44    l-2,2C26.168,6.711,26,7.086,26,7.5C26,8.328,26.671,9,27.5,9z M6.439,8.561C6.711,8.832,7.086,9,7.5,9C8.328,9,9,8.328,9,7.5    c0-0.414-0.168-0.789-0.439-1.061l-2-2C6.289,4.168,5.914,4,5.5,4C4.672,4,4,4.672,4,5.5c0,0.414,0.168,0.789,0.439,1.06    L6.439,8.561z M33.5,16h-3c-0.828,0-1.5,0.672-1.5,1.5s0.672,1.5,1.5,1.5h3c0.828,0,1.5-0.672,1.5-1.5S34.328,16,33.5,16z     M28.561,26.439C28.289,26.168,27.914,26,27.5,26c-0.828,0-1.5,0.672-1.5,1.5c0,0.414,0.168,0.789,0.439,1.06l2,2    C28.711,30.832,29.086,31,29.5,31c0.828,0,1.5-0.672,1.5-1.5c0-0.414-0.168-0.789-0.439-1.061L28.561,26.439z M17.5,29    c-0.829,0-1.5,0.672-1.5,1.5v3c0,0.828,0.671,1.5,1.5,1.5s1.5-0.672,1.5-1.5v-3C19,29.672,18.329,29,17.5,29z M17.5,7    C11.71,7,7,11.71,7,17.5S11.71,28,17.5,28S28,23.29,28,17.5S23.29,7,17.5,7z M17.5,25c-4.136,0-7.5-3.364-7.5-7.5    c0-4.136,3.364-7.5,7.5-7.5c4.136,0,7.5,3.364,7.5,7.5C25,21.636,21.636,25,17.5,25z" />
+        </svg>
+    </label>
+    <label id="toggle-label-dark" for='darkmode-toggle' tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="nightIcon" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background='new 0 0 100 100'" xml:space="preserve">
+            <title>Dark Mode</title>
+            <path d="M96.76,66.458c-0.853-0.852-2.15-1.064-3.23-0.534c-6.063,2.991-12.858,4.571-19.655,4.571  C62.022,70.495,50.88,65.88,42.5,57.5C29.043,44.043,25.658,23.536,34.076,6.47c0.532-1.08,0.318-2.379-0.534-3.23  c-0.851-0.852-2.15-1.064-3.23-0.534c-4.918,2.427-9.375,5.619-13.246,9.491c-9.447,9.447-14.65,22.008-14.65,35.369  c0,13.36,5.203,25.921,14.65,35.368s22.008,14.65,35.368,14.65c13.361,0,25.921-5.203,35.369-14.65  c3.872-3.871,7.064-8.328,9.491-13.246C97.826,68.608,97.611,67.309,96.76,66.458z" />
+        </svg>
+    </label>
+</div>
+</header>
+
+
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <main class="flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<div class="menu-search">
+  <div id="search-icon" class="quartz-search">
+    <p>Search</p>
+    <svg tabindex="0" aria-labelledby="title desc" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
+      <title id="title">Search Icon</title>
+      <desc id="desc">Icon to open search</desc>
+      <g class="search-path" fill="none">
+        <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
+        <circle cx="8" cy="8" r="7" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <span class="book-menu-title">Posts</span>
+  
+
+          
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-11-01-differential-expression-analysis-using-deseq2/" class="active">Differential expression analysis using DEseq2</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-30-diff-abun-analysis/" class="">Differential abundance analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-25-single-nucleus-analysis/" class="">Single nucleus analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-multi-omics-intergration-of-the-platelet-in-alzheimer-s-disease/" class="">Intergration of the platelet transcriptome and proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-transcriptome-in-alzheimer-s-disease/" class="">The platelet transcriptome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-10-23-the-platelet-proteome-in-alzheimer-s-disease/" class="">The platelet proteome in Alzheimer’s disease and aging data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-29-rppa-data-analysis/" class="">RPPA data analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-functional-analysis/" class="">Functional analysis</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/post/2023-09-14-introduction-to-pca/" class="">Introduction to PCA</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+  
+<ul>
+  
+  <li>
+    <a href="https://github.com/xiwen514/xiwen514.github.io"  target="_blank" rel="noopener">
+        Github
+      </a>
+  </li>
+  
+</ul>
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+    <div class="book-page container">
+      
+
+      
+      
+  <article class="markdown">
+    <h1 class="title">Differential expression analysis using DEseq2</h1>
+    
+
+
+
+
+
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+<p>I borrow the data from this article ( 
+<a href="https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability" rel="noopener">https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability</a>) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data, and further analyzes the data for differential abundance analysis. Here, I apply DEseq2 for differential expression analysis to identify significant genes and explore their functions.</p>
+<h3 id="libraries">
+  Libraries
+  <a class="anchor" href="#libraries">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(Seurat)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(scuttle)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(DESeq2)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(dplyr)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(EnhancedVolcano)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(annotables)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(clusterProfiler)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">library</span>(org.Hs.eg.db)
+</span></span></code></pre></div><h3 id="data">
+  Data
+  <a class="anchor" href="#data">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>seurat <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">readRDS</span>(<span style="color:#f1fa8c">&#34;../../../../../transcriptome_protein_AD_plat/sc_RNA/Seu_PCA_UMAP_annotated.RDS&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(seurat, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>,label <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)<span style="color:#ff79c6">+</span><span style="color:#50fa7b">NoLegend</span>()
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(seurat, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, group.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;group_id&#34;</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-2-2.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">DimPlot</span>(seurat, reduction <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;umap&#34;</span>, split.by <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;orig.ident&#34;</span>)<span style="color:#ff79c6">+</span><span style="color:#50fa7b">NoLegend</span>()
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-3-1.png" width="960" />
+<p>From above plots, we can see that cells in NC11 is much lesser than other samples. Here, I assume NC11 as a outlier.</p>
+<h3 id="creating-pseudo-bulk-samples">
+  Creating pseudo-bulk samples
+  <a class="anchor" href="#creating-pseudo-bulk-samples">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>sce <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.SingleCellExperiment</span>(seurat)
+</span></span><span style="display:flex;"><span>summed <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">aggregateAcrossCells</span>(sce, 
+</span></span><span style="display:flex;"><span>    ids<span style="color:#ff79c6">=</span><span style="color:#50fa7b">colData</span>(sce)[,<span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;orig.ident&#34;</span>, <span style="color:#f1fa8c">&#34;cell_type&#34;</span>)])
+</span></span><span style="display:flex;"><span>summed <span style="color:#ff79c6">&lt;-</span> summed[,summed<span style="color:#ff79c6">$</span>orig.ident <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;NC11&#34;</span>]
+</span></span></code></pre></div><h3 id="de-analysis-and-visualization">
+  DE analysis and visualization
+  <a class="anchor" href="#de-analysis-and-visualization">#</a>
+</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">dir.create</span>(<span style="color:#f1fa8c">&#34;DE_res&#34;</span>)
+</span></span><span style="display:flex;"><span>ht_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span>pca_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">list</span>()
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">for </span>(i in <span style="color:#50fa7b">unique</span>(summed<span style="color:#ff79c6">$</span>cell_type)) {
+</span></span><span style="display:flex;"><span>  current <span style="color:#ff79c6">&lt;-</span> summed[,summed<span style="color:#ff79c6">$</span>cell_type <span style="color:#ff79c6">==</span> i]
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">## Remove lowly expressed genes which have less than 6 cells with any counts</span>
+</span></span><span style="display:flex;"><span>  current <span style="color:#ff79c6">&lt;-</span> current<span style="color:#50fa7b">[rowSums</span>(<span style="color:#50fa7b">counts</span>(current) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">1</span>) <span style="color:#ff79c6">&gt;=</span> <span style="color:#bd93f9">5</span>,]
+</span></span><span style="display:flex;"><span>  cluster_counts <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">counts</span>(current)
+</span></span><span style="display:flex;"><span>  cluster_metadata <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">data.frame</span>(<span style="color:#50fa7b">colData</span>(current))
+</span></span><span style="display:flex;"><span>  dds <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DESeqDataSetFromMatrix</span>(cluster_counts, 
+</span></span><span style="display:flex;"><span>                              colData <span style="color:#ff79c6">=</span> cluster_metadata, 
+</span></span><span style="display:flex;"><span>                              design <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">~</span> group_id)
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># Transform counts for data visualization</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># rld &lt;- rlog(dds, blind=TRUE)</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># Run DESeq2 differential expression analysis</span>
+</span></span><span style="display:flex;"><span>  dds <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">DESeq</span>(dds)
+</span></span><span style="display:flex;"><span>  compare_list <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;AD&#34;</span>,<span style="color:#f1fa8c">&#34;NC&#34;</span>)
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>    contrast <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;group_id&#34;</span>, compare_list)
+</span></span><span style="display:flex;"><span>    res.all <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">results</span>(dds, contrast <span style="color:#ff79c6">=</span> contrast) <span style="color:#ff79c6">%&gt;%</span> <span style="color:#50fa7b">data.frame</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">write.csv</span>(res.all, <span style="color:#50fa7b">paste0</span>(<span style="color:#f1fa8c">&#34;DE_res/&#34;</span>,i,<span style="color:#f1fa8c">&#34;.csv&#34;</span>))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    res.other <span style="color:#ff79c6">&lt;-</span> res.all[res.all<span style="color:#ff79c6">$</span>pvalue <span style="color:#ff79c6">&gt;=</span> <span style="color:#bd93f9">0.001</span>,]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># Here select 20% insignificant genes randomly for plot. </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">set.seed</span>(<span style="color:#bd93f9">123</span>)
+</span></span><span style="display:flex;"><span>    res.sel <span style="color:#ff79c6">&lt;-</span> res.other<span style="color:#50fa7b">[sample</span>(<span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span><span style="color:#50fa7b">nrow</span>(res.other), <span style="color:#50fa7b">nrow</span>(res.other) <span style="color:#ff79c6">*</span> <span style="color:#bd93f9">0.2</span>),]
+</span></span><span style="display:flex;"><span>    res <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">rbind</span>(res.all[res.all<span style="color:#ff79c6">$</span>pvalue <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.001</span>,], res.sel)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">## volcanoplot</span>
+</span></span><span style="display:flex;"><span>    p <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">EnhancedVolcano</span>(res,
+</span></span><span style="display:flex;"><span>    lab <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">rownames</span>(res),
+</span></span><span style="display:flex;"><span>    x <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;log2FoldChange&#39;</span>,
+</span></span><span style="display:flex;"><span>    y <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#39;pvalue&#39;</span>,
+</span></span><span style="display:flex;"><span>    xlim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#50fa7b">min</span>(res<span style="color:#ff79c6">$</span>log2FoldChange, na.rm <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>) <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>,<span style="color:#50fa7b">max</span>(res<span style="color:#ff79c6">$</span>log2FoldChange, na.rm <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>),
+</span></span><span style="display:flex;"><span>    ylim <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">c</span>(<span style="color:#bd93f9">0</span>, <span style="color:#50fa7b">max</span>(<span style="color:#ff79c6">-</span><span style="color:#50fa7b">log10</span>(res<span style="color:#ff79c6">$</span>pvalue), na.rm <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>),
+</span></span><span style="display:flex;"><span>    title <span style="color:#ff79c6">=</span> i,
+</span></span><span style="display:flex;"><span>    pCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.001</span>,
+</span></span><span style="display:flex;"><span>    FCcutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>    pointSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1.4</span>,
+</span></span><span style="display:flex;"><span>    labSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2.3</span>,
+</span></span><span style="display:flex;"><span>    axisLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">8</span>,
+</span></span><span style="display:flex;"><span>    titleLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>,
+</span></span><span style="display:flex;"><span>    subtitleLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">8</span>,
+</span></span><span style="display:flex;"><span>    captionLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">8</span>,
+</span></span><span style="display:flex;"><span>    legendLabSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">7</span>,
+</span></span><span style="display:flex;"><span>    legendIconSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4"># max.overlaps = Inf,</span>
+</span></span><span style="display:flex;"><span>    drawConnectors <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>,
+</span></span><span style="display:flex;"><span>    widthConnectors <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0.3</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">print</span>(p)
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-3.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-6.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-7.png" width="672" /><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-5-8.png" width="672" /></p>
+<p>Volcano plots in each cell type. Here cutoff for the significant genes is: P value &lt; 0.001, log2FC &gt; 1.</p>
+<h3 id="functional-analysis">
+  Functional analysis
+  <a class="anchor" href="#functional-analysis">#</a>
+</h3>
+<p>Here, I explore the significant genes in &ldquo;Interneuron; GABAergic neuron&rdquo;  cell type. Because the  previous post in 
+<a href="https://xiwen514.github.io/post/2023-10-30-diff-abun-analysis/" rel="noopener">https://xiwen514.github.io/post/2023-10-30-diff-abun-analysis/</a> shows that the p value of this cell type is the lowerst, 0.1.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(grch37)
+</span></span></code></pre></div><pre tabindex="0"><code>## # A tibble: 6 × 9
+##   ensgene         entrez symbol   chr       start     end strand biotype descr…¹
+##   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;     &lt;int&gt;   &lt;int&gt;  &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;  
+## 1 ENSG00000000003   7105 TSPAN6   X      99883667  9.99e7     -1 protei… tetras…
+## 2 ENSG00000000005  64102 TNMD     X      99839799  9.99e7      1 protei… tenomo…
+## 3 ENSG00000000419   8813 DPM1     20     49551404  4.96e7     -1 protei… dolich…
+## 4 ENSG00000000457  57147 SCYL3    1     169818772  1.70e8     -1 protei… SCY1-l…
+## 5 ENSG00000000460  55732 C1orf112 1     169631245  1.70e8      1 protei… chromo…
+## 6 ENSG00000000938   2268 FGR      1      27938575  2.80e7     -1 protei… feline…
+## # … with abbreviated variable name ¹​description
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span>res.all <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">read.csv</span>(<span style="color:#f1fa8c">&#34;DE_res/Interneuron; GABAergic neuron.csv&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">colnames</span>(res.all)[1] <span style="color:#ff79c6">&lt;-</span> <span style="color:#f1fa8c">&#34;gene&#34;</span>
+</span></span><span style="display:flex;"><span>res_tableOE_tb <span style="color:#ff79c6">&lt;-</span> res.all 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>idx <span style="color:#ff79c6">&lt;-</span> grch37<span style="color:#ff79c6">$</span>symbol<span style="color:#ff79c6">%in%</span> res_tableOE_tb<span style="color:#ff79c6">$</span>gene
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> grch37[idx, ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## The gene names can map to more than one Ensembl ID (some genes change ID over time), </span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## so we need to remove duplicate IDs prior to assessing enriched GO terms</span>
+</span></span><span style="display:flex;"><span>non_duplicates <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">which</span>(<span style="color:#50fa7b">duplicated</span>(ids<span style="color:#ff79c6">$</span>symbol) <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>ids <span style="color:#ff79c6">&lt;-</span> ids[non_duplicates, ] 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Merge the IDs with the results </span>
+</span></span><span style="display:flex;"><span>res_ids <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">inner_join</span>(res_tableOE_tb, ids, by<span style="color:#ff79c6">=</span><span style="color:#50fa7b">c</span>(<span style="color:#f1fa8c">&#34;gene&#34;</span><span style="color:#ff79c6">=</span><span style="color:#f1fa8c">&#34;symbol&#34;</span>))   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Create background dataset for hypergeometric testing using all genes tested for significance in the results</span>
+</span></span><span style="display:flex;"><span>allOE_genes <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">as.character</span>(res_ids<span style="color:#ff79c6">$</span>gene)
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Extract significant results</span>
+</span></span><span style="display:flex;"><span>sigOE <span style="color:#ff79c6">&lt;-</span> res_ids <span style="color:#ff79c6">%&gt;%</span> dplyr<span style="color:#ff79c6">::</span><span style="color:#50fa7b">filter</span>(padj<span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0.05</span> <span style="color:#ff79c6">&amp;</span> <span style="color:#50fa7b">abs</span>(log2FoldChange) <span style="color:#ff79c6">&gt;</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>sigOE.order<span style="color:#ff79c6">&lt;-</span> sigOE<span style="color:#50fa7b">[order</span>(sigOE<span style="color:#ff79c6">$</span>pvalue,decreasing <span style="color:#ff79c6">=</span> F),]
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">head</span>(sigOE.order)
+</span></span></code></pre></div><pre tabindex="0"><code>##         gene baseMean log2FoldChange     lfcSE      stat       pvalue
+## 8  MTRNR2L12 330.4722      -1.862599 0.3153567 -5.906324 3.498266e-09
+## 29       UBC 331.1639      -1.187903 0.2354932 -5.044320 4.551377e-07
+## 21     CEND1 274.6389      -1.208004 0.2421301 -4.989070 6.067061e-07
+## 7    FAM19A1 266.9323       1.383870 0.2950563  4.690190 2.729509e-06
+## 13    EEF1A1 288.4591      -1.175869 0.2524100 -4.658568 3.184170e-06
+## 31    DYNLL2 244.6369      -1.125122 0.2439659 -4.611800 3.991969e-06
+##            padj         ensgene    entrez chr     start       end strand
+## 8  2.287166e-05 ENSG00000269028 100463486   3  96335981  96337000     -1
+## 29 9.916611e-04 ENSG00000150991      7316  12 125396150 125401914     -1
+## 21 9.916611e-04 ENSG00000184524     51286  11    787104    790123     -1
+## 7  2.974015e-03 ENSG00000183662    407738   3  68053359  68594776      1
+## 13 2.974015e-03 ENSG00000156508      1915   6  74225473  74233520     -1
+## 31 3.262437e-03 ENSG00000264364    140735  17  56160776  56172897      1
+##           biotype
+## 8  protein_coding
+## 29 protein_coding
+## 21 protein_coding
+## 7  protein_coding
+## 13 protein_coding
+## 31 protein_coding
+##                                                                   description
+## 8                                                MT-RNR2-like 12 (pseudogene)
+## 29                                                                ubiquitin C
+## 21                             cell cycle exit and neuronal differentiation 1
+## 7  family with sequence similarity 19 (chemokine (C-C motif)-like), member A1
+## 13                         eukaryotic translation elongation factor 1 alpha 1
+## 31                                            dynein, light chain, LC8-type 2
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Run KEGG enrichment analysis </span>
+</span></span><span style="display:flex;"><span>ekegg <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichKEGG</span>(gene <span style="color:#ff79c6">=</span> sigOE<span style="color:#ff79c6">$</span>entrez, 
+</span></span><span style="display:flex;"><span>                organism <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;hsa&#34;</span>,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;kegg&#34;</span>,
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>,
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> res_ids<span style="color:#ff79c6">$</span>entrez,
+</span></span><span style="display:flex;"><span>                minGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">10</span>,
+</span></span><span style="display:flex;"><span>                maxGSSize <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">500</span>,
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                use_internal_data <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">FALSE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ekegg, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pvalue&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-r" data-lang="r"><span style="display:flex;"><span><span style="color:#6272a4">## Run GO enrichment analysis </span>
+</span></span><span style="display:flex;"><span>ego <span style="color:#ff79c6">&lt;-</span> <span style="color:#50fa7b">enrichGO</span>(gene <span style="color:#ff79c6">=</span> sigOE<span style="color:#ff79c6">$</span>gene, 
+</span></span><span style="display:flex;"><span>                universe <span style="color:#ff79c6">=</span> allOE_genes,
+</span></span><span style="display:flex;"><span>                keyType <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SYMBOL&#34;</span>,
+</span></span><span style="display:flex;"><span>                OrgDb <span style="color:#ff79c6">=</span> org.Hs.eg.db, 
+</span></span><span style="display:flex;"><span>                ont <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;BP&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pAdjustMethod <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;fdr&#34;</span>, 
+</span></span><span style="display:flex;"><span>                pvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>, 
+</span></span><span style="display:flex;"><span>                qvalueCutoff <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>                readable <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">TRUE</span>)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Dotplot </span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">dotplot</span>(ego, color <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;pvalue&#34;</span>,showCategory<span style="color:#ff79c6">=</span><span style="color:#bd93f9">20</span>)
+</span></span></code></pre></div><img src="https://xiwen514.github.io/post/2023-11-01-differential-expression-analysis-using-deseq2/index_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+
+
+    
+
+<hr/>
+
+
+<div class="page-end" id="footer">
+    <div class="backlinks-container">
+        <h3>Backlinks</h3>
+<ul class="backlinks">
+    
+    
+    
+    
+    
+    
+    
+    <li>
+      No backlinks found
+    </li>
+    
+</ul>
+
+    </div>
+    <div>
+        <script
+  src="https://cdn.jsdelivr.net/npm/d3@6.7.0/dist/d3.min.js"
+  integrity="sha256-+7jaYCp29O1JusNWHaYtgUn6EhuP0VaFuswhNV06MyI="
+  crossorigin="anonymous"
+></script>
+<h3>Interactive Graph</h3>
+<div id="graph-container"></div>
+<style>
+  :root {
+    --g-node: var(--secondary);
+    --g-node-active: var(--primary);
+    --g-node-inactive: var(--visited);
+    --g-link: var(--outlinegray);
+    --g-link-active: #5a7282;
+  }
+</style>
+
+<script src="https://xiwen514.github.io/quartz/js/graph.cbd78cfa87df7d3e230d16fc24f06548.js"></script>
+
+    </div>
+</div>
+
+
+
+
+
+
+<div id="contact_buttons">
+    <footer>
+        
+        
+        <p>Made with <a href="https://github.com/64bitpandas/amethyst">Amethyst</a>, © 2023 <no value></p>
+        <ul>
+            
+            <li><a href="https://xiwen514.github.io/">Home</a></li>
+            <li><a href="https://xiwen514.github.io/">Home</a></li><li><a href="https://www.linkedin.com/in/xiwen-zhao-a478581a3/">Linkdin</a></li></ul>
+    </footer>
+</div>
+
+
+    
+  </article>
+ 
+      
+      
+      
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#libraries">Libraries</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#creating-pseudo-bulk-samples">Creating pseudo-bulk samples</a></li>
+        <li><a href="#de-analysis-and-visualization">DE analysis and visualization</a></li>
+        <li><a href="#functional-analysis">Functional analysis</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
