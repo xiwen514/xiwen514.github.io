@@ -1,0 +1,187 @@
+---
+title: Differential expression analysis using DEseq2
+author: Package Build
+date: '2023-11-01'
+slug: []
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE,message=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE, message = FALSE)
+```
+
+I borrow the data from this article ( https://www.pnas.org/doi/10.1073/pnas.2008762117#data-availability) to analyze Alzheimer’s disease (AD) data, aiming to show the standard analysis during my work. The previous blog mainly focused on the quality control, dimensionality reduction, clustering, and cell type annotation of single-nuclei RNA seq data, and further analyzes the data for differential abundance analysis. Here, I apply DEseq2 for differential expression analysis to identify significant genes and explore their functions.
+
+
+### Libraries
+```{r,results='hide',warning=FALSE,message=FALSE}
+library(Seurat)
+library(scuttle)
+library(DESeq2)
+library(dplyr)
+library(EnhancedVolcano)
+library(annotables)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+```
+
+### Data
+```{r}
+seurat <- readRDS("../../../../../transcriptome_protein_AD_plat/sc_RNA/Seu_PCA_UMAP_annotated.RDS")
+DimPlot(seurat, reduction = "umap",label = TRUE)+NoLegend()
+DimPlot(seurat, reduction = "umap", group.by = "group_id")
+```
+
+```{r, fig.width=10,fig.height=5}
+DimPlot(seurat, reduction = "umap", split.by = "orig.ident")+NoLegend()
+```
+
+From above plots, we can see that cells in NC11 is much lesser than other samples. Here, I assume NC11 as a outlier.
+
+
+### Creating pseudo-bulk samples
+
+```{r}
+sce <- as.SingleCellExperiment(seurat)
+summed <- aggregateAcrossCells(sce, 
+    ids=colData(sce)[,c("orig.ident", "cell_type")])
+summed <- summed[,summed$orig.ident != "NC11"]
+
+
+```
+
+
+
+### DE analysis and visualization
+```{r}
+dir.create("DE_res")
+ht_list <- list()
+pca_list <- list()
+for (i in unique(summed$cell_type)) {
+  current <- summed[,summed$cell_type == i]
+  ## Remove lowly expressed genes which have less than 6 cells with any counts
+  current <- current[rowSums(counts(current) > 1) >= 5,]
+  cluster_counts <- counts(current)
+  cluster_metadata <- data.frame(colData(current))
+  dds <- DESeqDataSetFromMatrix(cluster_counts, 
+                              colData = cluster_metadata, 
+                              design = ~ group_id)
+  # Transform counts for data visualization
+  # rld <- rlog(dds, blind=TRUE)
+  
+
+  # Run DESeq2 differential expression analysis
+  dds <- DESeq(dds)
+  compare_list <- c("AD","NC")
+ 
+    contrast <- c("group_id", compare_list)
+    res.all <- results(dds, contrast = contrast) %>% data.frame()
+    write.csv(res.all, paste0("DE_res/",i,".csv"))
+    
+    res.other <- res.all[res.all$pvalue >= 0.001,]
+    
+  # Here select 20% insignificant genes randomly for plot. 
+    set.seed(123)
+    res.sel <- res.other[sample(1:nrow(res.other), nrow(res.other) * 0.2),]
+    res <- rbind(res.all[res.all$pvalue < 0.001,], res.sel)
+    ## volcanoplot
+    p <- EnhancedVolcano(res,
+    lab = rownames(res),
+    x = 'log2FoldChange',
+    y = 'pvalue',
+    xlim = c(min(res$log2FoldChange, na.rm = TRUE) - 1,max(res$log2FoldChange, na.rm = TRUE) + 1),
+    ylim = c(0, max(-log10(res$pvalue), na.rm = TRUE) + 1),
+    title = i,
+    pCutoff = 0.001,
+    FCcutoff = 1,
+    pointSize = 1.4,
+    labSize = 2.3,
+    axisLabSize = 8,
+    titleLabSize = 10,
+    subtitleLabSize = 8,
+    captionLabSize = 8,
+    legendLabSize = 7,
+    legendIconSize = 2,
+    # max.overlaps = Inf,
+    drawConnectors = TRUE,
+    widthConnectors = 0.3)
+    
+    print(p)
+  
+}
+```
+
+Volcano plots in each cell type. Here cutoff for the significant genes is: P value < 0.001, log2FC > 1.
+
+
+### Functional analysis
+
+Here, I explore the significant genes in "Interneuron; GABAergic neuron"  cell type. Because the  previous post in https://xiwen514.github.io/post/2023-10-30-diff-abun-analysis/ shows that the p value of this cell type is the lowerst, 0.1.
+
+```{r}
+head(grch37)
+res.all <- read.csv("DE_res/Interneuron; GABAergic neuron.csv")
+colnames(res.all)[1] <- "gene"
+res_tableOE_tb <- res.all 
+
+
+idx <- grch37$symbol%in% res_tableOE_tb$gene
+ids <- grch37[idx, ]
+
+## The gene names can map to more than one Ensembl ID (some genes change ID over time), 
+## so we need to remove duplicate IDs prior to assessing enriched GO terms
+non_duplicates <- which(duplicated(ids$symbol) == FALSE)
+ids <- ids[non_duplicates, ] 
+
+## Merge the IDs with the results 
+res_ids <- inner_join(res_tableOE_tb, ids, by=c("gene"="symbol"))   
+
+
+## Create background dataset for hypergeometric testing using all genes tested for significance in the results
+allOE_genes <- as.character(res_ids$gene)
+## Extract significant results
+sigOE <- res_ids %>% dplyr::filter(padj< 0.05 & abs(log2FoldChange) > 1)
+sigOE.order<- sigOE[order(sigOE$pvalue,decreasing = F),]
+head(sigOE.order)
+
+
+```
+
+
+```{r,fig.width=7,fig.height=7}
+## Run KEGG enrichment analysis 
+ekegg <- enrichKEGG(gene = sigOE$entrez, 
+                organism = "hsa",
+                keyType = "kegg",
+                pvalueCutoff = 1,
+                pAdjustMethod = "fdr",
+                universe = res_ids$entrez,
+                minGSSize = 10,
+                maxGSSize = 500,
+                qvalueCutoff = 1,
+                use_internal_data = FALSE)
+                
+
+## Dotplot 
+dotplot(ekegg, color = "pvalue",showCategory=20)
+```
+
+
+```{r,fig.width=7,fig.height=9}
+## Run GO enrichment analysis 
+ego <- enrichGO(gene = sigOE$gene, 
+                universe = allOE_genes,
+                keyType = "SYMBOL",
+                OrgDb = org.Hs.eg.db, 
+                ont = "BP", 
+                pAdjustMethod = "fdr", 
+                pvalueCutoff = 1, 
+                qvalueCutoff = 1,
+                readable = TRUE)
+                
+
+## Dotplot 
+dotplot(ego, color = "pvalue",showCategory=20)
+```
